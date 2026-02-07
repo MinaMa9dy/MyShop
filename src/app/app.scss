@@ -1,0 +1,4 @@
+// Prevent body scroll when mobile menu is open
+body.overflow-hidden {
+  overflow: hidden !important;
+}
