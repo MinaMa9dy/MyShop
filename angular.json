@@ -18,7 +18,7 @@
           "builder": "@angular/build:application",
           "options": {
             "browser": "src/main.ts",
-            "outputPath": "../Identity.API/wwwroot",
+            "outputPath": "dist/Identity.Angular/browser",
             "polyfills": [
               "zone.js"
             ],
