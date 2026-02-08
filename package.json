@@ -1,11 +1,12 @@
 {
   "name": "identity.angular",
   "version": "0.0.0",
+  
   "scripts": {
     "ng": "ng",
+    "start": "ng serve",
     "copy":"copy-folder dist/browser docs",
-    "start": "ng serve --host 0.0.0.0 --port 4200",
-    "build": "ng build && npm run copy",
+    "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -38,7 +39,6 @@
     "@angular/cli": "^20.0.4",
     "@angular/compiler-cli": "^20.0.0",
     "@types/jasmine": "~5.1.0",
-    "copy-folder-util": "^1.1.5",
     "autoprefixer": "^10.4.24",
     "jasmine-core": "~5.7.0",
     "karma": "~6.4.0",
