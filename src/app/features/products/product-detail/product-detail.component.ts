@@ -7,6 +7,7 @@ import { ProductService } from '../../../core/services/product.service';
 import { CartService } from '../../../core/services/cart.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { LanguageService } from '../../../core/services/language.service';
+import { PhotoService } from '../../../core/services/photo.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -48,7 +49,7 @@ import { LanguageService } from '../../../core/services/language.service';
                          [alt]="product()?.name"
                          class="h-full w-full object-contain p-4">
                   } @else if ((product()?.productPhotos && product()!.productPhotos!.length > 0) || (product()?.productphotos && product()!.productphotos!.length > 0)) {
-                    <img [src]="(product()!.productPhotos || product()!.productphotos)![0].url" 
+                    <img [src]="photoService.getPhotoUrl((product()!.productPhotos || product()!.productphotos)![0].fileName)" 
                          [alt]="product()?.name"
                          class="h-full w-full object-contain p-4">
                   } @else {
@@ -63,10 +64,10 @@ import { LanguageService } from '../../../core/services/language.service';
                     @for (photo of (product()!.productPhotos || product()!.productphotos); track photo.id) {
                       <button 
                         class="thumbnail h-20 bg-white rounded-lg overflow-hidden border-2 transition-all hover:shadow-md"
-                        [class.border-blue-500]="mainImage() === photo.url"
-                        [class.border-transparent]="mainImage() !== photo.url"
-                        (click)="setMainImage(photo.url)">
-                        <img [src]="photo.url" 
+                        [class.border-blue-500]="mainImage() === photoService.getPhotoUrl(photo.fileName)"
+                        [class.border-transparent]="mainImage() !== photoService.getPhotoUrl(photo.fileName)"
+                        (click)="setMainImage(photo)">
+                        <img [src]="photoService.getPhotoUrl(photo.fileName)" 
                              [alt]="product()?.name"
                              class="h-full w-full object-cover">
                       </button>
@@ -200,6 +201,7 @@ export class ProductDetailComponent implements OnInit {
   private authService = inject(AuthService);
   private languageService = inject(LanguageService);
   private router = inject(Router);
+  photoService = inject(PhotoService);
   
   product = signal<any>(null);
   loading = signal(true);
@@ -245,7 +247,8 @@ export class ProductDetailComponent implements OnInit {
         
         // Set main image
         if (response && (response.productPhotos?.length > 0 || response.productphotos?.length > 0)) {
-          this.mainImage.set((response.productPhotos || response.productphotos)[0].url);
+          const firstPhoto = (response.productPhotos || response.productphotos)[0];
+          this.mainImage.set(this.photoService.getPhotoUrl(firstPhoto.fileName));
         }
         this.loading.set(false);
       },
@@ -256,8 +259,8 @@ export class ProductDetailComponent implements OnInit {
     });
   }
   
-  setMainImage(url: string): void {
-    this.mainImage.set(url);
+  setMainImage(photo: any): void {
+    this.mainImage.set(this.photoService.getPhotoUrl(photo.fileName));
   }
   
   increaseQuantity(): void {

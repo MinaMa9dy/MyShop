@@ -7,6 +7,7 @@ import { CategoryService } from '../../core/services/category.service';
 import { LanguageService } from '../../core/services/language.service';
 import { CartService } from '../../core/services/cart.service';
 import { AuthService } from '../../core/services/auth.service';
+import { PhotoService } from '../../core/services/photo.service';
 
 @Component({
   selector: 'app-home',
@@ -89,11 +90,13 @@ import { AuthService } from '../../core/services/auth.service';
                     <a [routerLink]="['/' + currentLang + '/products', product.id]" class="block">
                       <div class="h-28 sm:h-36 bg-gray-100 flex items-center justify-center overflow-hidden relative">
                           @if ((product.productPhotos && product.productPhotos.length > 0) || (product.productphotos && product.productphotos.length > 0)) {
-                            <img [src]="(product.productPhotos || product.productphotos)[0].url" 
+                            <img [src]="photoService.getPhotoUrl((product.productPhotos || product.productphotos)[0].fileName)" 
                                  [alt]="product.name"
                                  class="h-full w-full object-cover">
                           } @else {
-                            <span class="text-4xl text-gray-300">📦</span>
+                            <img [src]="placeholder" 
+                                 [alt]="product.name"
+                                 class="h-full w-full object-cover p-4">
                           }
                           @if (product.haveSale) {
                             <span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
@@ -172,6 +175,10 @@ export class HomeComponent implements OnInit {
   private cartService = inject(CartService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  photoService = inject(PhotoService);
+  
+  // Placeholder image URL
+  placeholder = 'assets/images/placeholder.svg';
   
   featuredProducts = signal<any[]>([]);
   categories = signal<any[]>([]);

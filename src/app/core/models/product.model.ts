@@ -26,8 +26,15 @@ export interface Product {
 
 export interface ProductPhoto {
   id: string;
-  url: string;
+  productId: string;
+  fileName: string;
+  relativePath: string;
+  contentType: string;
+  fileSize: number;
   isMain: boolean;
+  createdAt?: string;
+  // Helper property for display URL
+  url?: string;
 }
 
 export interface AddProductDto {

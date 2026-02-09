@@ -18,7 +18,7 @@ export class CartComponent {
   private router = inject(Router);
 
   // Placeholder image URL
-  placeholder = 'assets/images/placeholder.png';
+  placeholder = 'assets/images/placeholder.svg';
   
   // Track image errors to prevent infinite loops
   private imageErrors = new Set<string>();

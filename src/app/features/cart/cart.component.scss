@@ -47,10 +47,26 @@
       .item-details {
         text-align: right;
       }
+
+      .price-row {
+        flex-direction: row-reverse;
+      }
     }
 
     .cart-footer {
       direction: rtl;
+
+      .summary-row {
+        flex-direction: row-reverse;
+        
+        span:first-child {
+          text-align: right;
+        }
+        
+        span:last-child {
+          text-align: left;
+        }
+      }
     }
   }
 }
@@ -149,6 +165,26 @@
       white-space: nowrap;
     }
 
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      gap: 0.5rem;
+
+      .item-price {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #666;
+      }
+
+      .item-subtotal {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #007bff;
+      }
+    }
+
     .quantity-price-row {
       display: flex;
       justify-content: space-between;
@@ -240,12 +276,31 @@
 
 .cart-summary {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-  font-size: 1.1rem;
-  color: #555;
+  flex-direction: column;
+  gap: 0.5rem;
   margin-bottom: 1rem;
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 500;
+    font-size: 1rem;
+    color: #555;
+
+    &.total {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #333;
+      padding-top: 0.75rem;
+      border-top: 1px solid #e0e0e0;
+      margin-top: 0.5rem;
+
+      span:last-child {
+        color: #28a745;
+      }
+    }
+  }
 
   .total-count {
     background: #007bff;

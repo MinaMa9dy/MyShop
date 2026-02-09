@@ -14,6 +14,10 @@
       </div>
       <div class="item-details">
         <h3>{{ item.productName }}</h3>
+        <div class="price-row">
+          <span class="item-price">{{ item.productPrice | currency }}</span>
+          <span class="item-subtotal">{{ item.productPrice! * item.quantity | currency }}</span>
+        </div>
         <div class="quantity-price-row">
           <div class="quantity-controls">
             <button (click)="decreaseQuantity(item)">-</button>
@@ -37,16 +41,22 @@
 
   <div class="cart-footer" *ngIf="items().length > 0">
     <div class="cart-summary">
-      <span>{{ 'CART.TOTAL_ITEMS' | translate }}:</span>
-      <span class="total-count">{{ totalItems() }}</span>
-    </div>
-    <div class="cart-actions">
-      <button class="btn-continue" (click)="closeCart()">
-        {{ 'CART.CONTINUE_SHOPPING' | translate }}
-      </button>
-      <button class="btn-pay" (click)="proceedToCheckout()">
-        {{ 'CART.PAY' | translate }}
-      </button>
+      <div class="summary-row">
+        <span>{{ 'CART.SUBTOTAL' | translate }}:</span>
+        <span>{{ totalPrice() | currency }}</span>
+      </div>
+      <div class="summary-row total">
+        <span>{{ 'CART.TOTAL' | translate }}:</span>
+        <span>{{ totalPrice() | currency }}</span>
+      </div>
+      <div class="cart-actions">
+        <button class="btn-continue" (click)="closeCart()">
+          {{ 'CART.CONTINUE_SHOPPING' | translate }}
+        </button>
+        <button class="btn-pay" (click)="proceedToCheckout()">
+          {{ 'CART.PAY' | translate }}
+        </button>
+      </div>
     </div>
   </div>
 </aside>

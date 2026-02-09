@@ -5,7 +5,9 @@
     "TOTAL_ITEMS": "Total Items",
     "CONTINUE_SHOPPING": "Continue Shopping",
     "PAY": "Pay Now",
-    "EMPTY": "Your cart is empty"
+    "EMPTY": "Your cart is empty",
+    "SUBTOTAL": "Subtotal",
+    "TOTAL": "Total"
   },
   "home": {
     "welcome": "Welcome to MyShop",

@@ -20,13 +20,16 @@ export class ProductService {
   getAll(pageNumber: number = 1, pageSize: number = 10): Observable<any> {
     let params = new HttpParams()
       .set('PageNumber', pageNumber.toString())
-      .set('PageSize', pageSize.toString());
-    
+      .set('PageSize', pageSize.toString())
+      .set('Includes', 'ProductPhotos');
+      
     return this.http.get<any>(this.apiUrl, { params });
   }
   
   getById(id: string): Observable<Product> {
-    return this.http.get<Product>(`${this.apiUrl}/${id}`);
+    return this.http.get<Product>(`${this.apiUrl}/${id}`, {
+      params: { Includes: 'ProductPhotos' }
+    });
   }
   
   getFiltered(filter: ProductFilter): Observable<any> {
@@ -70,7 +73,8 @@ export class ProductService {
   
   getHotestProducts(numberOfProducts: number = 8): Observable<any> {
     let params = new HttpParams()
-      .set('numberOfProducts', numberOfProducts.toString());
+      .set('numberOfProducts', numberOfProducts.toString())
+      .set('Includes', 'ProductPhotos');
     
     return this.http.get<any>(`${this.apiUrl}/GetHotestProducts`, { params });
   }

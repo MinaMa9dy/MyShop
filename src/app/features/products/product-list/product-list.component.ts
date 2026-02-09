@@ -8,6 +8,7 @@ import { CategoryService } from '../../../core/services/category.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { CartService } from '../../../core/services/cart.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { PhotoService } from '../../../core/services/photo.service';
 
 @Component({
   selector: 'app-product-list',
@@ -114,7 +115,7 @@ import { AuthService } from '../../../core/services/auth.service';
                   <!-- Product Image -->
                   <div class="h-36 sm:h-48 bg-gray-100 flex items-center justify-center overflow-hidden relative">
                     @if ((product.productPhotos && product.productPhotos.length > 0) || (product.productphotos && product.productphotos.length > 0)) {
-                      <img [src]="(product.productPhotos || product.productphotos)[0].url" 
+                      <img [src]="photoService.getPhotoUrl((product.productPhotos || product.productphotos)[0].fileName)" 
                            [alt]="product.name"
                            class="h-full w-full object-cover">
                     } @else {
@@ -178,7 +179,7 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
           
           <!-- Pagination - Centered -->
-          @if (totalPages() > 1) {
+          @if (totalPages() >= 1) {
             <div class="pagination flex flex-col items-center gap-4 mt-8">
               <div class="text-sm text-gray-500">
                 {{ 'home.pageInfo' | translate:{'current': currentPage(), 'total': totalPages()} }}
@@ -223,6 +224,7 @@ export class ProductListComponent implements OnInit {
   private cartService = inject(CartService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  photoService = inject(PhotoService);
   
   products = signal<any[]>([]);
   categories = signal<any[]>([]);
@@ -278,6 +280,8 @@ export class ProductListComponent implements OnInit {
         let prods: any[] = [];
         if (Array.isArray(response)) {
           prods = response;
+        } else if (response && Array.isArray(response.getProducts)) {
+          prods = response.getProducts;
         } else if (response && Array.isArray(response.items)) {
           prods = response.items;
         } else if (response && Array.isArray(response.data)) {
@@ -287,26 +291,28 @@ export class ProductListComponent implements OnInit {
         }
         this.products.set(prods);
         
-        // Handle pagination
-        let totalCount = 0;
-        if (response && response.totalCount) {
-          totalCount = response.totalCount;
-        } else if (response && response.data && response.data.totalCount) {
-          totalCount = response.data.totalCount;
-        } else if (response && response.total && typeof response.total === 'number') {
-          totalCount = response.total;
-        } else if (Array.isArray(response)) {
-          // If backend returns just an array, estimate totalCount
-          totalCount = prods.length;
+        // Handle pagination using TotalPages from response
+        let totalPages = 1;
+        if (response && response.totalPages) {
+          totalPages = response.totalPages;
+        } else if (response && response.data && response.data.totalPages) {
+          totalPages = response.data.totalPages;
+        } else {
+          // Calculate total pages from totalCount if available
+          let totalCount = 0;
+          if (response && response.totalCount) {
+            totalCount = response.totalCount;
+          } else if (response && response.data && response.data.totalCount) {
+            totalCount = response.data.totalCount;
+          }
+          if (totalCount > 0) {
+            totalPages = Math.ceil(totalCount / this.pageSize);
+          } else if (prods.length > 0) {
+            totalPages = Math.ceil(prods.length / this.pageSize);
+          }
         }
         
-        // If we got a full page of products, there's likely more pages
-        if (prods.length >= this.pageSize && totalCount <= prods.length) {
-          // Assume there are more pages if we got a full page
-          totalCount = prods.length + this.pageSize;
-        }
-        
-        this.totalPages.set(Math.max(1, Math.ceil(totalCount / this.pageSize)));
+        this.totalPages.set(Math.max(1, totalPages));
         this.loading.set(false);
       },
       error: (error) => {

@@ -5,6 +5,18 @@ import { environment } from '../../../environments/environment';
 import { CartItem } from '../models/cart.model';
 import { TokenService } from './token.service';
 
+// Helper function to get main photo URL from product
+function getProductMainPhoto(product: any): string {
+  if (!product || !product.productPhotos || !Array.isArray(product.productPhotos) || product.productPhotos.length === 0) {
+    return 'assets/images/placeholder.svg';
+  }
+  const mainPhoto = product.productPhotos.find((photo: any) => photo.isMain);
+  if (mainPhoto && mainPhoto.fileName) {
+    return `${environment.apiUrl}/Photo/${mainPhoto.fileName}`;
+  }
+  return 'assets/images/placeholder.svg';
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -85,8 +97,8 @@ export class CartService {
               userId: item.userId || userId,
               quantity: item.quantity || quantity,
               productName: item.product?.name || item.productName || '',
-              productPrice: item.product?.price || item.productPrice || 0,
-              productImage: item.product?.image || item.productImage || ''
+              productPrice: item.product?.newPrice || item.product?.price || item.productPrice || 0,
+              productImage: getProductMainPhoto(item.product) || item.productImage || ''
             }]);
           }
         }
@@ -167,16 +179,18 @@ export class CartService {
           rawItems = response.items;
         }
         
+        console.log('Raw cart items:', rawItems);
+        
         const items = rawItems.map(item => ({
           productId: item.productId,
           userId: item.userId || userId,
           quantity: item.quantity,
           productName: item.product?.name || item.productName || '',
-          productPrice: item.product?.price || item.productPrice || 0,
-          productImage: item.product?.image || item.productImage || ''
+          productPrice: item.product?.newPrice || item.product?.price || item.productPrice || 0,
+          productImage: getProductMainPhoto(item.product) || item.productImage || ''
         }));
         
-        console.log('Mapped cart items:', items);
+        console.log('Mapped cart items with prices and photos:', items);
         this._items.set(items);
         this.saveToStorage();
       })
