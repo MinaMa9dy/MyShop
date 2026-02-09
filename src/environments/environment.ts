@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: '/api',
+  apiUrl: 'https://talkhashop.runasp.net/api',
   jwtKey: 'YourSuperSecretKeyForJwtTokenGeneration2026!'
 };
