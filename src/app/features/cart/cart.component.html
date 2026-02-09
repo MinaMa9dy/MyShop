@@ -1,0 +1,52 @@
+<!-- Cart Sidebar -->
+<div *ngIf="isOpen()" class="cart-overlay" (click)="closeCart()"></div>
+<aside class="cart-sidebar" [class.open]="isOpen()" [class.rtl]="isRtl()">
+  <div class="cart-header">
+    <h2>{{ 'CART.SHOPPING_CART' | translate }}</h2>
+    <button class="close-btn" (click)="closeCart()">×</button>
+  </div>
+
+  <div class="cart-items" *ngIf="items().length > 0; else emptyCart">
+    <div class="cart-item" *ngFor="let item of items()">
+      <div class="item-image">
+        <img [src]="item.productImage || placeholder" [alt]="item.productName" 
+             (error)="handleImageError($event, item)">
+      </div>
+      <div class="item-details">
+        <h3>{{ item.productName }}</h3>
+        <div class="quantity-price-row">
+          <div class="quantity-controls">
+            <button (click)="decreaseQuantity(item)">-</button>
+            <span>{{ item.quantity }}</span>
+            <button (click)="increaseQuantity(item)">+</button>
+          </div>
+          <button class="remove-btn" (click)="removeFromCart(item)">
+            {{ 'CART.REMOVE' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #emptyCart>
+    <div class="empty-cart">
+      <div class="empty-icon">🛒</div>
+      <p>{{ 'CART.EMPTY' | translate }}</p>
+    </div>
+  </ng-template>
+
+  <div class="cart-footer" *ngIf="items().length > 0">
+    <div class="cart-summary">
+      <span>{{ 'CART.TOTAL_ITEMS' | translate }}:</span>
+      <span class="total-count">{{ totalItems() }}</span>
+    </div>
+    <div class="cart-actions">
+      <button class="btn-continue" (click)="closeCart()">
+        {{ 'CART.CONTINUE_SHOPPING' | translate }}
+      </button>
+      <button class="btn-pay" (click)="proceedToCheckout()">
+        {{ 'CART.PAY' | translate }}
+      </button>
+    </div>
+  </div>
+</aside>

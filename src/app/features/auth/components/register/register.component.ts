@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { LanguageService } from '../../../../core/services/language.service';
 import { TranslatePipe } from '@ngx-translate/core';
+import { RegisterDto } from '../../../../core/models/auth.model';
 
 @Component({
   selector: 'app-register',
@@ -87,11 +88,11 @@ import { TranslatePipe } from '@ngx-translate/core';
             <label>{{ 'auth.gender' | translate }}</label>
             <div class="flex gap-4 mt-2">
               <label class="flex items-center">
-                <input type="radio" formControlName="gender" [value]="false" class="mr-2">
+                <input type="radio" formControlName="gender" [value]="true" class="mr-2">
                 <span>{{ 'auth.male' | translate }}</span>
               </label>
               <label class="flex items-center">
-                <input type="radio" formControlName="gender" [value]="true" class="mr-2">
+                <input type="radio" formControlName="gender" [value]="false" class="mr-2">
                 <span>{{ 'auth.female' | translate }}</span>
               </label>
             </div>
@@ -180,35 +181,52 @@ export class RegisterComponent {
     lastName: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     phoneNumber: ['', [Validators.required]],
-    gender: [false, [Validators.required]],
+    gender: [true, [Validators.required]],
     password: ['', [Validators.required, Validators.minLength(4)]],
     confirmPassword: ['', [Validators.required]]
   });
   
   onSubmit(): void {
-    if (this.registerForm.invalid) return;
+    if (this.registerForm.invalid) {
+      console.log('Form is invalid:', this.registerForm.errors);
+      console.log('Form values:', this.registerForm.value);
+      return;
+    }
     
     this.loading.set(true);
     this.error.set(null);
     
-    const { confirmPassword, ...registerData } = this.registerForm.value;
+    const formValue = this.registerForm.value;
+    const registerData = {
+      firstName: formValue.firstName || '',
+      lastName: formValue.lastName || '',
+      email: formValue.email || '',
+      phoneNumber: formValue.phoneNumber || '',
+      gender: formValue.gender ?? true,
+      password: formValue.password || '',
+      confirmPassword: formValue.confirmPassword || ''
+    };
     
-    if (registerData.password !== confirmPassword) {
+    if (registerData.password !== registerData.confirmPassword) {
       this.error.set('Passwords do not match');
       this.loading.set(false);
       return;
     }
     
-    this.authService.register(registerData as any).subscribe({
+    console.log('Sending register data:', registerData);
+    
+    this.authService.register(registerData).subscribe({
       next: (response) => {
         console.log('Registration successful:', response);
         this.loading.set(false);
-        this.router.navigate(['/auth/login']);
+        this.router.navigate([`/${this.currentLang}/dashboard`]);
       },
       error: (error) => {
         console.error('Registration failed:', error);
         this.loading.set(false);
-        this.error.set(error.message || 'Registration failed. Please try again.');
+        // Handle different error formats from backend
+        const errorMessage = error.error?.message || error.message || error.statusText || 'Registration failed. Please try again.';
+        this.error.set(errorMessage);
       }
     });
   }

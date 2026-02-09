@@ -379,9 +379,8 @@ export class ProductListComponent implements OnInit {
     }
     
     // User is logged in, add to cart (auth interceptor will handle 401 by redirecting to login)
-    const userId = this.authService.getUserId();
-    
-    this.cartService.addToCart(product.id, userId, 1).subscribe({
+    // userId is now automatically extracted from JWT token in cartService
+    this.cartService.addToCart(product.id, 1).subscribe({
       next: () => {
         console.log('Added to cart successfully');
       },

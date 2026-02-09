@@ -2,24 +2,15 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CartItem, AddToCartDto, UpdateCartDto } from '../models/cart.model';
-import { LanguageService } from './language.service';
-
-// Fallback UUID generator for browsers without crypto.randomUUID
-function generateUuid(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
+import { CartItem } from '../models/cart.model';
+import { TokenService } from './token.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
   private http = inject(HttpClient);
-  private languageService = inject(LanguageService);
+  private tokenService = inject(TokenService);
   private apiUrl = `${environment.apiUrl}/Cart`;
 
   // State using Signals
@@ -47,8 +38,21 @@ export class CartService {
     this._isOpen.set(false);
   }
 
+  // Get userId from JWT token
+  private getCurrentUserId(): string {
+    const userId = this.tokenService.getUserId();
+    return userId || '';
+  }
+
+  // Check if item exists in cart
+  private findItem(productId: string): CartItem | undefined {
+    return this._items().find(i => i.productId === productId);
+  }
+
   // Add item to cart - uses POST api/Cart
-  addToCart(productId: string, userId: string, quantity: number = 1): Observable<any> {
+  addToCart(productId: string, quantity: number = 1): Observable<any> {
+    const userId = this.getCurrentUserId();
+    
     const dto = {
       productId: productId,
       userId: userId,
@@ -61,63 +65,79 @@ export class CartService {
       tap((response: any) => {
         console.log('Add to cart response:', response);
         
-        // Backend returns CartItemResponse directly (not wrapped in data)
         const item = response || response?.data;
         
         if (item) {
-          // Map backend response to frontend CartItem
-          this.addItemWithDetails({
-            id: item.id || generateUuid(),
-            productId: item.productId || productId,
-            userId: item.userId || userId,
-            quantity: item.quantity || quantity,
-            // Flatten Product properties
-            productName: item.product?.name || item.productName || '',
-            productPrice: item.product?.price || item.productPrice || 0,
-            productImage: item.product?.image || item.productImage || ''
-          });
+          // Always increase quantity locally if item exists
+          const existingItem = this.findItem(productId);
+          if (existingItem) {
+            this._items.update(items =>
+              items.map(i =>
+                i.productId === productId
+                  ? { ...i, quantity: i.quantity + quantity }
+                  : i
+              )
+            );
+          } else {
+            // Add new item
+            this._items.update(items => [...items, {
+              productId: item.productId || productId,
+              userId: item.userId || userId,
+              quantity: item.quantity || quantity,
+              productName: item.product?.name || item.productName || '',
+              productPrice: item.product?.price || item.productPrice || 0,
+              productImage: item.product?.image || item.productImage || ''
+            }]);
+          }
         }
         
-        // Open cart to show the added item
         this.open();
         this.saveToStorage();
       })
     );
   }
 
-  // Update cart item - uses PUT api/Cart
-  updateCartItem(id: string, productId: string, userId: string, quantity: number): Observable<any> {
+  // Remove item from cart - uses DELETE api/Cart (body instead of query params)
+  removeFromCart(productId: string, quantityToRemove: number = 0): Observable<any> {
+    const userId = this.getCurrentUserId();
+    
     const dto = {
-      id: id,
       productId: productId,
       userId: userId,
-      quantity: quantity
+      quantity: quantityToRemove
     };
 
-    console.log('Updating cart - PUT api/Cart:', dto);
-
-    return this.http.put<any>(this.apiUrl, dto).pipe(
-      tap(response => {
-        console.log('Update cart response:', response);
-        this._items.update(items =>
-          items.map(item =>
-            item.id === id ? { ...item, quantity } : item
-          )
-        );
-        this.saveToStorage();
-      })
-    );
-  }
-
-  // Remove item from cart - uses DELETE api/Cart
-  removeFromCart(cartItemId: string): Observable<any> {
-    console.log('Removing from cart - DELETE api/Cart:', cartItemId);
+    console.log('Removing from cart - DELETE api/Cart:', dto);
     
-    return this.http.delete<any>(`${this.apiUrl}?cartItemId=${cartItemId}`).pipe(
-      tap(response => {
+    return this.http.delete<any>(this.apiUrl, { body: dto }).pipe(
+      tap((response: any) => {
         console.log('Remove cart response:', response);
-        this._items.update(items => items.filter(item => item.id !== cartItemId));
-        this.saveToStorage();
+        
+        // Check if the backend operation was successful
+        const isSuccess = response?.isSuccess || response?.data !== undefined;
+        
+        if (isSuccess && response?.data) {
+          const updatedItem = response.data;
+          
+          // If quantity returned is 0 or null, remove the item completely
+          if (!updatedItem.quantity || updatedItem.quantity === 0) {
+            this._items.update(items => items.filter(item => item.productId !== productId));
+            console.log('Item completely removed from cart');
+          } else {
+            // Update the quantity based on backend response
+            this._items.update(items =>
+              items.map(item =>
+                item.productId === productId
+                  ? { ...item, quantity: updatedItem.quantity }
+                  : item
+              )
+            );
+            console.log('Item quantity updated to:', updatedItem.quantity);
+          }
+          this.saveToStorage();
+        } else if (!isSuccess) {
+          console.error('Failed to remove item from cart:', response?.error || response);
+        }
       })
     );
   }
@@ -129,34 +149,28 @@ export class CartService {
   }
 
   // Get cart items for user - uses GET api/Cart
-  getCartItems(userId: string): Observable<any> {
-    console.log('Getting cart - GET api/Cart:', userId);
+  getCartItems(): Observable<any> {
+    const userId = this.getCurrentUserId();
+    console.log('Getting cart - GET api/Cart for userId:', userId);
     
     return this.http.get<any>(`${this.apiUrl}?userId=${userId}`).pipe(
       tap((response: any) => {
         console.log('Get cart response:', response);
         
-        // Handle different response formats
         let rawItems: any[] = [];
         
         if (response?.data) {
-          // Response has data wrapper
           rawItems = Array.isArray(response.data) ? response.data : [response.data];
         } else if (Array.isArray(response)) {
-          // Response is directly an array
           rawItems = response;
         } else if (response?.items && Array.isArray(response.items)) {
-          // Response has items wrapper
           rawItems = response.items;
         }
         
-        // Map backend CartItemResponse to frontend CartItem (flatten Product object)
         const items = rawItems.map(item => ({
-          id: item.id || undefined,
           productId: item.productId,
-          userId: item.userId,
+          userId: item.userId || userId,
           quantity: item.quantity,
-          // Flatten Product properties
           productName: item.product?.name || item.productName || '',
           productPrice: item.product?.price || item.productPrice || 0,
           productImage: item.product?.image || item.productImage || ''
@@ -175,24 +189,6 @@ export class CartService {
     localStorage.removeItem('cart');
   }
 
-  // Add item with product details (for immediate display)
-  addItemWithDetails(item: CartItem): void {
-    console.log('Adding item with details:', item);
-    const existingItem = this._items().find(i => i.productId === item.productId);
-    if (existingItem) {
-      this._items.update(items =>
-        items.map(i =>
-          i.productId === item.productId
-            ? { ...i, quantity: i.quantity + item.quantity }
-            : i
-        )
-      );
-    } else {
-      this._items.update(items => [...items, item]);
-    }
-    console.log('Current cart items:', this._items());
-  }
-
   // Sync cart from local storage (for guest users)
   loadFromStorage(): void {
     const saved = localStorage.getItem('cart');
@@ -208,8 +204,7 @@ export class CartService {
   }
 
   // Save cart to local storage
-  saveToStorage(): void {
+  private saveToStorage(): void {
     localStorage.setItem('cart', JSON.stringify(this._items()));
-    console.log('Saved cart to storage:', this._items());
   }
 }

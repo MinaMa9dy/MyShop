@@ -40,7 +40,7 @@ import { AuthService } from '../../core/services/auth.service';
       <section class="categories py-16 bg-gray-50">
         <div class="container mx-auto px-4">
           <h2 class="section-title text-center text-2xl font-bold mb-8 text-gray-800">
-            {{ 'home.featuredProducts' | translate }}
+            {{ 'home.categories' | translate }}
           </h2>
           @if (categories().length > 0) {
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -53,7 +53,7 @@ import { AuthService } from '../../core/services/auth.service';
                   </div>
                   <h3 class="font-semibold text-lg text-gray-800">{{ category.name }}</h3>
                   <p class="text-gray-500 text-sm mt-2">
-                    {{ category.productsCount || 0 }} {{ 'home.featuredProducts' | translate }}
+                    {{ category.productsCount || 0 }} {{ 'nav.products' | translate }}
                   </p>
                 </a>
               }
@@ -237,9 +237,8 @@ export class HomeComponent implements OnInit {
     }
     
     // User is logged in, add to cart (auth interceptor will handle 401 by redirecting to login)
-    const userId = this.authService.getUserId();
-    
-    this.cartService.addToCart(product.id, userId, 1).subscribe({
+    // userId is now automatically extracted from JWT token in cartService
+    this.cartService.addToCart(product.id, 1).subscribe({
       next: () => {
         console.log('Added to cart successfully');
       },

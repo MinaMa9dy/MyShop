@@ -132,15 +132,15 @@ export const routes: Routes = [
       }
     ]
   },
-  // Redirect root to default language (en)
+  // Redirect root to default language (ar)
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'en'
+    redirectTo: 'ar'
   },
   // Catch all - redirect to default language
   {
     path: '**',
-    redirectTo: 'en'
+    redirectTo: 'ar'
   }
 ];

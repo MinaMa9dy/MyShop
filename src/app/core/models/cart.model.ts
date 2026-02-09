@@ -1,5 +1,4 @@
 export interface CartItem {
-  id?: string;
   productId: string;
   userId: string;
   quantity: number;
@@ -16,7 +15,6 @@ export interface AddToCartDto {
 }
 
 export interface UpdateCartDto {
-  id: string;
   productId: string;
   userId: string;
   quantity: number;

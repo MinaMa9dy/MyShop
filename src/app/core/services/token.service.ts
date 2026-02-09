@@ -25,12 +25,10 @@ export class TokenService {
   }
   
   setTokens(accessToken: string, refreshToken: string): void {
-    console.log('TokenService - Setting tokens:', { accessToken: accessToken ? 'exists' : 'null', refreshToken: refreshToken ? 'exists' : 'null' });
     localStorage.setItem(this.accessTokenKey, accessToken);
     localStorage.setItem(this.refreshTokenKey, refreshToken);
     this.accessTokenSignal.set(accessToken);
     this.refreshTokenSignal.set(refreshToken);
-    console.log('TokenService - Tokens saved to localStorage');
   }
   
   updateAccessToken(accessToken: string): void {
@@ -51,21 +49,12 @@ export class TokenService {
     
     try {
       const payload = this.decodeToken(token);
-      // If no exp claim, assume token is valid (not expired)
-      if (!payload || !payload.exp) {
-        console.log('Token has no exp claim, assuming not expired');
-        return false;
-      }
+      if (!payload || !payload.exp) return false;
       
       const expirationDate = new Date(payload.exp * 1000);
       const now = new Date();
-      
-      const isExpired = expirationDate < now;
-      console.log('Token expiration check:', { expirationDate, now, isExpired });
-      
-      return isExpired;
-    } catch (error) {
-      console.error('Error checking token expiration:', error);
+      return expirationDate < now;
+    } catch {
       return true;
     }
   }
@@ -90,6 +79,28 @@ export class TokenService {
     return this.decodeToken(token);
   }
   
+  // Get userId from JWT token claims
+  getUserId(): string | null {
+    const token = this.getAccessToken();
+    if (!token) return null;
+    
+    const payload = this.decodeToken(token);
+    if (!payload) return null;
+    
+    // Log payload for debugging (remove in production)
+    console.log('Token payload:', JSON.stringify(payload, null, 2));
+    
+    // Try common claim names for userId
+    return payload.sub || payload.userId || payload.nameid || payload.id || payload.UserId || payload.UserID || payload.uid || null;
+  }
+  
+  // Get all claims from token (for debugging)
+  getAllClaims(): any {
+    const token = this.getAccessToken();
+    if (!token) return null;
+    return this.decodeToken(token);
+  }
+  
   getTokenExpiration(): Date | null {
     const token = this.getAccessToken();
     if (!token) return null;
@@ -97,7 +108,6 @@ export class TokenService {
     try {
       const payload = this.decodeToken(token);
       if (!payload || !payload.exp) return null;
-      
       return new Date(payload.exp * 1000);
     } catch {
       return null;

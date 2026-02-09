@@ -51,18 +51,14 @@ export class App implements OnInit, OnDestroy {
   }
   
   private fetchUserCart(): void {
-    const userId = this.authService.getUserId();
-    if (userId) {
-      this.cartService.getCartItems(userId).subscribe({
+    this.cartService.getCartItems().subscribe({
         next: () => {
           console.log('Cart loaded from backend');
-          this.cartService.saveToStorage();
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error loading cart:', error);
         }
       });
-    }
   }
   
   toggleMobileMenu(): void {

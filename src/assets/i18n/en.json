@@ -1,12 +1,21 @@
 {
+  "CART": {
+    "SHOPPING_CART": "Shopping Cart",
+    "REMOVE": "Remove",
+    "TOTAL_ITEMS": "Total Items",
+    "CONTINUE_SHOPPING": "Continue Shopping",
+    "PAY": "Pay Now",
+    "EMPTY": "Your cart is empty"
+  },
   "home": {
     "welcome": "Welcome to MyShop",
     "subtitle": "Discover amazing products at unbeatable prices",
     "shopNow": "Shop Now",
     "createAccount": "Create Account",
+    "categories": "Categories",
     "featuredProducts": "Featured Products",
     "viewAll": "View All Products →",
-    "noProducts": "No featured products available",
+    "noProducts": "No categories available",
     "search": "Search products...",
     "allCategories": "All Categories",
     "minPrice": "Min",
@@ -54,19 +63,27 @@
     "fasting": "Fasting"
   },
   "cart": {
+    "SHOPPING_CART": "Shopping Cart",
+    "shoppingCart": "Shopping Cart",
     "cart": "Cart",
     "emptyCart": "Your cart is empty",
+    "EMPTY": "Your cart is empty",
     "emptyCartDesc": "Looks like you haven't added any items to your cart yet.",
     "total": "Total",
     "checkout": "Checkout",
     "continueShopping": "Continue Shopping",
+    "CONTINUE_SHOPPING": "Continue Shopping",
+    "PAY": "Pay Now",
     "orderSummary": "Order Summary",
     "subtotal": "Subtotal",
     "shipping": "Shipping",
     "free": "Free",
     "tax": "Tax (10%)",
     "product": "Product",
-    "removeConfirm": "Are you sure you want to remove this item?"
+    "removeConfirm": "Are you sure you want to remove this item?",
+    "REMOVE": "Remove",
+    "TOTAL_ITEMS": "Total Items",
+    "totalItems": "Total Items"
   },
   "footer": {
     "freeShipping": "Free Shipping",

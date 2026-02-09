@@ -1,12 +1,21 @@
 {
+  "CART": {
+    "SHOPPING_CART": "سلة التسوق",
+    "REMOVE": "إزالة",
+    "TOTAL_ITEMS": "إجمالي العناصر",
+    "CONTINUE_SHOPPING": "متابعة التسوق",
+    "PAY": "ادفع الآن",
+    "EMPTY": "سلة التسوق فارغة"
+  },
   "home": {
     "welcome": "مرحباً بكم في متجرنا",
     "subtitle": "اكتشف منتجات مذهلة بأسعار لا تقاوم",
     "shopNow": "تسوق الآن",
     "createAccount": "إنشاء حساب",
+    "categories": "الفئات",
     "featuredProducts": "المنتجات المميزة",
     "viewAll": "عرض جميع المنتجات ←",
-    "noProducts": "لا توجد منتجات مميزة",
+    "noProducts": "لا توجد فئات",
     "search": "ابحث عن منتجات...",
     "allCategories": "جميع الفئات",
     "minPrice": "الحد الأدنى",
@@ -54,19 +63,27 @@
     "fasting": "صيامي"
   },
   "cart": {
+    "SHOPPING_CART": "سلة التسوق",
+    "shoppingCart": "سلة التسوق",
     "cart": "السلة",
     "emptyCart": "سلة التسوق فارغة",
+    "EMPTY": "سلة التسوق فارغة",
     "emptyCartDesc": "يبدو أنك لم تضف أي عناصر إلى سلة التسوق بعد.",
     "total": "الإجمالي",
     "checkout": "الدفع",
     "continueShopping": "متابعة التسوق",
+    "CONTINUE_SHOPPING": "متابعة التسوق",
+    "PAY": "ادفع الآن",
     "orderSummary": "ملخص الطلب",
     "subtotal": "المجموع الفرعي",
     "shipping": "الشحن",
     "free": "مجاني",
     "tax": "الضريبة (10%)",
     "product": "منتج",
-    "removeConfirm": "هل أنت متأكد من إزالة هذا العنصر؟"
+    "removeConfirm": "هل أنت متأكد من إزالة هذا العنصر؟",
+    "REMOVE": "إزالة",
+    "TOTAL_ITEMS": "إجمالي العناصر",
+    "totalItems": "إجمالي العناصر"
   },
   "footer": {
     "freeShipping": "شحن مجاني",
