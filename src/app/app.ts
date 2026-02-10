@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit, OnDestroy, Renderer2 } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterOutlet, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from './core/services/auth.service';
 import { CartService } from './core/services/cart.service';
@@ -9,7 +9,7 @@ import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslateModule, CartComponent],
+  imports: [RouterOutlet, RouterLink, TranslateModule, CartComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

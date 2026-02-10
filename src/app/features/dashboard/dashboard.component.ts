@@ -1,8 +1,10 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth.service';
+import { CartService } from '../../core/services/cart.service';
+import { TokenService } from '../../core/services/token.service';
 import { User } from '../../core/models/auth.model';
 
 @Component({
@@ -15,7 +17,7 @@ import { User } from '../../core/models/auth.model';
         <div class="flex justify-between items-center mb-8">
           <div>
             <h1 class="page-header mb-2">{{ 'footer.dashboard' | translate }}</h1>
-            <p class="text-gray-500">{{ 'dashboard.welcomeBack' | translate }}, {{ user()?.email }}</p>
+            <p class="text-gray-500">{{ 'dashboard.welcomeBack' | translate }}, {{ userName() || 'User' }}</p>
           </div>
         </div>
         
@@ -37,7 +39,7 @@ import { User } from '../../core/models/auth.model';
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-gray-500 text-sm mb-1">{{ 'dashboard.cartItems' | translate }}</p>
-                <p class="text-3xl font-bold text-gray-800">{{ stats().cartItems }}</p>
+                <p class="text-3xl font-bold text-gray-800">{{ cartTotalItems() }}</p>
               </div>
               <div class="stat-icon w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-2xl">
                 🛒
@@ -100,7 +102,7 @@ import { User } from '../../core/models/auth.model';
             <div class="account-info">
               <div class="info-row flex justify-between py-3 border-b border-gray-100">
                 <span class="text-gray-500">{{ 'auth.email' | translate }}</span>
-                <span class="font-medium">{{ user()?.email }}</span>
+                <span class="font-medium">{{ userEmail() }}</span>
               </div>
               <div class="info-row flex justify-between py-3 border-b border-gray-100">
                 <span class="text-gray-500">{{ 'dashboard.userId' | translate }}</span>
@@ -127,6 +129,8 @@ import { User } from '../../core/models/auth.model';
 })
 export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
+  private cartService = inject(CartService);
+  private tokenService = inject(TokenService);
   
   user = signal<User | null>(null);
   
@@ -137,6 +141,15 @@ export class DashboardComponent implements OnInit {
   });
   
   memberSince = signal('2026');
+  
+  // Expose cart totalItems to template
+  cartTotalItems = this.cartService.totalItems;
+  
+  // Get email from token claims
+  userEmail = computed(() => this.tokenService.getEmail());
+  
+  // Get name from token claims
+  userName = computed(() => this.tokenService.getName());
   
   ngOnInit(): void {
     this.loadUserInfo();

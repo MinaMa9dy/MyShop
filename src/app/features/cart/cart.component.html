@@ -45,7 +45,7 @@
         <span>{{ 'CART.SUBTOTAL' | translate }}:</span>
         <span>{{ totalPrice() | currency }}</span>
       </div>
-      <div class="summary-row total">
+      <div class="summary-row total" [class.rtl-total]="isRtl()">
         <span>{{ 'CART.TOTAL' | translate }}:</span>
         <span>{{ totalPrice() | currency }}</span>
       </div>

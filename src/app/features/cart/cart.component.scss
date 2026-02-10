@@ -125,8 +125,8 @@
   }
 
   .item-image {
-    width: 90px;
-    height: 90px;
+    width: 120px;
+    height: 120px;
     flex-shrink: 0;
     border-radius: 12px;
     overflow: hidden;
@@ -296,6 +296,20 @@
       border-top: 1px solid #e0e0e0;
       margin-top: 0.5rem;
 
+      // In RTL Arabic: Price on left, label on right
+      &.rtl-total {
+        flex-direction: row-reverse;
+        
+        span:first-child {
+          // This is the price (was second), now on left
+          color: #28a745;
+        }
+        
+        span:last-child {
+          // This is the label (was first), now on right
+        }
+      }
+
       span:last-child {
         color: #28a745;
       }
@@ -364,8 +378,8 @@
 
   .cart-item {
     .item-image {
-      width: 70px;
-      height: 70px;
+      width: 90px;
+      height: 90px;
     }
 
     .item-details {

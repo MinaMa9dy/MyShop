@@ -10,19 +10,6 @@
         
         <!-- Desktop Navigation Links -->
         <div class="nav-links hidden lg:flex items-center gap-4">
-          <a [routerLink]="'/' + currentLanguage() + '/'" routerLinkActive="text-blue-600" 
-             [routerLinkActiveOptions]="{exact: true}"
-             class="text-sm text-gray-600 hover:text-blue-600 transition-colors">
-            {{ 'home.shopNow' | translate }}
-          </a>
-          <a [routerLink]="'/' + currentLanguage() + '/products'" routerLinkActive="text-blue-600"
-             class="text-sm text-gray-600 hover:text-blue-600 transition-colors">
-            {{ 'nav.products' | translate }}
-          </a>
-          <a [routerLink]="'/' + currentLanguage() + '/categories'" routerLinkActive="text-blue-600"
-             class="text-sm text-gray-600 hover:text-blue-600 transition-colors">
-            {{ 'nav.categories' | translate }}
-          </a>
         </div>
         
         <!-- Desktop Right Actions -->
@@ -107,25 +94,6 @@
         <!-- Navigation Links -->
         <div class="flex-1 p-4">
           <div class="flex flex-col gap-2">
-            <a [routerLink]="'/' + currentLanguage() + '/'" routerLinkActive="bg-blue-50 text-blue-600" 
-               [routerLinkActiveOptions]="{exact: true}"
-               (click)="closeMobileMenu()"
-               class="px-4 py-3.5 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-3">
-               <span class="text-xl w-8 text-center">🏠</span>
-               <span class="font-medium">{{ 'home.shopNow' | translate }}</span>
-            </a>
-            <a [routerLink]="'/' + currentLanguage() + '/products'" routerLinkActive="bg-blue-50 text-blue-600"
-               (click)="closeMobileMenu()"
-               class="px-4 py-3.5 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-3">
-               <span class="text-xl w-8 text-center">🛍️</span>
-               <span class="font-medium">{{ 'nav.products' | translate }}</span>
-            </a>
-            <a [routerLink]="'/' + currentLanguage() + '/categories'" routerLinkActive="bg-blue-50 text-blue-600"
-               (click)="closeMobileMenu()"
-               class="px-4 py-3.5 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-3">
-               <span class="text-xl w-8 text-center">📂</span>
-               <span class="font-medium">{{ 'nav.categories' | translate }}</span>
-            </a>
           </div>
         </div>
         

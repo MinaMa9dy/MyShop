@@ -94,6 +94,55 @@ export class TokenService {
     return payload.sub || payload.userId || payload.nameid || payload.id || payload.UserId || payload.UserID || payload.uid || null;
   }
   
+  // Get email from JWT token claims
+  getEmail(): string | null {
+    const token = this.getAccessToken();
+    if (!token) return null;
+    
+    const payload = this.decodeToken(token);
+    if (!payload) return null;
+    
+    // Try common claim names for email
+    if (payload.email) return payload.email;
+    if (payload.emailaddress) return payload.emailaddress;
+    if (payload.mail) return payload.mail;
+    
+    // Check for namespaced email claim
+    for (const key of Object.keys(payload)) {
+      if (key.toLowerCase().includes('emailaddress') || key.toLowerCase().includes('email')) {
+        return payload[key];
+      }
+    }
+    
+    return null;
+  }
+  
+  // Get name from JWT token claims
+  getName(): string | null {
+    const token = this.getAccessToken();
+    if (!token) return null;
+    
+    const payload = this.decodeToken(token);
+    if (!payload) return null;
+    
+    // Try common claim names for name
+    if (payload.name) return payload.name;
+    if (payload.fullName) return payload.fullName;
+    if (payload.firstName) {
+      const lastName = payload.lastName || '';
+      return `${payload.firstName} ${lastName}`.trim();
+    }
+    
+    // Check for namespaced name claim
+    for (const key of Object.keys(payload)) {
+      if (key.toLowerCase().includes('name') && !key.toLowerCase().includes('identifier')) {
+        return payload[key];
+      }
+    }
+    
+    return null;
+  }
+  
   // Get all claims from token (for debugging)
   getAllClaims(): any {
     const token = this.getAccessToken();

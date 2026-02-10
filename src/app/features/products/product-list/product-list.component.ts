@@ -121,20 +121,23 @@ import { PhotoService } from '../../../core/services/photo.service';
                     } @else {
                       <span class="text-6xl text-gray-300">📦</span>
                     }
-                    @if (product.haveSale) {
-                      <span class="absolute top-3 left-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
-                        {{ 'product.sale' | translate }}
-                      </span>
-                    }
-                    @if (product.isFasting) {
-                      <span class="absolute top-3 right-3 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
-                        {{ 'product.fasting' | translate }}
-                      </span>
-                    }
+                    <!-- Labels - Sale and Fasting -->
+                    <div class="absolute top-2 left-2 right-2 flex justify-between items-start pointer-events-none">
+                      @if (product.haveSale) {
+                        <span class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold z-10">
+                          {{ 'product.sale' | translate }}
+                        </span>
+                      }
+                      @if (product.isFasting) {
+                        <span class="bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold z-10">
+                          {{ 'product.fasting' | translate }}
+                        </span>
+                      }
+                    </div>
                   </div>
                   <!-- Product Info -->
                   <div class="p-2 sm:p-4 text-center">
-                    <h3 class="font-bold text-xs sm:text-base mb-1 text-gray-800 truncate px-1">
+                    <h3 class="font-bold text-[10px] sm:text-xs mb-1 text-gray-800 line-clamp-2 px-1 leading-tight">
                       {{ product.name }}
                     </h3>
                     <!-- Price -->

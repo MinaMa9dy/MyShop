@@ -88,7 +88,7 @@ import { PhotoService } from '../../core/services/photo.service';
                        style="min-height: auto;">
                     <!-- Product Image -->
                     <a [routerLink]="['/' + currentLang + '/products', product.id]" class="block">
-                      <div class="h-28 sm:h-36 bg-gray-100 flex items-center justify-center overflow-hidden relative">
+                      <div class="h-40 sm:h-48 bg-gray-100 flex items-center justify-center overflow-hidden relative">
                           @if ((product.productPhotos && product.productPhotos.length > 0) || (product.productphotos && product.productphotos.length > 0)) {
                             <img [src]="photoService.getPhotoUrl((product.productPhotos || product.productphotos)[0].fileName)" 
                                  [alt]="product.name"
@@ -98,22 +98,25 @@ import { PhotoService } from '../../core/services/photo.service';
                                  [alt]="product.name"
                                  class="h-full w-full object-cover p-4">
                           }
-                          @if (product.haveSale) {
-                            <span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
-                              {{ 'product.sale' | translate }}
-                            </span>
-                          }
-                          @if (product.isFasting) {
-                            <span class="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
-                              {{ 'product.fasting' | translate }}
-                            </span>
-                          }
+                          <!-- Labels - Sale and Fasting -->
+                          <div class="absolute top-2 left-2 right-2 flex justify-between items-start pointer-events-none">
+                            @if (product.haveSale) {
+                              <span class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold z-10">
+                                {{ 'product.sale' | translate }}
+                              </span>
+                            }
+                            @if (product.isFasting) {
+                              <span class="bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold z-10">
+                                {{ 'product.fasting' | translate }}
+                              </span>
+                            }
+                          </div>
                       </div>
                     </a>
                     <!-- Product Info -->
                     <div class="p-2 sm:p-3 text-center">
                       <a [routerLink]="['/' + currentLang + '/products', product.id]" class="block">
-                        <h3 class="font-bold text-xs sm:text-sm text-gray-800 truncate px-1 hover:text-blue-600 transition-colors">
+                        <h3 class="font-bold text-[10px] sm:text-sm text-gray-800 line-clamp-2 px-1 leading-tight hover:text-blue-600 transition-colors">
                           {{ product.name }}
                         </h3>
                       </a>

@@ -1,13 +1,14 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { CategoryService } from '../../../core/services/category.service';
 import { Category } from '../../../core/models/category.model';
 
 @Component({
   selector: 'app-category-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   template: `
     <div class="categories-page py-8">
       <div class="container mx-auto px-4">
@@ -40,7 +41,7 @@ import { Category } from '../../../core/models/category.model';
                 }
                 <div class="text-center">
                   <span class="text-sm text-gray-400">
-                    {{ category.productCount || 0 }} products
+                    {{ category.productsCount || 0 }} {{ 'nav.products' | translate }}
                   </span>
                 </div>
               </a>
@@ -85,3 +86,4 @@ export class CategoryListComponent implements OnInit {
     });
   }
 }
+
