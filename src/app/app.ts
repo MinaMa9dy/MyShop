@@ -56,6 +56,13 @@ export class App implements OnInit, OnDestroy {
           console.log('Cart loaded from backend');
         },
         error: (error: any) => {
+          // Handle 401 gracefully - user is not authenticated
+          // Don't redirect, just keep the local cart data
+          if (error.status === 401) {
+            console.log('App - User is not authenticated, keeping local cart data');
+            // Cart service already handles this silently
+            return;
+          }
           console.error('Error loading cart:', error);
         }
       });

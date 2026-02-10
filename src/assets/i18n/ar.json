@@ -62,7 +62,19 @@
     "reviews": "التقييمات",
     "productId": "رقم المنتج",
     "sale": "خصم",
-    "fasting": "صيامي"
+    "fasting": "صيامي",
+    "writeReview": "اكتب تقييم",
+    "rating": "التقييم",
+    "reviewContent": "تقييمك",
+    "reviewPlaceholder": "شاركنا تجربتك مع هذا المنتج...",
+    "submitReview": "إرسال التقييم",
+    "submitting": "جاري الإرسال...",
+    "reviewSubmitted": "شكراً! تم إرسال تقييمك بنجاح.",
+    "loginToReview": "الرجاء تسجيل الدخول لكتابة تقييم",
+    "login": "تسجيل الدخول",
+    "customerReviews": "تقييمات العملاء",
+    "noReviews": "لا توجد تقييمات بعد",
+    "beFirstToReview": "كن أول من يقيم هذا المنتج"
   },
   "cart": {
     "SHOPPING_CART": "سلة التسوق",

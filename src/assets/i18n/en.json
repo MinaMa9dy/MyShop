@@ -62,7 +62,19 @@
     "reviews": "Reviews",
     "productId": "Product ID",
     "sale": "Sale",
-    "fasting": "Fasting"
+    "fasting": "Fasting",
+    "writeReview": "Write a Review",
+    "rating": "Rating",
+    "reviewContent": "Your Review",
+    "reviewPlaceholder": "Share your experience with this product...",
+    "submitReview": "Submit Review",
+    "submitting": "Submitting...",
+    "reviewSubmitted": "Thank you! Your review has been submitted successfully.",
+    "loginToReview": "Please login to write a review",
+    "login": "Login",
+    "customerReviews": "Customer Reviews",
+    "noReviews": "No reviews yet",
+    "beFirstToReview": "Be the first to review this product"
   },
   "cart": {
     "SHOPPING_CART": "Shopping Cart",

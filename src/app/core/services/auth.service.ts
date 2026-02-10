@@ -10,6 +10,7 @@ import {
   User 
 } from '../models/auth.model';
 import { TokenService } from './token.service';
+import { CartService } from './cart.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,7 @@ import { TokenService } from './token.service';
 export class AuthService {
   private http = inject(HttpClient);
   private tokenService = inject(TokenService);
+  private cartService = inject(CartService);
   
   private apiUrl = `${environment.apiUrl}/Account`;
   
@@ -111,6 +113,8 @@ export class AuthService {
     this.tokenService.clearTokens();
     this.isLoggedInSignal.set(false);
     this.currentUserSubject.next(null);
+    // Clear cart data on logout to prevent stale data persistence
+    this.cartService.clear();
   }
   
   loadCurrentUser(): void {

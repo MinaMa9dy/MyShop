@@ -8,6 +8,9 @@ import { CartService } from '../../../core/services/cart.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { PhotoService } from '../../../core/services/photo.service';
+import { ReviewService } from '../../../core/services/review.service';
+import { TokenService } from '../../../core/services/token.service';
+import { Review } from '../../../core/models/review.model';
 
 @Component({
   selector: 'app-product-detail',
@@ -39,7 +42,7 @@ import { PhotoService } from '../../../core/services/photo.service';
             }
           </nav>
           
-          <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
               <!-- Product Images -->
               <div class="product-images p-6 bg-gray-100">
@@ -140,7 +143,7 @@ import { PhotoService } from '../../../core/services/photo.service';
                   }
                   <div class="bg-gray-50 rounded-lg p-4">
                     <p class="text-sm text-gray-500 mb-1">{{ 'product.reviews' | translate }}</p>
-                    <p class="font-medium text-gray-800">{{ product()?.reviewCount || 0 }}</p>
+                    <p class="font-medium text-gray-800">{{ totalReviewCount() }}</p>
                   </div>
                 </div>
                 
@@ -189,6 +192,120 @@ import { PhotoService } from '../../../core/services/photo.service';
               </div>
             </div>
           </div>
+
+          <!-- Reviews Section -->
+          <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="p-8">
+              <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ 'product.writeReview' | translate }}</h2>
+              
+              <!-- Review Form -->
+              @if (isLoggedIn()) {
+                <div class="bg-gray-50 rounded-xl p-6 mb-8">
+                  <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">{{ 'product.rating' | translate }}</label>
+                    <div class="flex gap-2">
+                      @for (star of [1, 2, 3, 4, 5]; track star) {
+                        <button 
+                          type="button"
+                          class="text-3xl transition-transform hover:scale-110 focus:outline-none"
+                          [class.text-yellow-400]="star <= newReviewStars"
+                          [class.text-gray-300]="star > newReviewStars"
+                          (click)="setRating(star)">
+                          ★
+                        </button>
+                      }
+                    </div>
+                  </div>
+                  
+                  <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">{{ 'product.reviewContent' | translate }}</label>
+                    <textarea 
+                      [(ngModel)]="newReviewContent"
+                      rows="4"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      placeholder="{{ 'product.reviewPlaceholder' | translate }}"></textarea>
+                  </div>
+                  
+                  @if (reviewError()) {
+                    <div class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+                      {{ reviewError() }}
+                    </div>
+                  }
+                  
+                  @if (reviewSuccess()) {
+                    <div class="mb-4 p-3 bg-green-100 text-green-700 rounded-lg">
+                      {{ 'product.reviewSubmitted' | translate }}
+                    </div>
+                  }
+                  
+                  <button 
+                    type="button"
+                    class="py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    [disabled]="reviewSubmitting() || newReviewStars === 0 || !newReviewContent.trim()"
+                    (click)="submitReview()">
+                    @if (reviewSubmitting()) {
+                      <span class="flex items-center gap-2">
+                        <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        {{ 'product.submitting' | translate }}
+                      </span>
+                    } @else {
+                      {{ 'product.submitReview' | translate }}
+                    }
+                  </button>
+                </div>
+              } @else {
+                <div class="bg-gray-50 rounded-xl p-6 mb-8 text-center">
+                  <p class="text-gray-600 mb-4">{{ 'product.loginToReview' | translate }}</p>
+                  <a [routerLink]="'/' + getCurrentLang() + '/auth/login'" class="inline-block py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+                    {{ 'product.login' | translate }}
+                  </a>
+                </div>
+              }
+              
+              <!-- Existing Reviews -->
+              <h3 class="text-xl font-bold text-gray-800 mb-4">{{ 'product.customerReviews' | translate }}</h3>
+              
+              @if (loadingReviews()) {
+                <div class="flex justify-center py-8">
+                  <div class="w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+                </div>
+              } @else if (reviews().length === 0) {
+                <div class="text-center py-8 text-gray-500">
+                  <p class="text-lg">{{ 'product.noReviews' | translate }}</p>
+                  <p class="text-sm mt-2">{{ 'product.beFirstToReview' | translate }}</p>
+                </div>
+              } @else {
+                <div class="space-y-4">
+                  @for (review of reviews(); track review.id) {
+                    <div class="bg-gray-50 rounded-xl p-6">
+                      <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                          <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                            {{ review.personName ? review.personName.charAt(0) : 'U' }}
+                          </div>
+                          <div>
+                            <p class="font-medium text-gray-800">{{ review.personName || 'Anonymous' }}</p>
+                            <p class="text-sm text-gray-500">{{ review.createdAt | date:'mediumDate' }}</p>
+                          </div>
+                        </div>
+                        <div class="flex gap-1">
+                          @for (star of [1, 2, 3, 4, 5]; track star) {
+                            <span 
+                              class="text-lg"
+                              [class.text-yellow-400]="star <= review.stars"
+                              [class.text-gray-300]="star > review.stars">
+                              ★
+                            </span>
+                          }
+                        </div>
+                      </div>
+                      <p class="text-gray-600">{{ review.content }}</p>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
         }
       </div>
     </div>
@@ -202,11 +319,22 @@ export class ProductDetailComponent implements OnInit {
   private languageService = inject(LanguageService);
   private router = inject(Router);
   photoService = inject(PhotoService);
+  private tokenService = inject(TokenService);
+  private reviewService = inject(ReviewService);
   
   product = signal<any>(null);
   loading = signal(true);
   mainImage = signal<string | null>(null);
   quantity = 1;
+  
+  // Review-related signals
+  reviews = signal<Review[]>([]);
+  loadingReviews = signal(false);
+  newReviewStars = 0;
+  newReviewContent = '';
+  reviewSubmitting = signal(false);
+  reviewError = signal<string | null>(null);
+  reviewSuccess = signal(false);
   
   // Computed signal to calculate sale percentage
   salePercentage = computed(() => {
@@ -226,6 +354,13 @@ export class ProductDetailComponent implements OnInit {
     if (!p) return false;
     // Only show sale if oldPrice > newPrice
     return p.oldPrice > p.newPrice;
+  });
+  
+  // Computed signal to get total review count (from product + loaded reviews)
+  totalReviewCount = computed(() => {
+    const productReviews = this.product()?.reviewCount || 0;
+    const loadedReviews = this.reviews().length;
+    return Math.max(productReviews, loadedReviews);
   });
   
   ngOnInit(): void {
@@ -251,10 +386,32 @@ export class ProductDetailComponent implements OnInit {
           this.mainImage.set(this.photoService.getPhotoUrl(firstPhoto.fileName));
         }
         this.loading.set(false);
+        
+        // Load reviews for this product
+        this.loadReviews(id);
       },
       error: (error) => {
         console.error('Error loading product:', error);
         this.loading.set(false);
+      }
+    });
+  }
+  
+  loadReviews(productId: string): void {
+    this.loadingReviews.set(true);
+    this.reviewService.getReviewsByProductId(productId).subscribe({
+      next: (response: Review[]) => {
+        console.log('Reviews API Response:', response);
+        if (Array.isArray(response)) {
+          this.reviews.set(response);
+        } else if (response && Array.isArray((response as any).data)) {
+          this.reviews.set((response as any).data);
+        }
+        this.loadingReviews.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading reviews:', error);
+        this.loadingReviews.set(false);
       }
     });
   }
@@ -287,6 +444,65 @@ export class ProductDetailComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error adding to cart:', error);
+      }
+    });
+  }
+  
+  isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+  
+  getCurrentLang(): string {
+    return this.languageService.getCurrentLanguage();
+  }
+  
+  setRating(stars: number): void {
+    this.newReviewStars = stars;
+  }
+  
+  submitReview(): void {
+    if (this.newReviewStars === 0 || !this.newReviewContent.trim()) {
+      this.reviewError.set('Please provide a rating and review content');
+      return;
+    }
+    
+    const productId = this.product()?.id;
+    if (!productId) {
+      this.reviewError.set('Product ID not found');
+      return;
+    }
+    
+    this.reviewSubmitting.set(true);
+    this.reviewError.set(null);
+    this.reviewSuccess.set(false);
+    
+    // Get user ID from JWT token claims
+    const userId = this.tokenService.getUserId() || '';
+    
+    this.reviewService.addReview({
+      productId: productId,
+      userId: userId || '',
+      stars: this.newReviewStars,
+      content: this.newReviewContent.trim()
+    }).subscribe({
+      next: (response: any) => {
+        console.log('Submit review response:', response);
+        // Check if response has IsSuccess property (wrapper) or if it's the direct data
+        if (response && (response.isSuccess !== false)) {
+          this.reviewSuccess.set(true);
+          this.newReviewStars = 0;
+          this.newReviewContent = '';
+          // Reload reviews to show the new one
+          this.loadReviews(productId);
+        } else {
+          this.reviewError.set(response?.error || 'Failed to submit review');
+        }
+        this.reviewSubmitting.set(false);
+      },
+      error: (error) => {
+        console.error('Error submitting review:', error);
+        this.reviewError.set(error.error?.error || 'An error occurred while submitting the review');
+        this.reviewSubmitting.set(false);
       }
     });
   }

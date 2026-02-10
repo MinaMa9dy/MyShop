@@ -1,6 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CartItem } from '../models/cart.model';
 import { TokenService } from './token.service';
@@ -193,6 +193,19 @@ export class CartService {
         console.log('Mapped cart items with prices and photos:', items);
         this._items.set(items);
         this.saveToStorage();
+      }),
+      catchError((error: any) => {
+        // Handle 401 Unauthorized gracefully for unauthenticated users
+        if (error.status === 401) {
+          console.log('CartService - 401 received, user is not authenticated. Keeping local cart data.');
+          // Don't update cart items - keep the local cart data
+          // This allows unauthenticated users to keep their local cart
+          return throwError(() => error);
+        }
+        
+        // For other errors, log and re-throw
+        console.error('CartService - Error fetching cart:', error);
+        return throwError(() => error);
       })
     );
   }
