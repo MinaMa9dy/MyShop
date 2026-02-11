@@ -11,7 +11,7 @@ import { TokenService } from './token.service';
 export class OrderService {
   private http = inject(HttpClient);
   private tokenService = inject(TokenService);
-  private apiUrl = `${environment.apiUrl}/orders`;
+  private apiUrl = `${environment.apiUrl}/order`;
 
   private getCurrentUserId(): string {
     const userId = this.tokenService.getUserId();
