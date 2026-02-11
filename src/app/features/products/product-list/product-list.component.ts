@@ -114,8 +114,8 @@ import { PhotoService } from '../../../core/services/photo.service';
                    style="min-height: auto;">
                   <!-- Product Image -->
                   <div class="h-36 sm:h-48 bg-gray-100 flex items-center justify-center overflow-hidden relative">
-                    @if ((product.productPhotos && product.productPhotos.length > 0) || (product.productphotos && product.productphotos.length > 0)) {
-                      <img [src]="photoService.getPhotoUrl((product.productPhotos || product.productphotos)[0].fileName)" 
+                    @if (photoService.getMainPhotoUrl(product.productPhotos || product.productphotos)) {
+                      <img [src]="photoService.getMainPhotoUrl(product.productPhotos || product.productphotos)" 
                            [alt]="product.name"
                            class="h-full w-full object-cover">
                     } @else {
