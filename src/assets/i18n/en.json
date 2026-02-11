@@ -5,6 +5,7 @@
     "TOTAL_ITEMS": "Total Items",
     "CONTINUE_SHOPPING": "Continue Shopping",
     "PAY": "Order Now",
+    "PLACE_ORDER": "Place Order",
     "EMPTY": "Your cart is empty",
     "SUBTOTAL": "Subtotal",
     "TOTAL": "Total"
@@ -139,5 +140,64 @@
     "loading": "Loading...",
     "backToProducts": "Back to Products",
     "productNotFound": "Product not found"
+  },
+  "orders": {
+    "title": "My Orders",
+    "subtitle": "View and track your orders",
+    "empty": "You haven't placed any orders yet",
+    "orderId": "Order ID",
+    "date": "Date",
+    "qty": "Qty",
+    "total": "Total",
+    "status": "Status",
+    "shippingTo": "Shipping to",
+    "phoneNumber": "Phone",
+    "note": "Note",
+    "processing": "Processing",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "orderConfirm": {
+    "title": "Confirm Order",
+    "subtitle": "Review your order and enter shipping details",
+    "shippingInfo": "Shipping Information",
+    "city": "City",
+    "selectCity": "Select a city",
+    "street": "Street Address",
+    "streetPlaceholder": "Enter your street address",
+    "phoneNumber": "Phone Number",
+    "phoneNumberPlaceholder": "Enter your phone number",
+    "comment": "Comment (Optional)",
+    "commentPlaceholder": "Any special instructions for your order...",
+    "orderSummary": "Order Summary",
+    "confirmOrder": "Place Order",
+    "placingOrder": "Placing Order...",
+    "orderPlaced": "Order placed successfully!"
+  },
+  "admin": {
+    "addProduct": {
+      "title": "Add New Product",
+      "subtitle": "Fill in the product details below",
+      "name": "Product Name",
+      "namePlaceholder": "Enter product name",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter product description",
+      "price": "Price",
+      "pricePlaceholder": "Enter price",
+      "stock": "Stock",
+      "stockPlaceholder": "Enter stock quantity",
+      "category": "Category",
+      "selectCategory": "Select a category",
+      "supplierId": "Supplier ID",
+      "supplierIdPlaceholder": "Enter supplier ID",
+      "isFasting": "Fasting Product",
+      "haveSale": "On Sale",
+      "popularity": "Popularity",
+      "popularityPlaceholder": "Enter popularity score",
+      "addProduct": "Add Product",
+      "adding": "Adding Product...",
+      "cancel": "Cancel"
+    }
   }
 }

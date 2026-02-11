@@ -35,6 +35,10 @@
           </button>
           
           @if (isLoggedIn()) {
+            <a [routerLink]="'/' + currentLanguage() + '/orders'" class="btn btn-secondary text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-3 flex items-center gap-1">
+              <span>📋</span>
+              <span class="hidden sm:inline">{{ 'orders.title' | translate }}</span>
+            </a>
             <a [routerLink]="'/' + currentLanguage() + '/dashboard'" class="btn btn-secondary text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-3">
               {{ 'footer.dashboard' | translate }}
             </a>
@@ -120,6 +124,10 @@
             </button>
             
             @if (isLoggedIn()) {
+              <a [routerLink]="'/' + currentLanguage() + '/orders'" (click)="closeMobileMenu()" class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full">
+                <span class="text-xl w-8 text-center">📋</span>
+                <span class="font-medium">{{ 'orders.title' | translate }}</span>
+              </a>
               <a [routerLink]="'/' + currentLanguage() + '/dashboard'" (click)="closeMobileMenu()" class="btn btn-secondary w-full text-center py-3">
                 {{ 'footer.dashboard' | translate }}
               </a>
@@ -171,6 +179,7 @@
             <li><a [routerLink]="'/' + currentLanguage() + '/auth/login'" class="hover:text-white">{{ 'auth.login' | translate }}</a></li>
             <li><a [routerLink]="'/' + currentLanguage() + '/auth/register'" class="hover:text-white">{{ 'auth.register' | translate }}</a></li>
             <li><a [routerLink]="'/' + currentLanguage() + '/dashboard'" class="hover:text-white">{{ 'footer.dashboard' | translate }}</a></li>
+            <li><a [routerLink]="'/' + currentLanguage() + '/orders'" class="hover:text-white">{{ 'orders.title' | translate }}</a></li>
           </ul>
         </div>
         <div>

@@ -65,6 +65,24 @@ export const routes: Routes = [
         path: 'categories',
         loadComponent: () => import('./features/categories/category-list/category-list.component').then(m => m.CategoryListComponent),
         title: 'MyShop - Categories'
+      },
+      {
+        path: 'orders',
+        loadComponent: () => import('./features/orders/order-list/order-list.component').then(m => m.OrderListComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - Orders'
+      },
+      {
+        path: 'orders/confirm',
+        loadComponent: () => import('./features/orders/order-confirm/order-confirm.component').then(m => m.OrderConfirmComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - Confirm Order'
+      },
+      {
+        path: 'admin/products/add',
+        loadComponent: () => import('./features/admin/add-product/add-product.component').then(m => m.AddProductComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - Add Product'
       }
     ]
   },
@@ -129,6 +147,24 @@ export const routes: Routes = [
         path: 'categories',
         loadComponent: () => import('./features/categories/category-list/category-list.component').then(m => m.CategoryListComponent),
         title: 'MyShop - الفئات'
+      },
+      {
+        path: 'orders',
+        loadComponent: () => import('./features/orders/order-list/order-list.component').then(m => m.OrderListComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - الطلبات'
+      },
+      {
+        path: 'orders/confirm',
+        loadComponent: () => import('./features/orders/order-confirm/order-confirm.component').then(m => m.OrderConfirmComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - تأكيد الطلب'
+      },
+      {
+        path: 'admin/products/add',
+        loadComponent: () => import('./features/admin/add-product/add-product.component').then(m => m.AddProductComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - إضافة منتج'
       }
     ]
   },

@@ -5,6 +5,7 @@
     "TOTAL_ITEMS": "إجمالي العناصر",
     "CONTINUE_SHOPPING": "متابعة التسوق",
     "PAY": "اطلب الآن",
+    "PLACE_ORDER": "إتمام الطلب",
     "EMPTY": "سلة التسوق فارغة",
     "SUBTOTAL": "المجموع الفرعي",
     "TOTAL": "الإجمالي"
@@ -139,5 +140,64 @@
     "loading": "جاري التحميل...",
     "backToProducts": "العودة للمنتجات",
     "productNotFound": "المنتج غير موجود"
+  },
+  "orders": {
+    "title": "طلباتي",
+    "subtitle": "عرض وتتبع طلباتك",
+    "empty": "لم تقم بإجراء أي طلبات بعد",
+    "orderId": "رقم الطلب",
+    "date": "التاريخ",
+    "qty": "الكمية",
+    "total": "الإجمالي",
+    "status": "الحالة",
+    "shippingTo": " الشحن إلى",
+    "phoneNumber": "الهاتف",
+    "note": "ملاحظة",
+    "processing": "جاري المعالجة",
+    "shipped": "تم الشحن",
+    "delivered": "تم التوصيل",
+    "cancelled": "تم الإلغاء"
+  },
+  "orderConfirm": {
+    "title": "تأكيد الطلب",
+    "subtitle": "راجع طلبك وأدخل بيانات الشحن",
+    "shippingInfo": "معلومات الشحن",
+    "city": "المدينة",
+    "selectCity": "اختر مدينة",
+    "street": "عنوان الشارع",
+    "streetPlaceholder": "أدخل عنوان الشارع",
+    "phoneNumber": "رقم الهاتف",
+    "phoneNumberPlaceholder": "أدخل رقم الهاتف",
+    "comment": "ملاحظة (اختياري)",
+    "commentPlaceholder": "أي تعليمات خاصة لطلبك...",
+    "orderSummary": "ملخص الطلب",
+    "confirmOrder": "إتمام الطلب",
+    "placingOrder": "جاري إتمام الطلب...",
+    "orderPlaced": "تم تقديم طلبك بنجاح!"
+  },
+  "admin": {
+    "addProduct": {
+      "title": "إضافة منتج جديد",
+      "subtitle": "املأ تفاصيل المنتج أدناه",
+      "name": "اسم المنتج",
+      "namePlaceholder": "أدخل اسم المنتج",
+      "description": "الوصف",
+      "descriptionPlaceholder": "أدخل وصف المنتج",
+      "price": "السعر",
+      "pricePlaceholder": "أدخل السعر",
+      "stock": "المخزون",
+      "stockPlaceholder": "أدخل كمية المخزون",
+      "category": "الفئة",
+      "selectCategory": "اختر فئة",
+      "supplierId": "معرف المورد",
+      "supplierIdPlaceholder": "أدخل معرف المورد",
+      "isFasting": "منتج صيامي",
+      "haveSale": "للبيع",
+      "popularity": "الشعبية",
+      "popularityPlaceholder": "أدخل درجة الشعبية",
+      "addProduct": "إضافة المنتج",
+      "adding": "جاري إضافة المنتج...",
+      "cancel": "إلغاء"
+    }
   }
 }

@@ -41,12 +41,12 @@ export interface AddProductDto {
   name: string;
   description?: string;
   price: number;
-  discountPrice?: number;
+  isFasting: boolean;
+  haveSale: boolean;
+  popularity: number;
+  stock: number;
   categoryId: string;
-  supplier?: string;
-  quantityInStock: number;
-  isOnSale?: boolean;
-  isFasting?: boolean; // New property
+  supplierId: string;
 }
 
 export interface UpdateProductDto {

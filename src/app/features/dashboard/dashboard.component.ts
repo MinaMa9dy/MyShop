@@ -5,6 +5,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth.service';
 import { CartService } from '../../core/services/cart.service';
 import { TokenService } from '../../core/services/token.service';
+import { LanguageService } from '../../core/services/language.service';
 import { User } from '../../core/models/auth.model';
 
 @Component({
@@ -77,22 +78,22 @@ import { User } from '../../core/models/auth.model';
           <div class="card">
             <h2 class="section-title">{{ 'dashboard.quickActions' | translate }}</h2>
             <div class="grid grid-cols-2 gap-4">
-              <a routerLink="/products" class="action-btn p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-center">
+              <a [routerLink]="'/' + currentLang() + '/products'" class="action-btn p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-center">
                 <span class="text-3xl block mb-2">🛍️</span>
                 <span class="font-medium">{{ 'dashboard.browseProducts' | translate }}</span>
               </a>
-              <a routerLink="/cart" class="action-btn p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-center">
+              <a [routerLink]="'/' + currentLang() + '/cart'" class="action-btn p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-center">
                 <span class="text-3xl block mb-2">🛒</span>
                 <span class="font-medium">{{ 'dashboard.viewCart' | translate }}</span>
               </a>
-              <a routerLink="/categories" class="action-btn p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-center">
+              <a [routerLink]="'/' + currentLang() + '/categories'" class="action-btn p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-center">
                 <span class="text-3xl block mb-2">📂</span>
                 <span class="font-medium">{{ 'nav.categories' | translate }}</span>
               </a>
-              <button class="action-btn p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-center">
-                <span class="text-3xl block mb-2">⚙️</span>
-                <span class="font-medium">{{ 'dashboard.settings' | translate }}</span>
-              </button>
+              <a [routerLink]="'/' + currentLang() + '/orders'" class="action-btn p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-center">
+                <span class="text-3xl block mb-2">📋</span>
+                <span class="font-medium">{{ 'orders.title' | translate }}</span>
+              </a>
             </div>
           </div>
           
@@ -131,6 +132,7 @@ export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private cartService = inject(CartService);
   private tokenService = inject(TokenService);
+  private languageService = inject(LanguageService);
   
   user = signal<User | null>(null);
   
@@ -150,6 +152,11 @@ export class DashboardComponent implements OnInit {
   
   // Get name from token claims
   userName = computed(() => this.tokenService.getName());
+  
+  // Get current language for routerLink
+  currentLang(): string {
+    return this.languageService.currentLanguage();
+  }
   
   ngOnInit(): void {
     this.loadUserInfo();

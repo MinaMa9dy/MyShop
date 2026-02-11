@@ -55,4 +55,28 @@ export class PhotoService {
     const mainPhoto = photos.find(p => p.isMain);
     return mainPhoto ? this.getPhotoUrl(mainPhoto.fileName) : this.getPhotoUrl(photos[0].fileName);
   }
+
+  // Helper method to get photo URL from a path (handles full URLs or partial paths)
+  getPhotoUrlFromPath(path: string): string {
+    if (!path) {
+      return 'assets/images/placeholder.svg';
+    }
+    
+    // Backend returns full URLs like http://192.168.1.8:4100/api/Photo/filename.jpg
+    // If it's already a full URL (contains http), return as-is
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    
+    // Extract just the filename from the path
+    let fileName = path;
+    
+    // Find the last slash and get everything after it
+    const lastSlashIndex = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+    if (lastSlashIndex >= 0) {
+      fileName = path.substring(lastSlashIndex + 1);
+    }
+    
+    return `${this.apiUrl}/${fileName}`;
+  }
 }

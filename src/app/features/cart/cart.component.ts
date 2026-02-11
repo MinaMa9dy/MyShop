@@ -19,7 +19,7 @@ export class CartComponent {
 
   // Placeholder image URL
   placeholder = 'assets/images/placeholder.svg';
-  
+
   // Track image errors to prevent infinite loops
   private imageErrors = new Set<string>();
 
@@ -92,9 +92,9 @@ export class CartComponent {
   }
 
   proceedToCheckout(): void {
-    // Close cart and navigate to checkout
+    // Close cart and navigate to order confirmation page
     this.cartService.close();
-    // Navigate to checkout page (create this route if needed)
-    this.router.navigate(['/' + this.currentLang + '/checkout']);
+    // Navigate to order confirmation page
+    this.router.navigate(['/' + this.currentLang + '/orders/confirm']);
   }
 }

@@ -15,8 +15,8 @@
       <div class="item-details">
         <h3>{{ item.productName }}</h3>
         <div class="price-row">
-          <span class="item-price">{{ item.productPrice | currency }}</span>
-          <span class="item-subtotal">{{ item.productPrice! * item.quantity | currency }}</span>
+          <span class="item-price">{{ item.productPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+          <span class="item-subtotal">{{ item.productPrice! * item.quantity | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
         </div>
         <div class="quantity-price-row">
           <div class="quantity-controls">
@@ -43,18 +43,18 @@
     <div class="cart-summary">
       <div class="summary-row">
         <span>{{ 'CART.SUBTOTAL' | translate }}:</span>
-        <span>{{ totalPrice() | currency }}</span>
+        <span>{{ totalPrice() | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
       </div>
       <div class="summary-row total" [class.rtl-total]="isRtl()">
         <span>{{ 'CART.TOTAL' | translate }}:</span>
-        <span>{{ totalPrice() | currency }}</span>
+        <span>{{ totalPrice() | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
       </div>
       <div class="cart-actions">
         <button class="btn-continue" (click)="closeCart()">
           {{ 'CART.CONTINUE_SHOPPING' | translate }}
         </button>
         <button class="btn-pay" (click)="proceedToCheckout()">
-          {{ 'CART.PAY' | translate }}
+          {{ 'CART.PLACE_ORDER' | translate }}
         </button>
       </div>
     </div>
