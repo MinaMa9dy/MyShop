@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -45,7 +45,7 @@ import { Review } from '../../../core/models/review.model';
           <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
               <!-- Product Images -->
-              <div class="product-images p-6 bg-gray-100">
+              <div #productImages class="product-images p-6 bg-gray-100" id="product-images">
                 <div class="main-image h-96 bg-white rounded-xl mb-4 overflow-hidden flex items-center justify-center shadow-sm">
                   @if (mainImage()) {
                     <img [src]="mainImage()" 
@@ -311,7 +311,7 @@ import { Review } from '../../../core/models/review.model';
     </div>
   `
 })
-export class ProductDetailComponent implements OnInit {
+export class ProductDetailComponent implements OnInit, AfterViewInit {
   private route = inject(ActivatedRoute);
   private productService = inject(ProductService);
   private cartService = inject(CartService);
@@ -321,6 +321,9 @@ export class ProductDetailComponent implements OnInit {
   photoService = inject(PhotoService);
   private tokenService = inject(TokenService);
   private reviewService = inject(ReviewService);
+  
+  // Element refs for scrolling
+  productImagesRef!: ElementRef;
   
   product = signal<any>(null);
   loading = signal(true);
@@ -367,6 +370,10 @@ export class ProductDetailComponent implements OnInit {
     this.loadProduct();
   }
   
+  ngAfterViewInit(): void {
+    // Will scroll after product is loaded
+  }
+  
   loadProduct(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
@@ -386,6 +393,9 @@ export class ProductDetailComponent implements OnInit {
           this.mainImage.set(this.photoService.getPhotoUrl(firstPhoto.fileName));
         }
         this.loading.set(false);
+        
+        // Scroll to product images section
+        this.scrollToProductImages();
         
         // Load reviews for this product
         this.loadReviews(id);
@@ -454,6 +464,15 @@ export class ProductDetailComponent implements OnInit {
   
   getCurrentLang(): string {
     return this.languageService.getCurrentLanguage();
+  }
+  
+  scrollToProductImages(): void {
+    setTimeout(() => {
+      const element = document.getElementById('product-images');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   }
   
   setRating(stars: number): void {

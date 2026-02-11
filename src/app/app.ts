@@ -1,11 +1,12 @@
 import { Component, inject, signal, OnInit, OnDestroy, Renderer2 } from '@angular/core';
-import { RouterOutlet, RouterLink } from '@angular/router';
+import { RouterOutlet, RouterLink, Router, Event, NavigationEnd } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from './core/services/auth.service';
 import { CartService } from './core/services/cart.service';
 import { LanguageService } from './core/services/language.service';
 import { CartComponent } from './features/cart/cart.component';
 import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -18,8 +19,10 @@ export class App implements OnInit, OnDestroy {
   private cartService = inject(CartService);
   private languageService = inject(LanguageService);
   private renderer = inject(Renderer2);
+  private router = inject(Router);
   
   private loginSubscription?: Subscription;
+  private routerSubscription?: Subscription;
   
   title = 'MyShop';
   
@@ -44,10 +47,18 @@ export class App implements OnInit, OnDestroy {
       console.log('Login success detected, fetching cart from backend');
       this.fetchUserCart();
     });
+    
+    // Scroll to top on navigation
+    this.routerSubscription = this.router.events.pipe(
+      filter((event: Event): event is NavigationEnd => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   }
   
   ngOnDestroy(): void {
     this.loginSubscription?.unsubscribe();
+    this.routerSubscription?.unsubscribe();
   }
   
   private fetchUserCart(): void {
