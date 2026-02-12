@@ -83,6 +83,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/add-product/add-product.component').then(m => m.AddProductComponent),
         canActivate: [authGuard],
         title: 'MyShop - Add Product'
+      },
+      {
+        path: 'wishes',
+        loadComponent: () => import('./features/wish/wish-list/wish-list.component').then(m => m.WishListComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - Wishlist'
       }
     ]
   },
@@ -165,6 +171,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/add-product/add-product.component').then(m => m.AddProductComponent),
         canActivate: [authGuard],
         title: 'MyShop - إضافة منتج'
+      },
+      {
+        path: 'wishes',
+        loadComponent: () => import('./features/wish/wish-list/wish-list.component').then(m => m.WishListComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - قائمة الأمنيات'
       }
     ]
   },

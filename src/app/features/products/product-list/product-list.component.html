@@ -1,0 +1,226 @@
+<!-- Products Page -->
+<div class="min-h-screen bg-gray-50 py-8 px-2 sm:px-4">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ 'home.featuredProducts' | translate }}</h1>
+      <p class="text-gray-500">{{ 'home.subtitle' | translate }}</p>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-8">
+      <div class="flex flex-wrap gap-4 items-center justify-center">
+        <!-- Search -->
+        <div>
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onFilterChange()"
+            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
+            [placeholder]="'home.search' | translate">
+        </div>
+
+        <!-- Categories -->
+        <div>
+          <select
+            [(ngModel)]="selectedCategory"
+            (ngModelChange)="onFilterChange()"
+            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
+            <option value="">{{ 'home.allCategories' | translate }}</option>
+            @for (category of categories(); track category.id) {
+              <option [value]="category.id">{{ category.name }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Price Range -->
+        <div class="flex gap-2 items-center">
+          <input
+            type="number"
+            [(ngModel)]="minPrice"
+            (ngModelChange)="onFilterChange()"
+            class="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [placeholder]="'home.minPrice' | translate">
+          <span class="text-gray-400">-</span>
+          <input
+            type="number"
+            [(ngModel)]="maxPrice"
+            (ngModelChange)="onFilterChange()"
+            class="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [placeholder]="'home.maxPrice' | translate">
+        </div>
+
+        <!-- On Sale Filter -->
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            [(ngModel)]="onSaleOnly"
+            (ngModelChange)="onFilterChange()"
+            class="w-4 h-4 text-blue-600 rounded">
+          <span class="text-gray-700">{{ 'home.onSaleOnly' | translate }}</span>
+        </label>
+
+        <button
+          class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+          (click)="clearFilters()">
+          {{ 'home.clear' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="text-center mb-6">
+      <span class="text-gray-500">
+        {{ 'home.showingProducts' | translate:{'count': products().length} }}
+      </span>
+    </div>
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="flex justify-center py-12">
+        <div class="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!loading() && products().length === 0) {
+      <div class="bg-white rounded-xl shadow-sm text-center py-12 px-4">
+        <p class="text-gray-500 mb-4">{{ 'home.noProductsFound' | translate }}</p>
+        <button
+          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          (click)="clearFilters()">
+          {{ 'home.clear' | translate }}
+        </button>
+      </div>
+    }
+
+    <!-- Products Grid -->
+    @if (!loading() && products().length > 0) {
+      <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        @for (product of products(); track product.id) {
+          <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+               [routerLink]="['/' + currentLang + '/products', product.id]">
+            <!-- Product Image -->
+            <div class="relative h-36 sm:h-44 bg-gray-100">
+              @if (photoService.getMainPhotoUrl(product.productPhotos || product.productphotos)) {
+                <img [src]="photoService.getMainPhotoUrl(product.productPhotos || product.productphotos)"
+                     [alt]="product.name"
+                     class="w-full h-full object-cover">
+              } @else {
+                <div class="w-full h-full flex items-center justify-center">
+                  <span class="text-5xl text-gray-300">📦</span>
+                </div>
+              }
+
+              <!-- Sale and Fasting Labels -->
+              <div class="absolute top-2 left-2 flex flex-col gap-1">
+                @if (product.haveSale) {
+                  <span class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold">
+                    {{ 'product.sale' | translate }}
+                  </span>
+                }
+                @if (product.isFasting) {
+                  <span class="bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold">
+                    {{ 'product.fasting' | translate }}
+                  </span>
+                }
+              </div>
+
+              <!-- Heart Button -->
+              <button
+                class="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full shadow-md hover:bg-red-50 transition-all duration-200"
+                [class.text-red-500]="wishlistIds().has(product.id)"
+                [class.text-gray-400]="!wishlistIds().has(product.id)"
+                [disabled]="processingId() === product.id"
+                (click)="toggleWishlist(product, $event)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" [class.fill-current]="wishlistIds().has(product.id)" viewBox="0 0 24 24">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Product Info -->
+            <div class="p-2 sm:p-3 text-center">
+              <h3 class="font-bold text-xs sm:text-sm text-gray-800 line-clamp-2 mb-1 leading-tight">
+                {{ product.name }}
+              </h3>
+
+              <!-- Price -->
+              <div class="mb-1">
+                <span class="text-base sm:text-lg font-bold text-red-600">
+                  {{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
+                </span>
+              </div>
+
+              <!-- Quantity -->
+              <div class="mb-2">
+                @if (product.shownQuantity > 0) {
+                  <span class="inline-flex items-center gap-1 text-green-600 text-xs font-medium">
+                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                    {{ 'product.inStock' | translate }} ({{ product.shownQuantity }})
+                  </span>
+                } @else {
+                  <span class="inline-flex items-center gap-1 text-red-500 text-xs font-medium">
+                    <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                    {{ 'product.outOfStock' | translate }}
+                  </span>
+                }
+              </div>
+
+              <!-- Category -->
+              @if (product.categoryName) {
+                <p class="text-gray-500 text-xs truncate mb-2">
+                  {{ product.categoryName }}
+                </p>
+              }
+
+              <!-- Add to Cart Button -->
+              <button
+                class="w-full py-1.5 px-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-colors"
+                [class.opacity-50]="product.shownQuantity <= 0"
+                [class.cursor-not-allowed]="product.shownQuantity <= 0"
+                [disabled]="product.shownQuantity <= 0"
+                (click)="addToCart(product, $event)">
+                {{ product.shownQuantity > 0 ? ('product.addToCart' | translate) : ('product.outOfStock' | translate) }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Pagination -->
+    @if (totalPages() >= 1) {
+      <div class="flex flex-col items-center gap-4 mt-8">
+        <div class="text-sm text-gray-500">
+          {{ 'home.pageInfo' | translate:{'current': currentPage(), 'total': totalPages()} }}
+        </div>
+        <div class="flex justify-center gap-2 flex-wrap">
+          <button
+            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 transition-colors"
+            [disabled]="currentPage() === 1"
+            (click)="goToPage(currentPage() - 1)">
+            {{ 'home.previous' | translate }}
+          </button>
+          @for (page of getPages(); track page) {
+            <button
+              class="px-4 py-2 rounded-lg transition-colors"
+              [class.bg-blue-600]="page === currentPage()"
+              [class.text-white]="page === currentPage()"
+              [class.bg-gray-200]="page !== currentPage()"
+              [class.text-gray-700]="page !== currentPage()"
+              (click)="goToPage(page)">
+              {{ page }}
+            </button>
+          }
+          <button
+            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 transition-colors"
+            [disabled]="currentPage() === totalPages()"
+            (click)="goToPage(currentPage() + 1)">
+            {{ 'home.next' | translate }}
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

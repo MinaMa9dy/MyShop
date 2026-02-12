@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth.service';
 import { CartService } from '../../core/services/cart.service';
+import { WishService } from '../../core/services/wish.service';
 import { TokenService } from '../../core/services/token.service';
 import { LanguageService } from '../../core/services/language.service';
 import { User } from '../../core/models/auth.model';
@@ -131,6 +132,7 @@ import { User } from '../../core/models/auth.model';
 export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private cartService = inject(CartService);
+  private wishService = inject(WishService);
   private tokenService = inject(TokenService);
   private languageService = inject(LanguageService);
   
@@ -139,7 +141,7 @@ export class DashboardComponent implements OnInit {
   stats = signal({
     totalOrders: 0,
     cartItems: 0,
-    wishlist: 3
+    wishlist: 0
   });
   
   memberSince = signal('2026');
@@ -161,6 +163,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.loadUserInfo();
     this.authService.loadCurrentUser();
+    this.loadWishlistCount();
   }
   
   loadUserInfo(): void {
@@ -170,6 +173,23 @@ export class DashboardComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading user:', error);
+      }
+    });
+  }
+  
+  loadWishlistCount(): void {
+    const userId = this.tokenService.getUserId();
+    if (!userId) return;
+    
+    this.wishService.getWishes(userId).subscribe({
+      next: (wishes) => {
+        this.stats.update(s => ({
+          ...s,
+          wishlist: wishes.length
+        }));
+      },
+      error: (error) => {
+        console.error('Error loading wishlist count:', error);
       }
     });
   }

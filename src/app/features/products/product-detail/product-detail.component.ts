@@ -10,6 +10,7 @@ import { LanguageService } from '../../../core/services/language.service';
 import { PhotoService } from '../../../core/services/photo.service';
 import { ReviewService } from '../../../core/services/review.service';
 import { TokenService } from '../../../core/services/token.service';
+import { WishService } from '../../../core/services/wish.service';
 import { Review } from '../../../core/models/review.model';
 
 @Component({
@@ -46,7 +47,7 @@ import { Review } from '../../../core/models/review.model';
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
               <!-- Product Images -->
               <div #productImages class="product-images p-6 bg-gray-100" id="product-images">
-                <div class="main-image h-96 bg-white rounded-xl mb-4 overflow-hidden flex items-center justify-center shadow-sm">
+                <div class="main-image h-96 bg-white rounded-xl mb-4 overflow-hidden flex items-center justify-center shadow-sm relative">
                   @if (mainImage()) {
                     <img [src]="mainImage()" 
                          [alt]="product()?.name"
@@ -61,6 +62,17 @@ import { Review } from '../../../core/models/review.model';
                       <p class="text-gray-400 mt-4">No image available</p>
                     </div>
                   }
+                  
+                  <!-- Wish Heart Button -->
+                  <button 
+                    class="absolute top-4 right-4 z-10 p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors"
+                    [class.text-red-500]="isInWishlist()"
+                    [class.text-gray-400]="!isInWishlist()"
+                    (click)="toggleWishlist()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" [class.fill-current]="isInWishlist()" viewBox="0 0 24 24">
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                  </button>
                 </div>
                 @if ((product()?.productPhotos && product()!.productPhotos!.length > 1) || (product()?.productphotos && product()!.productphotos!.length > 1)) {
                   <div class="thumbnail-grid grid grid-cols-4 gap-3">
@@ -182,11 +194,6 @@ import { Review } from '../../../core/models/review.model';
                     (click)="addToCart()">
                     <span class="text-xl">🛒</span>
                     {{ product()!.shownQuantity! > 0 ? ('product.addToCart' | translate) : ('product.outOfStock' | translate) }}
-                  </button>
-                  <button 
-                    class="py-4 px-6 border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold rounded-xl transition-colors"
-                    title="Add to favorites">
-                    ❤️
                   </button>
                 </div>
               </div>
@@ -321,6 +328,7 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   photoService = inject(PhotoService);
   private tokenService = inject(TokenService);
   private reviewService = inject(ReviewService);
+  private wishService = inject(WishService);
   
   // Element refs for scrolling
   productImagesRef!: ElementRef;
@@ -329,6 +337,9 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   loading = signal(true);
   mainImage = signal<string | null>(null);
   quantity = 1;
+  
+  // Wishlist state
+  isWishlisted = signal<boolean>(false);
   
   // Review-related signals
   reviews = signal<Review[]>([]);
@@ -399,12 +410,72 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
         
         // Load reviews for this product
         this.loadReviews(id);
+        
+        // Check if product is in wishlist
+        this.checkWishlistStatus(id);
       },
       error: (error) => {
         console.error('Error loading product:', error);
         this.loading.set(false);
       }
     });
+  }
+  
+  checkWishlistStatus(productId: string): void {
+    const userId = this.tokenService.getUserId();
+    if (!userId) {
+      this.isWishlisted.set(false);
+      return;
+    }
+    
+    this.wishService.getWishes(userId).subscribe({
+      next: (wishes) => {
+        const isInWishlist = wishes.some(w => w.productId === productId);
+        this.isWishlisted.set(isInWishlist);
+      },
+      error: (error) => {
+        console.error('Error checking wishlist status:', error);
+      }
+    });
+  }
+  
+  isInWishlist(): boolean {
+    return this.isWishlisted();
+  }
+  
+  toggleWishlist(): void {
+    const userId = this.tokenService.getUserId();
+    const productId = this.product()?.id;
+    
+    if (!userId) {
+      // Redirect to login if not logged in
+      this.router.navigate(['/' + this.getCurrentLang() + '/auth/login']);
+      return;
+    }
+    
+    if (!productId) return;
+    
+    if (this.isWishlisted()) {
+      // Remove from wishlist
+      this.wishService.removeWish(userId, productId).subscribe({
+        next: () => {
+          this.isWishlisted.set(false);
+        },
+        error: (error) => {
+          console.error('Error removing from wishlist:', error);
+        }
+      });
+    } else {
+      // Add to wishlist
+      this.wishService.addWish({ userId, productId }).subscribe({
+        next: () => {
+          this.isWishlisted.set(true);
+        },
+        error: (error) => {
+          console.error('Error adding to wishlist:', error);
+        }
+      });
+    }
   }
   
   loadReviews(productId: string): void {
@@ -497,31 +568,25 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     
     // Get user ID from JWT token claims
     const userId = this.tokenService.getUserId() || '';
-    
     this.reviewService.addReview({
-      productId: productId,
-      userId: userId || '',
+      productId,
       stars: this.newReviewStars,
-      content: this.newReviewContent.trim()
+      content: this.newReviewContent,
+      personName: ''
     }).subscribe({
-      next: (response: any) => {
-        console.log('Submit review response:', response);
-        // Check if response has IsSuccess property (wrapper) or if it's the direct data
-        if (response && (response.isSuccess !== false)) {
-          this.reviewSuccess.set(true);
-          this.newReviewStars = 0;
-          this.newReviewContent = '';
-          // Reload reviews to show the new one
-          this.loadReviews(productId);
-        } else {
-          this.reviewError.set(response?.error || 'Failed to submit review');
-        }
+      next: (response) => {
+        console.log('Review submitted successfully:', response);
         this.reviewSubmitting.set(false);
+        this.reviewSuccess.set(true);
+        this.newReviewStars = 0;
+        this.newReviewContent = '';
+        // Reload reviews
+        this.loadReviews(productId);
       },
       error: (error) => {
         console.error('Error submitting review:', error);
-        this.reviewError.set(error.error?.error || 'An error occurred while submitting the review');
         this.reviewSubmitting.set(false);
+        this.reviewError.set(error.message || 'Failed to submit review');
       }
     });
   }

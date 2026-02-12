@@ -8,6 +8,8 @@ import { LanguageService } from '../../core/services/language.service';
 import { CartService } from '../../core/services/cart.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PhotoService } from '../../core/services/photo.service';
+import { WishService } from '../../core/services/wish.service';
+import { TokenService } from '../../core/services/token.service';
 
 @Component({
   selector: 'app-home',
@@ -86,8 +88,8 @@ import { PhotoService } from '../../core/services/photo.service';
                 @for (product of featuredProducts(); track product.id) {
                   <div class="product-card card bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer rounded-lg overflow-hidden"
                        style="min-height: auto;">
-                    <!-- Product Image -->
-                    <a [routerLink]="['/' + currentLang + '/products', product.id]" class="block">
+                    <!-- Product Image Container -->
+                    <a [routerLink]="['/' + currentLang + '/products', product.id]" class="block relative group">
                       <div class="h-40 sm:h-48 bg-gray-100 flex items-center justify-center overflow-hidden relative">
                           @if (photoService.getMainPhotoUrl(product.productPhotos || product.productphotos)) {
                             <img [src]="photoService.getMainPhotoUrl(product.productPhotos || product.productphotos)" 
@@ -98,21 +100,35 @@ import { PhotoService } from '../../core/services/photo.service';
                                  [alt]="product.name"
                                  class="h-full w-full object-cover p-4">
                           }
-                          <!-- Labels - Sale and Fasting -->
-                          <div class="absolute top-2 left-2 right-2 flex justify-between items-start pointer-events-none">
+                          
+                          <!-- Sale and Fasting Labels -->
+                          <div class="absolute top-2 left-2 flex flex-col gap-1 pointer-events-none z-10">
                             @if (product.haveSale) {
-                              <span class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold z-10">
+                              <span class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold">
                                 {{ 'product.sale' | translate }}
                               </span>
                             }
                             @if (product.isFasting) {
-                              <span class="bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold z-10">
+                              <span class="bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold">
                                 {{ 'product.fasting' | translate }}
                               </span>
                             }
                           </div>
+                          
+                          <!-- Heart Button -->
+                          <button 
+                            class="absolute top-2 right-2 z-20 p-1.5 bg-white/90 rounded-full shadow-md hover:bg-red-50 transition-all duration-200 transform hover:scale-110"
+                            [class.text-red-500]="wishlistIds().has(product.id)"
+                            [class.text-gray-400]="!wishlistIds().has(product.id)"
+                            [disabled]="processingId() === product.id"
+                            (click)="toggleWishlist(product, $event)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" [class.fill-current]="wishlistIds().has(product.id)" viewBox="0 0 24 24">
+                              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                          </button>
                       </div>
                     </a>
+                    
                     <!-- Product Info -->
                     <div class="p-2 sm:p-3 text-center">
                       <a [routerLink]="['/' + currentLang + '/products', product.id]" class="block">
@@ -161,8 +177,6 @@ import { PhotoService } from '../../core/services/photo.service';
           }
         </div>
       </section>
-
-      
     </div>
   `,
   styles: [`
@@ -177,6 +191,8 @@ export class HomeComponent implements OnInit {
   private languageService = inject(LanguageService);
   private cartService = inject(CartService);
   private authService = inject(AuthService);
+  private wishService = inject(WishService);
+  private tokenService = inject(TokenService);
   private router = inject(Router);
   photoService = inject(PhotoService);
   
@@ -186,7 +202,11 @@ export class HomeComponent implements OnInit {
   featuredProducts = signal<any[]>([]);
   categories = signal<any[]>([]);
   
-  // Get current language for routerLink
+  // Track wishlist items
+  wishlistIds = signal<Set<string>>(new Set());
+  // Track which product is being processed
+  processingId = signal<string | null>(null);
+  
   get currentLang(): string {
     return this.languageService.currentLanguage();
   }
@@ -194,21 +214,17 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.loadFeaturedProducts();
     this.loadCategories();
+    this.loadWishlist();
   }
   
   private loadFeaturedProducts(): void {
     this.productService.getHotestProducts(8).subscribe({
       next: (response: any) => {
-        console.log('Hotest Products API Response:', response);
         let products: any[] = [];
         if (Array.isArray(response)) {
           products = response;
         } else if (response && Array.isArray(response.items)) {
           products = response.items;
-        } else if (response && Array.isArray(response.data)) {
-          products = response.data;
-        } else if (response && response.data && Array.isArray(response.data.items)) {
-          products = response.data.items;
         }
         this.featuredProducts.set(products);
       },
@@ -221,14 +237,11 @@ export class HomeComponent implements OnInit {
   private loadCategories(): void {
     this.categoryService.getAll().subscribe({
       next: (response: any) => {
-        console.log('Categories API Response:', response);
         let cats: any[] = [];
         if (Array.isArray(response)) {
           cats = response;
         } else if (response && Array.isArray(response.data)) {
           cats = response.data;
-        } else if (response && response.items) {
-          cats = response.items;
         }
         this.categories.set(cats);
       },
@@ -236,6 +249,77 @@ export class HomeComponent implements OnInit {
         console.error('Error loading categories:', error);
       }
     });
+  }
+  
+  loadWishlist(): void {
+    const userId = this.tokenService.getUserId();
+    if (!userId) return;
+    
+    this.wishService.getWishes(userId).subscribe({
+      next: (wishes) => {
+        const ids = new Set<string>();
+        wishes.forEach(w => {
+          if (w.productId) ids.add(w.productId);
+        });
+        this.wishlistIds.set(ids);
+      },
+      error: (error) => {
+        console.error('Error loading wishlist:', error);
+      }
+    });
+  }
+  
+  toggleWishlist(product: any, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const userId = this.tokenService.getUserId();
+    if (!userId) {
+      this.router.navigate(['/' + this.currentLang + '/auth/login']);
+      return;
+    }
+    
+    const productId = product.id;
+    const isCurrentlyInWishlist = this.wishlistIds().has(productId);
+    
+    // Set processing state
+    this.processingId.set(productId);
+    
+    if (isCurrentlyInWishlist) {
+      // Remove from wishlist - wait for API response
+      this.wishService.removeWish(userId, productId).subscribe({
+        next: () => {
+          // Update UI after successful API response
+          const currentIds = this.wishlistIds();
+          const newIds = new Set<string>();
+          currentIds.forEach(id => newIds.add(id));
+          newIds.delete(productId);
+          this.wishlistIds.set(newIds);
+          this.processingId.set(null);
+        },
+        error: (error) => {
+          console.error('Error removing from wishlist:', error);
+          this.processingId.set(null);
+        }
+      });
+    } else {
+      // Add to wishlist - wait for API response
+      this.wishService.addWish({ userId, productId }).subscribe({
+        next: () => {
+          // Update UI after successful API response
+          const currentIds = this.wishlistIds();
+          const newIds = new Set<string>();
+          currentIds.forEach(id => newIds.add(id));
+          newIds.add(productId);
+          this.wishlistIds.set(newIds);
+          this.processingId.set(null);
+        },
+        error: (error) => {
+          console.error('Error adding to wishlist:', error);
+          this.processingId.set(null);
+        }
+      });
+    }
   }
   
   addToCart(product: any, event: Event): void {
@@ -246,8 +330,6 @@ export class HomeComponent implements OnInit {
       return;
     }
     
-    // User is logged in, add to cart (auth interceptor will handle 401 by redirecting to login)
-    // userId is now automatically extracted from JWT token in cartService
     this.cartService.addToCart(product.id, 1).subscribe({
       next: () => {
         console.log('Added to cart successfully');

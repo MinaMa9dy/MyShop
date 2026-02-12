@@ -34,6 +34,13 @@
             }
           </button>
           
+          <!-- Wishlist Button -->
+          <a 
+            [routerLink]="'/' + currentLanguage() + '/wishes'"
+            class="cart-btn relative p-1.5 sm:p-2 text-gray-600 hover:text-red-500">
+            <span class="text-lg sm:text-xl">❤️</span>
+          </a>
+          
           @if (isLoggedIn()) {
             <a [routerLink]="'/' + currentLanguage() + '/orders'" class="btn btn-secondary text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-3 flex items-center gap-1">
               <span>📋</span>
@@ -122,6 +129,15 @@
                 <span class="bg-red-500 text-white text-sm px-2.5 py-0.5 rounded-full ml-auto font-medium">{{ cartItemCount() }}</span>
               }
             </button>
+            
+            <!-- Wishlist Button -->
+            <a 
+              [routerLink]="'/' + currentLanguage() + '/wishes'" 
+              (click)="closeMobileMenu()"
+              class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full">
+              <span class="text-xl w-8 text-center">❤️</span>
+              <span class="font-medium">{{ 'dashboard.wishlist' | translate }}</span>
+            </a>
             
             @if (isLoggedIn()) {
               <a [routerLink]="'/' + currentLanguage() + '/orders'" (click)="closeMobileMenu()" class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full">

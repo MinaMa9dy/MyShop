@@ -199,5 +199,13 @@
       "adding": "Adding Product...",
       "cancel": "Cancel"
     }
+  },
+  "WISH": {
+    "title": "My Wishlist",
+    "subtitle": "Items you've saved for later",
+    "empty": "Your wishlist is empty",
+    "emptyDesc": "Start adding items you love to your wishlist",
+    "remove": "Remove",
+    "browseProducts": "Browse Products"
   }
 }

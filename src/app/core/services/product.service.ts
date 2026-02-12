@@ -49,6 +49,9 @@ export class ProductService {
     if (filter.searchTerm) {
       params = params.set('SearchTerm', filter.searchTerm);
     }
+    if (filter.isOnSale !== undefined && filter.isOnSale !== null) {
+      params = params.set('IsOnSale', filter.isOnSale.toString());
+    }
     if (filter.sortBy) {
       params = params.set('SortBy', filter.sortBy);
     }
