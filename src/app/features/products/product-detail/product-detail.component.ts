@@ -568,7 +568,15 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     
     // Get user ID from JWT token claims
     const userId = this.tokenService.getUserId() || '';
+    
+    if (!userId) {
+      this.reviewSubmitting.set(false);
+      this.reviewError.set('User not authenticated');
+      return;
+    }
+    
     this.reviewService.addReview({
+      userId,
       productId,
       stars: this.newReviewStars,
       content: this.newReviewContent,
