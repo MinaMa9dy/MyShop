@@ -20,8 +20,21 @@ import { RegisterDto } from '../../../../core/models/auth.model';
         </div>
         
         @if (error()) {
-          <div class="error-alert bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-            {{ error() }}
+          <div class="error-alert bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 relative">
+            <div class="flex items-start">
+              <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+              </svg>
+              <div class="flex-1">
+                <p class="font-medium">Error</p>
+                <p class="text-sm">{{ error() }}</p>
+              </div>
+              <button type="button" (click)="clearError()" class="text-red-500 hover:text-red-700 ml-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+            </div>
           </div>
         }
         
@@ -176,6 +189,10 @@ export class RegisterComponent {
     return this.languageService.currentLanguage();
   }
   
+  clearError(): void {
+    this.error.set(null);
+  }
+  
   registerForm = this.fb.group({
     firstName: ['', [Validators.required]],
     lastName: ['', [Validators.required]],
@@ -221,11 +238,27 @@ export class RegisterComponent {
         this.loading.set(false);
         this.router.navigate([`/${this.currentLang}/dashboard`]);
       },
-      error: (error) => {
-        console.error('Registration failed:', error);
+      error: (err) => {
+        console.error('Registration failed:', err);
         this.loading.set(false);
-        // Handle different error formats from backend
-        const errorMessage = error.error?.message || error.message || error.statusText || 'Registration failed. Please try again.';
+        
+        // Let the global interceptor handle the toast notification
+        // Just show local error for this form
+        let errorMessage = 'Registration failed. Please try again.';
+        
+        // Try to extract error message for local display
+        const errorData = err.error;
+        if (errorData) {
+          if (errorData.message) errorMessage = errorData.message;
+          else if (errorData.Message) errorMessage = errorData.Message;
+          else if (Array.isArray(errorData)) errorMessage = errorData[0] || errorMessage;
+          else if (typeof errorData === 'string') errorMessage = errorData;
+        }
+        
+        if (err.status === 409 || (errorData?.code === '400' && errorData?.message?.includes('already'))) {
+          errorMessage = 'A user with this email already exists.';
+        }
+        
         this.error.set(errorMessage);
       }
     });

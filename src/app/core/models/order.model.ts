@@ -12,7 +12,7 @@ export interface OrderItem {
 
 export interface Order {
   id: string;
-  userId: string;
+  customerId: string;
   buyerName: string;
   buyerEmail: string;
   buyerPhone?: string;
@@ -26,7 +26,7 @@ export interface Order {
 }
 
 export interface AddOrderDto {
-  userId: string;
+  customerId: string;
   city: CityOption;
   street: string;
   phoneNumber: string;

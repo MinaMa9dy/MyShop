@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CategoryService } from '../../../core/services/category.service';
+import { LanguageService } from '../../../core/services/language.service';
 import { Category } from '../../../core/models/category.model';
 
 @Component({
@@ -25,7 +26,7 @@ import { Category } from '../../../core/models/category.model';
         } @else {
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             @for (category of categories(); track category.id) {
-              <a [routerLink]="['/products']" 
+              <a [routerLink]="['/' + currentLang + '/products']" 
                  [queryParams]="{categoryId: category.id}"
                  class="category-card card hover:shadow-lg transition-all cursor-pointer group">
                 <div class="category-icon w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-full flex items-center justify-center text-3xl group-hover:bg-blue-100 transition-colors">
@@ -54,9 +55,14 @@ import { Category } from '../../../core/models/category.model';
 })
 export class CategoryListComponent implements OnInit {
   private categoryService = inject(CategoryService);
+  private languageService = inject(LanguageService);
   
   categories = signal<any[]>([]);
   loading = signal(false);
+  
+  get currentLang(): string {
+    return this.languageService.currentLanguage();
+  }
   
   ngOnInit(): void {
     this.loadCategories();

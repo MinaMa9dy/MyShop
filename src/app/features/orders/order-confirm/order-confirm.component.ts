@@ -232,12 +232,12 @@ export class OrderConfirmComponent implements OnInit {
     this.submitting.set(true);
     this.error.set(null);
 
-    // Get user ID from token
+    // Get customer ID from token
     const userId = this.tokenService.getUserId() || '';
 
     // Create order DTO
     const orderDto: AddOrderDto = {
-      userId: userId,
+      customerId: userId,
       city: this.selectedCity,
       street: this.street.trim(),
       phoneNumber: this.phoneNumber.trim(),
@@ -258,7 +258,15 @@ export class OrderConfirmComponent implements OnInit {
       error: (error) => {
         console.error('Error creating order:', error);
         this.submitting.set(false);
-        this.error.set(error.error?.message || 'Failed to place order. Please try again.');
+        
+        // Try to extract error message from different response formats
+        const errorMessage = 
+          error.error?.message || 
+          error.error?.error ||
+          error.message ||
+          (typeof error.error === 'string' ? error.error : 'Failed to place order. Please try again.');
+        
+        this.error.set(errorMessage);
       }
     });
   }

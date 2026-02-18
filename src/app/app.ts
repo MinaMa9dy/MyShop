@@ -1,16 +1,20 @@
-import { Component, inject, signal, OnInit, OnDestroy, Renderer2 } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, Renderer2, computed } from '@angular/core';
 import { RouterOutlet, RouterLink, Router, Event, NavigationEnd } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from './core/services/auth.service';
 import { CartService } from './core/services/cart.service';
 import { LanguageService } from './core/services/language.service';
+import { TokenService } from './core/services/token.service';
 import { CartComponent } from './features/cart/cart.component';
+import { ToastComponent } from './shared/toast/toast.component';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { UserProfile } from './core/models/auth.model';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, TranslateModule, CartComponent],
+  imports: [RouterOutlet, RouterLink, TranslateModule, CartComponent, ToastComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -18,6 +22,7 @@ export class App implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private cartService = inject(CartService);
   private languageService = inject(LanguageService);
+  private tokenService = inject(TokenService);
   private renderer = inject(Renderer2);
   private router = inject(Router);
   
@@ -30,6 +35,31 @@ export class App implements OnInit, OnDestroy {
   cartItemCount = this.cartService.totalItems;
   currentLanguage = this.languageService.currentLanguage;
   
+  // User profile for photo
+  private userProfile = signal<UserProfile | null>(null);
+  
+  // Get user initials for avatar
+  userInitials = computed(() => {
+    const name = this.tokenService.getName();
+    if (name) {
+      const parts = name.split(' ');
+      return parts.map(p => p.charAt(0)).join('').toUpperCase().slice(0, 2);
+    }
+    return '👤';
+  });
+  
+  // Get user photo URL
+  getUserPhotoUrl(): string {
+    const profile = this.userProfile();
+    if (profile?.userPhoto?.relativePath) {
+      const normalizedPath = profile.userPhoto.relativePath.replace(/\\/g, '/');
+      const parts = normalizedPath.split('/');
+      const fileName = parts[parts.length - 1];
+      return `${environment.apiUrl}/Photo/UserPhoto/${fileName}`;
+    }
+    return '';
+  }
+  
   // Mobile menu state
   mobileMenuOpen = signal(false);
   
@@ -40,12 +70,14 @@ export class App implements OnInit, OnDestroy {
     // If user is logged in, fetch cart from backend
     if (this.authService.isAuthenticated()) {
       this.fetchUserCart();
+      this.loadUserProfile();
     }
     
     // Subscribe to login success event for cart sync
     this.loginSubscription = this.authService.loginSuccess.subscribe(() => {
       console.log('Login success detected, fetching cart from backend');
       this.fetchUserCart();
+      this.loadUserProfile();
     });
     
     // Scroll to top on navigation
@@ -77,6 +109,20 @@ export class App implements OnInit, OnDestroy {
           console.error('Error loading cart:', error);
         }
       });
+  }
+  
+  private loadUserProfile(): void {
+    const userId = this.tokenService.getUserId();
+    if (!userId) return;
+    
+    this.authService.getUserProfile(userId).subscribe({
+      next: (profile) => {
+        this.userProfile.set(profile);
+      },
+      error: (error) => {
+        console.error('Error loading user profile:', error);
+      }
+    });
   }
   
   toggleMobileMenu(): void {

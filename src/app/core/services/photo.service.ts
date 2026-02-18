@@ -38,7 +38,7 @@ export class PhotoService {
   }
 
   getPhotoUrl(fileName: string): string {
-    return `${this.apiUrl}/${fileName}`;
+    return `${this.apiUrl}/ProductPhoto/${fileName}`;
   }
 
   getPhotosByProductId(productId: string): Observable<ProductPhoto[]> {
@@ -77,6 +77,6 @@ export class PhotoService {
       fileName = path.substring(lastSlashIndex + 1);
     }
     
-    return `${this.apiUrl}/${fileName}`;
+    return `${this.apiUrl}/ProductPhoto/${fileName}`;
   }
 }

@@ -1,8 +1,9 @@
 export interface Review {
   id: string;
   productId: string;
-  userId: string;
+  customerId: string;
   personName: string;
+  photoUrl?: string;
   content: string;
   stars: number;
   createdAt: Date;
@@ -10,7 +11,7 @@ export interface Review {
 
 export interface AddReviewDto {
   productId: string;
-  userId: string;
+  customerId: string;
   stars: number;
   content: string;
 }

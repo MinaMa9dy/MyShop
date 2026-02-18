@@ -1,6 +1,6 @@
 export interface CartItem {
   productId: string;
-  userId: string;
+  customerId: string;
   quantity: number;
   // Additional properties for display
   productName?: string;
@@ -10,13 +10,13 @@ export interface CartItem {
 
 export interface AddToCartDto {
   productId: string;
-  userId: string;
+  customerId: string;
   quantity: number;
 }
 
 export interface UpdateCartDto {
   productId: string;
-  userId: string;
+  customerId: string;
   quantity: number;
 }
 

@@ -28,6 +28,11 @@ export const routes: Routes = [
             title: 'MyShop - Register'
           },
           {
+            path: 'profile',
+            loadComponent: () => import('./features/auth/components/profile/profile.component').then(m => m.ProfileComponent),
+            title: 'MyShop - Profile'
+          },
+          {
             path: '',
             pathMatch: 'full',
             redirectTo: 'login'
@@ -114,6 +119,11 @@ export const routes: Routes = [
             path: 'register',
             loadComponent: () => import('./features/auth/components/register/register.component').then(m => m.RegisterComponent),
             title: 'MyShop - التسجيل'
+          },
+          {
+            path: 'profile',
+            loadComponent: () => import('./features/auth/components/profile/profile.component').then(m => m.ProfileComponent),
+            title: 'MyShop - الملف الشخصي'
           },
           {
             path: '',

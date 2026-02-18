@@ -7,7 +7,8 @@ import {
   RegisterDto, 
   AuthenticationResponseDto, 
   TokenModelDto,
-  User 
+  User,
+  UserProfile 
 } from '../models/auth.model';
 import { TokenService } from './token.service';
 import { CartService } from './cart.service';
@@ -140,6 +141,18 @@ export class AuthService {
   getUserId(): string {
     const user = this.currentUserSubject.value;
     return user?.id || '';
+  }
+  
+  getUserProfile(userId: string): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${this.apiUrl}/Profile`, {
+      params: { UserId: userId }
+    });
+  }
+  
+  changeUserPhoto(file: File, userId: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post(`${environment.apiUrl}/Photo/ChangePhoto?UserId=${userId}`, formData);
   }
   
   isAuthenticated(): boolean {

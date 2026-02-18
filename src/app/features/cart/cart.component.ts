@@ -90,6 +90,12 @@ export class CartComponent {
       img.src = this.placeholder;
     }
   }
+  
+  goToProductDetail(item: any): void {
+    // Close cart and navigate to product detail page
+    this.cartService.close();
+    this.router.navigate(['/' + this.currentLang + '/products/' + item.productId]);
+  }
 
   proceedToCheckout(): void {
     // Close cart and navigate to order confirmation page

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -31,10 +31,12 @@ import { TokenService } from '../../core/services/token.service';
                class="btn bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors">
               {{ 'home.shopNow' | translate }}
             </a>
-            <a [routerLink]="'/' + currentLang + '/auth/register'" 
-               class="btn border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-lg font-semibold transition-colors">
-              {{ 'home.createAccount' | translate }}
-            </a>
+            @if (!isLoggedIn()) {
+              <a [routerLink]="'/' + currentLang + '/auth/register'" 
+                 class="btn border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-lg font-semibold transition-colors">
+                {{ 'home.createAccount' | translate }}
+              </a>
+            }
           </div>
         </div>
       </section>
@@ -206,6 +208,9 @@ export class HomeComponent implements OnInit {
   wishlistIds = signal<Set<string>>(new Set());
   // Track which product is being processed
   processingId = signal<string | null>(null);
+  
+  // Check if user is logged in
+  isLoggedIn = computed(() => !!this.tokenService.getUserId());
   
   get currentLang(): string {
     return this.languageService.currentLanguage();

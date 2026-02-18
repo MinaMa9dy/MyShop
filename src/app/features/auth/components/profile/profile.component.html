@@ -1,0 +1,72 @@
+<div class="profile-page min-h-screen bg-gray-100 py-8 px-4">
+  <div class="max-w-2xl mx-auto">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+    
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+      {{ error }}
+    </div>
+    
+    <!-- Profile Content -->
+    <div *ngIf="!loading && !error && profile" class="bg-white rounded-lg shadow-md overflow-hidden">
+      <!-- Header with Photo -->
+      <div class="bg-gradient-to-r from-blue-600 to-blue-800 h-32"></div>
+      
+      <div class="px-6 pb-6">
+        <!-- Profile Photo -->
+        <div class="relative -mt-16 mb-4">
+          <div class="w-32 h-32 rounded-full border-4 border-white bg-gray-200 overflow-hidden flex items-center justify-center">
+            <img *ngIf="getPhotoUrl()" 
+                 [src]="getPhotoUrl()" 
+                 alt="Profile Photo" 
+                 class="w-full h-full object-cover">
+            <span *ngIf="!getPhotoUrl()" class="text-4xl text-gray-400">
+              {{ profile.firstName.charAt(0) }}{{ profile.lastName.charAt(0) }}
+            </span>
+          </div>
+        </div>
+        
+        <!-- User Info -->
+        <div class="mb-6">
+          <h1 class="text-3xl font-bold text-gray-800">{{ getFullName() }}</h1>
+          <p class="text-gray-500">Member since {{ getCreatedDate() }}</p>
+        </div>
+        
+        <!-- Details Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- First Name -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <label class="block text-sm font-medium text-gray-500 mb-1">First Name</label>
+            <p class="text-gray-800 font-semibold">{{ profile.firstName }}</p>
+          </div>
+          
+          <!-- Last Name -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <label class="block text-sm font-medium text-gray-500 mb-1">Last Name</label>
+            <p class="text-gray-800 font-semibold">{{ profile.lastName }}</p>
+          </div>
+          
+          <!-- Gender -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <label class="block text-sm font-medium text-gray-500 mb-1">Gender</label>
+            <p class="text-gray-800 font-semibold">{{ getGenderText() }}</p>
+          </div>
+          
+          <!-- Created Date -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <label class="block text-sm font-medium text-gray-500 mb-1">Account Created</label>
+            <p class="text-gray-800 font-semibold">{{ getCreatedDate() }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- No Profile Data -->
+    <div *ngIf="!loading && !error && !profile" class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative">
+      No profile data available
+    </div>
+  </div>
+</div>

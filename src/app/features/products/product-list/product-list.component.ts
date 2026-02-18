@@ -54,15 +54,14 @@ export class ProductListComponent implements OnInit {
   onSaleOnly = false;
 
   ngOnInit(): void {
-    this.loadProducts();
     this.loadCategories();
     this.loadWishlist();
 
+    // First, check if there's already a categoryId in the URL
     this.route.queryParams.subscribe(params => {
-      if (params['categoryId']) {
-        this.selectedCategory = params['categoryId'];
-        this.loadProducts();
-      }
+      const categoryId = params['categoryId'] || params['categoryId'];
+      this.selectedCategory = categoryId || '';
+      this.loadProducts();
     });
   }
 

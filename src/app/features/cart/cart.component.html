@@ -8,7 +8,7 @@
 
   <div class="cart-items" *ngIf="items().length > 0; else emptyCart">
     <div class="cart-item" *ngFor="let item of items()">
-      <div class="item-image">
+      <div class="item-image" (click)="goToProductDetail(item)">
         <img [src]="item.productImage || placeholder" [alt]="item.productName" 
              (error)="handleImageError($event, item)">
       </div>

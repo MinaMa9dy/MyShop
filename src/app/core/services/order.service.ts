@@ -22,7 +22,7 @@ export class OrderService {
   getOrdersByUserId(userId?: string): Observable<Order[]> {
     const id = userId || this.getCurrentUserId();
     
-    return this.http.get<Order[]>(`${this.apiUrl}?userId=${id}`);
+    return this.http.get<Order[]>(`${this.apiUrl}?customerId=${id}`);
   }
 
   // Create a new order - uses POST api/Order

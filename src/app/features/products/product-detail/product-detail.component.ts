@@ -12,6 +12,7 @@ import { ReviewService } from '../../../core/services/review.service';
 import { TokenService } from '../../../core/services/token.service';
 import { WishService } from '../../../core/services/wish.service';
 import { Review } from '../../../core/models/review.model';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-product-detail',
@@ -48,11 +49,11 @@ import { Review } from '../../../core/models/review.model';
               <!-- Product Images -->
               <div #productImages class="product-images p-6 bg-gray-100" id="product-images">
                 <div class="main-image h-96 bg-white rounded-xl mb-4 overflow-hidden flex items-center justify-center shadow-sm relative">
-                  @if (mainImage()) {
+                  @if (mainImage() && product()) {
                     <img [src]="mainImage()" 
                          [alt]="product()?.name"
                          class="h-full w-full object-contain p-4">
-                  } @else if ((product()?.productPhotos && product()!.productPhotos!.length > 0) || (product()?.productphotos && product()!.productphotos!.length > 0)) {
+                  } @else if (product() && (product()!.productPhotos && product()!.productPhotos!.length > 0) || (product()!.productphotos && product()!.productphotos!.length > 0)) {
                     <img [src]="photoService.getPhotoUrl((product()!.productPhotos || product()!.productphotos)![0].fileName)" 
                          [alt]="product()?.name"
                          class="h-full w-full object-contain p-4">
@@ -147,10 +148,10 @@ import { Review } from '../../../core/models/review.model';
                     <p class="text-sm text-gray-500 mb-1">{{ 'product.category' | translate }}</p>
                     <p class="font-medium text-gray-800">{{ product()?.category }}</p>
                   </div>
-                  @if (product()?.supplier) {
+                  @if (product()?.supplierName) {
                     <div class="bg-gray-50 rounded-lg p-4">
                       <p class="text-sm text-gray-500 mb-1">{{ 'product.supplier' | translate }}</p>
-                      <p class="font-medium text-gray-800 text-sm truncate">{{ product()?.supplier }}</p>
+                      <p class="font-medium text-gray-800 text-sm truncate">{{ product()?.supplierName }}</p>
                     </div>
                   }
                   <div class="bg-gray-50 rounded-lg p-4">
@@ -287,11 +288,17 @@ import { Review } from '../../../core/models/review.model';
                     <div class="bg-gray-50 rounded-xl p-6">
                       <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-3">
-                          <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                            {{ review.personName ? review.personName.charAt(0) : 'U' }}
+                          <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold overflow-hidden">
+                            @if (getReviewerPhotoUrl(review.photoUrl)) {
+                              <img [src]="getReviewerPhotoUrl(review.photoUrl)" alt="Reviewer photo" class="w-full h-full object-cover">
+                            } @else {
+                              {{ review.personName ? review.personName.charAt(0) : 'U' }}
+                            }
                           </div>
                           <div>
-                            <p class="font-medium text-gray-800">{{ review.personName || 'Anonymous' }}</p>
+                            <a [routerLink]="['/' + getCurrentLang() + '/auth/profile']" [queryParams]="{UserId: review.customerId}" class="font-medium text-gray-800 hover:text-blue-600 transition-colors">
+                              {{ review.personName || 'Anonymous' }}
+                            </a>
                             <p class="text-sm text-gray-500">{{ review.createdAt | date:'mediumDate' }}</p>
                           </div>
                         </div>
@@ -377,6 +384,15 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     return Math.max(productReviews, loadedReviews);
   });
   
+  // Method to get reviewer photo URL
+  getReviewerPhotoUrl(photoPath: string | undefined): string {
+    if (!photoPath) return '';
+    const normalizedPath = photoPath.replace(/\\/g, '/');
+    const parts = normalizedPath.split('/');
+    const fileName = parts[parts.length - 1];
+    return `${environment.apiUrl}/Photo/UserPhoto/${fileName}`;
+  }
+  
   ngOnInit(): void {
     this.loadProduct();
   }
@@ -391,6 +407,10 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
       this.loading.set(false);
       return;
     }
+    
+    // Clear previous product data
+    this.product.set(null);
+    this.mainImage.set(null);
     
     this.productService.getById(id).subscribe({
       next: (response: any) => {
@@ -566,7 +586,7 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     this.reviewError.set(null);
     this.reviewSuccess.set(false);
     
-    // Get user ID from JWT token claims
+    // Get customer ID from JWT token claims
     const userId = this.tokenService.getUserId() || '';
     
     if (!userId) {
@@ -576,7 +596,7 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     }
     
     this.reviewService.addReview({
-      userId,
+      customerId: userId,
       productId,
       stars: this.newReviewStars,
       content: this.newReviewContent,

@@ -12,7 +12,7 @@ function getProductMainPhoto(product: any): string {
   }
   const mainPhoto = product.productPhotos.find((photo: any) => photo.isMain);
   if (mainPhoto && mainPhoto.fileName) {
-    return `${environment.apiUrl}/Photo/${mainPhoto.fileName}`;
+    return `${environment.apiUrl}/Photo/ProductPhoto/${mainPhoto.fileName}`;
   }
   return 'assets/images/placeholder.svg';
 }
@@ -63,11 +63,11 @@ export class CartService {
 
   // Add item to cart - uses POST api/Cart
   addToCart(productId: string, quantity: number = 1): Observable<any> {
-    const userId = this.getCurrentUserId();
+    const customerId = this.getCurrentUserId();
     
     const dto = {
       productId: productId,
-      userId: userId,
+      customerId: customerId,
       quantity: quantity
     };
 
@@ -94,7 +94,7 @@ export class CartService {
             // Add new item
             this._items.update(items => [...items, {
               productId: item.productId || productId,
-              userId: item.userId || userId,
+              customerId: item.customerId || customerId,
               quantity: item.quantity || quantity,
               productName: item.product?.name || item.productName || '',
               productPrice: item.product?.newPrice || item.product?.price || item.productPrice || 0,
@@ -111,11 +111,11 @@ export class CartService {
 
   // Remove item from cart - uses DELETE api/Cart (body instead of query params)
   removeFromCart(productId: string, quantityToRemove: number = 0): Observable<any> {
-    const userId = this.getCurrentUserId();
+    const customerId = this.getCurrentUserId();
     
     const dto = {
       productId: productId,
-      userId: userId,
+      customerId: customerId,
       quantity: quantityToRemove
     };
 
@@ -162,10 +162,10 @@ export class CartService {
 
   // Get cart items for user - uses GET api/Cart
   getCartItems(): Observable<any> {
-    const userId = this.getCurrentUserId();
-    console.log('Getting cart - GET api/Cart for userId:', userId);
+    const customerId = this.getCurrentUserId();
+    console.log('Getting cart - GET api/Cart for customerId:', customerId);
     
-    return this.http.get<any>(`${this.apiUrl}?userId=${userId}`).pipe(
+    return this.http.get<any>(`${this.apiUrl}?customerId=${customerId}`).pipe(
       tap((response: any) => {
         console.log('Get cart response:', response);
         
@@ -183,7 +183,7 @@ export class CartService {
         
         const items = rawItems.map(item => ({
           productId: item.productId,
-          userId: item.userId || userId,
+          customerId: item.customerId || customerId,
           quantity: item.quantity,
           productName: item.product?.name || item.productName || '',
           productPrice: item.product?.newPrice || item.product?.price || item.productPrice || 0,

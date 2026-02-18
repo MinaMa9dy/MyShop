@@ -44,3 +44,20 @@ export interface AuthResult {
   error?: string;
   data?: AuthenticationResponseDto;
 }
+
+export interface UserPhoto {
+  userId: string;
+  fileName: string;
+  relativePath: string;
+  contentType: string;
+  fileSize: number;
+  createdAt: string;
+}
+
+export interface UserProfile {
+  firstName: string;
+  lastName: string;
+  gender: boolean;
+  createdAt: string;
+  userPhoto: UserPhoto | null;
+}
