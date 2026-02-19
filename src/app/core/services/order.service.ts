@@ -29,4 +29,15 @@ export class OrderService {
   createOrder(order: AddOrderDto): Observable<Order> {
     return this.http.post<Order>(this.apiUrl, order);
   }
+
+  // Get orders by seller ID - uses GET api/Order/SellerOrders?sellerId={sellerId}
+  getOrdersBySellerId(sellerId: string): Observable<Order[]> {
+    return this.http.get<Order[]>(`${this.apiUrl}/SellerOrders?sellerId=${sellerId}`);
+  }
+
+  // Get orders for the current logged-in seller
+  getCurrentSellerOrders(): Observable<Order[]> {
+    const sellerId = this.getCurrentUserId();
+    return this.getOrdersBySellerId(sellerId);
+  }
 }

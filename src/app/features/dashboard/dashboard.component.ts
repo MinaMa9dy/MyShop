@@ -349,17 +349,32 @@ export class DashboardComponent implements OnInit {
     const userId = this.tokenService.getUserId();
     if (!userId) return;
     
-    this.orderService.getOrdersByUserId(userId).subscribe({
-      next: (orders) => {
-        this.stats.update(s => ({
-          ...s,
-          totalOrders: orders.length
-        }));
-      },
-      error: (error) => {
-        console.error('Error loading orders count:', error);
-      }
-    });
+    // Check if user is a seller and call appropriate endpoint
+    if (this.tokenService.isSeller()) {
+      this.orderService.getOrdersBySellerId(userId).subscribe({
+        next: (orders) => {
+          this.stats.update(s => ({
+            ...s,
+            totalOrders: orders.length
+          }));
+        },
+        error: (error) => {
+          console.error('Error loading seller orders count:', error);
+        }
+      });
+    } else {
+      this.orderService.getOrdersByUserId(userId).subscribe({
+        next: (orders) => {
+          this.stats.update(s => ({
+            ...s,
+            totalOrders: orders.length
+          }));
+        },
+        error: (error) => {
+          console.error('Error loading orders count:', error);
+        }
+      });
+    }
   }
   
   loadWishlistCount(): void {

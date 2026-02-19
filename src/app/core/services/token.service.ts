@@ -142,6 +142,46 @@ export class TokenService {
     
     return null;
   }
+
+  // Get role from JWT token claims
+  getRole(): string | null {
+    const token = this.getAccessToken();
+    if (!token) return null;
+    
+    const payload = this.decodeToken(token);
+    if (!payload) return null;
+    
+    // Try common claim names for role
+    if (payload.role) return payload.role;
+    if (payload.roles) return Array.isArray(payload.roles) ? payload.roles[0] : payload.roles;
+    if (payload.roleclaimtype) return payload.roleclaimtype;
+    
+    // Check for namespaced role claim
+    for (const key of Object.keys(payload)) {
+      if (key.toLowerCase().includes('role')) {
+        return payload[key];
+      }
+    }
+    
+    return null;
+  }
+
+  // Check if user has a specific role
+  hasRole(role: string): boolean {
+    const userRole = this.getRole();
+    if (!userRole) return false;
+    
+    if (Array.isArray(userRole)) {
+      return userRole.includes(role);
+    }
+    
+    return userRole.toLowerCase() === role.toLowerCase();
+  }
+
+  // Check if user is a Seller
+  isSeller(): boolean {
+    return this.hasRole('Seller');
+  }
   
   // Get all claims from token (for debugging)
   getAllClaims(): any {

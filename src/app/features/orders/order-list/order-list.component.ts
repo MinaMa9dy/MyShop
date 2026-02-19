@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { OrderService } from '../../../core/services/order.service';
+import { TokenService } from '../../../core/services/token.service';
 import { Order, OrderItem } from '../../../core/models/order.model';
 import { LanguageService } from '../../../core/services/language.service';
 import { PhotoService } from '../../../core/services/photo.service';
@@ -155,6 +156,7 @@ import { PhotoService } from '../../../core/services/photo.service';
 })
 export class OrderListComponent implements OnInit {
   private orderService = inject(OrderService);
+  private tokenService = inject(TokenService);
   private languageService = inject(LanguageService);
   photoService = inject(PhotoService);
   
@@ -175,32 +177,50 @@ export class OrderListComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     
-    this.orderService.getOrdersByUserId().subscribe({
-      next: (response: any) => {
-        let ordersData: any[] = [];
-        if (Array.isArray(response)) {
-          ordersData = response;
-        } else if (response && Array.isArray(response.data)) {
-          ordersData = response.data;
-        } else if (response && response.items && Array.isArray(response.items)) {
-          ordersData = response.items;
+    // Check if user is a seller and call appropriate endpoint
+    if (this.tokenService.isSeller()) {
+      this.orderService.getCurrentSellerOrders().subscribe({
+        next: (response: any) => {
+          this.handleOrdersResponse(response);
+        },
+        error: (error) => {
+          console.error('Error loading seller orders:', error);
+          this.error.set('Failed to load orders. Please try again.');
+          this.loading.set(false);
         }
-        
-        // Calculate totals for each order from items
-        ordersData = ordersData.map(order => ({
-          ...order,
-          calculatedTotal: this.calculateOrderTotalFromItems(order.orderItems || [])
-        }));
-        
-        this.orders.set(ordersData);
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading orders:', error);
-        this.error.set('Failed to load orders. Please try again.');
-        this.loading.set(false);
-      }
-    });
+      });
+    } else {
+      this.orderService.getOrdersByUserId().subscribe({
+        next: (response: any) => {
+          this.handleOrdersResponse(response);
+        },
+        error: (error) => {
+          console.error('Error loading orders:', error);
+          this.error.set('Failed to load orders. Please try again.');
+          this.loading.set(false);
+        }
+      });
+    }
+  }
+  
+  private handleOrdersResponse(response: any): void {
+    let ordersData: any[] = [];
+    if (Array.isArray(response)) {
+      ordersData = response;
+    } else if (response && Array.isArray(response.data)) {
+      ordersData = response.data;
+    } else if (response && response.items && Array.isArray(response.items)) {
+      ordersData = response.items;
+    }
+    
+    // Calculate totals for each order from items
+    ordersData = ordersData.map(order => ({
+      ...order,
+      calculatedTotal: this.calculateOrderTotalFromItems(order.orderItems || [])
+    }));
+    
+    this.orders.set(ordersData);
+    this.loading.set(false);
   }
   
   calculateOrderTotal(order: Order): number {
