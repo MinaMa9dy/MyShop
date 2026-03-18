@@ -17,6 +17,12 @@ export class ProductService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/Products`;
   
+  // Create a new product (AddProduct endpoint)
+  addProduct(product: AddProductDto): Observable<any> {
+    const formData = this.toFormData(product);
+    return this.http.post(`${this.apiUrl}/AddProduct`, formData);
+  }
+  
   getAll(pageNumber: number = 1, pageSize: number = 10): Observable<any> {
     let params = new HttpParams()
       .set('PageNumber', pageNumber.toString())
@@ -67,7 +73,31 @@ export class ProductService {
   }
   
   update(product: UpdateProductDto): Observable<Product> {
-    return this.http.put<Product>(`${this.apiUrl}/${product.id}`, product);
+    const formData = this.toFormData(product);
+    return this.http.put<Product>(`${this.apiUrl}/${product.id}`, formData);
+  }
+
+  private toFormData(obj: any): FormData {
+    const formData = new FormData();
+    for (const key in obj) {
+      if (obj[key] === null || obj[key] === undefined) continue;
+      
+      if (Array.isArray(obj[key])) {
+        // Handle files or arrays of strings/numbers
+        obj[key].forEach((item: any) => {
+          if (item instanceof File) {
+            formData.append(key, item, item.name);
+          } else {
+            formData.append(key, item);
+          }
+        });
+      } else if (obj[key] instanceof File) {
+        formData.append(key, obj[key], obj[key].name);
+      } else {
+        formData.append(key, obj[key]);
+      }
+    }
+    return formData;
   }
   
   delete(id: string): Observable<void> {

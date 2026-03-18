@@ -1,12 +1,14 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AdminProductService } from '../../../core/services/admin-product.service';
+import { ProductService } from '../../../core/services/product.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { Category } from '../../../core/models/category.model';
 import { TokenService } from '../../../core/services/token.service';
+import { LanguageService } from '../../../core/services/language.service';
+import { PhotoService } from '../../../core/services/photo.service';
 
 @Component({
   selector: 'app-add-product',
@@ -17,8 +19,12 @@ import { TokenService } from '../../../core/services/token.service';
       <div class="max-w-2xl mx-auto px-4">
         <!-- Header -->
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ 'admin.addProduct.title' | translate }}</h1>
-          <p class="text-gray-500">{{ 'admin.addProduct.subtitle' | translate }}</p>
+          <h1 class="text-3xl font-bold text-gray-800 mb-2">
+            {{ (isEditMode() ? 'admin.editProduct' : 'admin.addProduct.title') | translate }}
+          </h1>
+          <p class="text-gray-500">
+            {{ (isEditMode() ? 'admin.editProductSubtitle' : 'admin.addProduct.subtitle') | translate }}
+          </p>
         </div>
 
         <!-- Loading Categories -->
@@ -29,7 +35,7 @@ import { TokenService } from '../../../core/services/token.service';
         } @else {
           <!-- Form Card -->
           <div class="card bg-white rounded-xl shadow-sm p-6">
-            <form [formGroup]="productForm" (ngSubmit)="addProduct()">
+            <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
               <!-- Product Name -->
               <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'admin.addProduct.name' | translate }}</label>
@@ -153,24 +159,90 @@ import { TokenService } from '../../../core/services/token.service';
                 </div>
               </div>
 
-              <!-- Popularity -->
-              <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'admin.addProduct.popularity' | translate }}</label>
-                <input 
-                  type="number" 
-                  formControlName="popularity"
-                  class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  [class.border-red-500]="isFieldInvalid('popularity')"
-                  [class.border-gray-300]="!isFieldInvalid('popularity')"
-                  [placeholder]="'admin.addProduct.popularityPlaceholder' | translate"
-                  min="0">
-                @if (isFieldInvalid('popularity')) {
-                  <p class="mt-1 text-sm text-red-500">
-                    Popularity must be a non-negative number
-                  </p>
+               <!-- Popularity -->
+               <div class="mb-6">
+                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'admin.addProduct.popularity' | translate }}</label>
+                 <input 
+                   type="number" 
+                   formControlName="popularity"
+                   class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   [class.border-red-500]="isFieldInvalid('popularity')"
+                   [class.border-gray-300]="!isFieldInvalid('popularity')"
+                   [placeholder]="'admin.addProduct.popularityPlaceholder' | translate"
+                   min="0">
+                 @if (isFieldInvalid('popularity')) {
+                   <p class="mt-1 text-sm text-red-500">
+                     Popularity must be a non-negative number
+                   </p>
+                 }
+               </div>
+ 
+               <!-- Photos Section -->
+               <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'admin.addProduct.photos' | translate }}</label>
+                
+                <!-- Existing Photos (Edit Mode) -->
+                @if (isEditMode() && (originalProduct()?.productPhotos?.length || originalProduct()?.productphotos?.length)) {
+                  <div class="grid grid-cols-4 gap-4 mb-4">
+                    @for (photo of (originalProduct().productPhotos || originalProduct().productphotos); track photo.id) {
+                      <div class="relative group aspect-square rounded-lg overflow-hidden border bg-gray-100">
+                        <img [src]="photoService.getPhotoUrl(photo.fileName)" class="w-full h-full object-cover" [class.opacity-40]="isPhotoMarkedForDeletion(photo.id)">
+                        <button 
+                          type="button"
+                          (click)="togglePhotoDeletion(photo.id)"
+                          class="absolute top-1 right-1 p-1 bg-white/80 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                          [title]="(isPhotoMarkedForDeletion(photo.id) ? 'admin.addProduct.keepPhoto' : 'admin.addProduct.deletePhoto') | translate">
+                          @if (isPhotoMarkedForDeletion(photo.id)) {
+                            <i class="fas fa-undo text-blue-600"></i>
+                          } @else {
+                            <i class="fas fa-trash text-red-600"></i>
+                          }
+                        </button>
+                        @if (isPhotoMarkedForDeletion(photo.id)) {
+                          <div class="absolute inset-0 flex items-center justify-center bg-red-500/10 pointer-events-none">
+                            <span class="bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded">{{ 'admin.addProduct.deleted' | translate }}</span>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
                 }
+ 
+                <!-- New Photos Previews -->
+                @if (selectedFiles().length > 0) {
+                  <div class="grid grid-cols-4 gap-4 mb-4">
+                    @for (fileObj of selectedFiles(); track fileObj.name; let i = $index) {
+                      <div class="relative group aspect-square rounded-lg overflow-hidden border bg-gray-50">
+                        <img [src]="fileObj.preview" class="w-full h-full object-cover">
+                        <button 
+                          type="button"
+                          (click)="removeNewPhoto(i)"
+                          class="absolute top-1 right-1 p-1 bg-white/80 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                          <i class="fas fa-times text-gray-600"></i>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+ 
+                <!-- Add Photos Input -->
+                <div class="relative">
+                  <input 
+                    type="file" 
+                    multiple 
+                    accept="image/*"
+                    (change)="onFileSelected($event)"
+                    class="hidden" 
+                    #fileInput>
+                  <button 
+                    type="button"
+                    (click)="fileInput.click()"
+                    class="w-full py-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-blue-500 hover:text-blue-500 transition-all flex flex-col items-center justify-center gap-1">
+                    <i class="fas fa-cloud-upload-alt text-2xl"></i>
+                    <span class="text-sm font-medium">{{ 'admin.addProduct.uploadPhotos' | translate }}</span>
+                  </button>
+                </div>
               </div>
-
               <!-- Error Message -->
               @if (error()) {
                 <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -194,14 +266,14 @@ import { TokenService } from '../../../core/services/token.service';
                   @if (submitting()) {
                     <span class="flex items-center justify-center gap-2">
                       <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                      {{ 'admin.addProduct.adding' | translate }}
+                      {{ (isEditMode() ? 'admin.updating' : 'admin.addProduct.adding') | translate }}
                     </span>
                   } @else {
-                    {{ 'admin.addProduct.addProduct' | translate }}
+                    {{ (isEditMode() ? 'admin.updateProduct' : 'admin.addProduct.addProduct') | translate }}
                   }
                 </button>
                 <a 
-                  routerLink="/en/admin/products/add"
+                  [routerLink]="'/' + currentLang + '/products'"
                   class="flex-1 py-3 px-4 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition-colors text-center">
                   {{ 'admin.addProduct.cancel' | translate }}
                 </a>
@@ -214,10 +286,18 @@ import { TokenService } from '../../../core/services/token.service';
   `
 })
 export class AddProductComponent implements OnInit {
-  private adminProductService = inject(AdminProductService);
+  private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private tokenService = inject(TokenService);
   private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private languageService = inject(LanguageService);
+  public photoService = inject(PhotoService);
+
+  get currentLang(): string {
+    return this.languageService.currentLanguage();
+  }
 
   // Reactive form with validation (supplierId removed - will be set from token)
   productForm: FormGroup = this.fb.group({
@@ -231,25 +311,73 @@ export class AddProductComponent implements OnInit {
     popularity: [0, [Validators.min(0)]]
   });
 
-  // States
   submitting = signal(false);
   loadingCategories = signal(true);
   error = signal<string | null>(null);
   success = signal<string | null>(null);
   categories = signal<Category[]>([]);
+  isEditMode = signal(false);
+  productId = signal<string | null>(null);
+  originalProduct = signal<any>(null);
+  
+  selectedFiles = signal<{file: File, name: string, preview: string}[]>([]);
+  photoIdsToDelete = signal<string[]>([]);
 
   ngOnInit(): void {
     this.loadCategories();
+    
+    // Check for ID parameter to enable EDIT mode
+    this.route.queryParams.subscribe((params: any) => {
+      const id = params['id'];
+      if (id) {
+        this.productId.set(id);
+        this.isEditMode.set(true);
+        this.loadProductForEdit(id);
+      }
+    });
+  }
+
+  loadProductForEdit(id: string): void {
+    this.productService.getById(id).subscribe({
+      next: (product: any) => {
+        // Authorization check: User must be the owner
+        const userId = this.tokenService.getUserId();
+        const isOwner = product.supplierId === userId || product.SupplierId === userId;
+        const isAdmin = this.tokenService.hasRole('Admin');
+        
+        if (!isOwner && !isAdmin) {
+          this.error.set('You are not authorized to edit this product.');
+          return;
+        }
+
+        // Populate form
+        this.originalProduct.set(product);
+        this.productForm.patchValue({
+          name: product.name,
+          description: product.description,
+          price: product.newPrice || product.price,
+          stock: product.stockQuantity || product.shownQuantity,
+          categoryId: product.categoryId,
+          isFasting: product.isFasting || product.isfasting,
+          haveSale: product.haveSale,
+          popularity: product.popularity
+        });
+      },
+      error: (err: any) => {
+        console.error('Error loading product for edit:', err);
+        this.error.set('Failed to load product data.');
+      }
+    });
   }
 
   loadCategories(): void {
     this.categoryService.getAll().subscribe({
-      next: (categories) => {
+      next: (categories: any) => {
         // Ensure categories is an array
         this.categories.set(Array.isArray(categories) ? categories : []);
         this.loadingCategories.set(false);
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading categories:', error);
         this.error.set('Failed to load categories');
         this.loadingCategories.set(false);
@@ -260,6 +388,53 @@ export class AddProductComponent implements OnInit {
   isFieldInvalid(fieldName: string): boolean {
     const field = this.productForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+  
+  onFileSelected(event: any): void {
+    const files: FileList = event.target.files;
+    if (files.length > 0) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          this.selectedFiles.update(current => [
+            ...current, 
+            { file, name: file.name, preview: e.target.result }
+          ]);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  }
+
+  removeNewPhoto(index: number): void {
+    this.selectedFiles.update(current => {
+      const updated = [...current];
+      updated.splice(index, 1);
+      return updated;
+    });
+  }
+
+  togglePhotoDeletion(photoId: string): void {
+    this.photoIdsToDelete.update(ids => {
+      if (ids.includes(photoId)) {
+        return ids.filter(id => id !== photoId);
+      } else {
+        return [...ids, photoId];
+      }
+    });
+  }
+
+  isPhotoMarkedForDeletion(photoId: string): boolean {
+    return this.photoIdsToDelete().includes(photoId);
+  }
+
+  onSubmit(): void {
+    if (this.isEditMode()) {
+      this.updateProduct();
+    } else {
+      this.addProduct();
+    }
   }
 
   addProduct(): void {
@@ -278,16 +453,29 @@ export class AddProductComponent implements OnInit {
     const userId = this.tokenService.getUserId() || '';
     
     // Create product data with supplierId from token
-    const productData = {
-      ...this.productForm.value,
+    const productData: any = {
+      name: this.productForm.value.name,
+      description: this.productForm.value.description,
+      price: this.productForm.value.price,
+      isfasting: this.productForm.value.isFasting,
+      haveSale: this.productForm.value.haveSale,
+      popularity: this.productForm.value.popularity,
+      stock: this.productForm.value.stock,
+      categoryId: this.productForm.value.categoryId,
       supplierId: userId
     };
 
-    this.adminProductService.addProduct(productData).subscribe({
-      next: (response) => {
+    if (this.selectedFiles().length > 0) {
+      productData.Photos = this.selectedFiles().map(f => f.file);
+    }
+
+    this.productService.addProduct(productData).subscribe({
+      next: (response: any) => {
         console.log('Product added successfully:', response);
         this.submitting.set(false);
         this.success.set('Product added successfully!');
+        this.selectedFiles.set([]);
+        this.photoIdsToDelete.set([]);
         
         // Reset form
         this.productForm.reset({
@@ -301,10 +489,62 @@ export class AddProductComponent implements OnInit {
           popularity: 0
         });
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error adding product:', error);
         this.submitting.set(false);
         this.error.set(error.error?.message || error.error?.error || 'Failed to add product. Please try again.');
+      }
+    });
+  }
+
+  updateProduct(): void {
+    this.productForm.markAllAsTouched();
+    if (this.productForm.invalid) return;
+
+    this.submitting.set(true);
+    this.error.set(null);
+    this.success.set(null);
+
+    const userId = this.tokenService.getUserId() || '';
+    const orig = this.originalProduct();
+    
+    // Explicitly mapping to UpdateProductDto fields
+    const productData: any = {
+      id: this.productId()!,
+      name: this.productForm.value.name,
+      description: this.productForm.value.description,
+      haveSale: this.productForm.value.haveSale,
+      popularity: this.productForm.value.popularity || 0,
+      oldPrice: orig?.oldPrice || (orig?.newPrice || this.productForm.value.price), // Fallback logic
+      newPrice: this.productForm.value.price,
+      stockQuantity: this.productForm.value.stock,
+      shownQuantity: this.productForm.value.stock, // Usually same as stock if not specified otherwise
+      supplierId: userId,
+      categoryId: this.productForm.value.categoryId
+    };
+
+    // Add photos
+    if (this.selectedFiles().length > 0) {
+      productData.Photos = this.selectedFiles().map(f => f.file);
+    }
+
+    // Add photo IDs to delete
+    if (this.photoIdsToDelete().length > 0) {
+      productData.PhotoIdsToDelete = this.photoIdsToDelete();
+    }
+
+    this.productService.update(productData).subscribe({
+      next: () => {
+        this.submitting.set(false);
+        this.success.set('Product updated successfully!');
+        setTimeout(() => {
+          this.router.navigate([`/${this.currentLang}/products/${this.productId()}`]);
+        }, 1500);
+      },
+      error: (err: any) => {
+        console.error('Error updating product:', err);
+        this.submitting.set(false);
+        this.error.set('Failed to update product. Please try again.');
       }
     });
   }

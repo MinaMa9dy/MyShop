@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, catchError, throwError, BehaviorSubject } from 'rxjs';
+import { Observable, tap, catchError, throwError, BehaviorSubject, shareReplay, finalize } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { 
   LoginDto, 
@@ -8,7 +8,12 @@ import {
   AuthenticationResponseDto, 
   TokenModelDto,
   User,
-  UserProfile 
+  UserProfile,
+  ConfirmEmailDto,
+  ResendEmailConfirmationDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  GoogleLoginDto
 } from '../models/auth.model';
 import { TokenService } from './token.service';
 import { CartService } from './cart.service';
@@ -34,13 +39,16 @@ export class AuthService {
   // Event for cart sync
   public loginSuccess = new BehaviorSubject<boolean>(false);
   
+  // Track ongoing refresh request to prevent multiple concurrent calls
+  private refreshTokenInProgress$: Observable<AuthenticationResponseDto> | null = null;
+  
   login(credentials: LoginDto): Observable<AuthenticationResponseDto> {
-    return this.http.post<AuthenticationResponseDto>(`${this.apiUrl}/Login`, credentials)
+    return this.http.post<AuthenticationResponseDto>(`${this.apiUrl}/login`, credentials)
       .pipe(
         tap(response => {
           console.log('Login response:', response);
-          if (response && response.token) {
-            this.tokenService.setTokens(response.token, response.refreshToken || '');
+          if (response && response.accessToken) {
+            this.tokenService.setTokens(response.accessToken, response.refreshToken || '');
             this.isLoggedInSignal.set(true);
             this.loadCurrentUser();
             // Trigger cart sync
@@ -53,12 +61,12 @@ export class AuthService {
   }
   
   register(user: RegisterDto): Observable<AuthenticationResponseDto> {
-    return this.http.post<AuthenticationResponseDto>(`${this.apiUrl}/Register`, user)
+    return this.http.post<AuthenticationResponseDto>(`${this.apiUrl}/register`, user)
       .pipe(
         tap(response => {
           console.log('Register response:', response);
-          if (response && response.token) {
-            this.tokenService.setTokens(response.token, response.refreshToken || '');
+          if (response && response.accessToken) {
+            this.tokenService.setTokens(response.accessToken, response.refreshToken || '');
             this.isLoggedInSignal.set(true);
             this.loadCurrentUser();
             // Trigger cart sync
@@ -71,10 +79,13 @@ export class AuthService {
   }
   
   refreshToken(): Observable<AuthenticationResponseDto> {
+    if (this.refreshTokenInProgress$) {
+      console.log('AuthService - Refresh already in progress, returning existing observable');
+      return this.refreshTokenInProgress$;
+    }
+
     const token = this.tokenService.getAccessToken();
     const refreshToken = this.tokenService.getRefreshToken();
-    
-    console.log('AuthService - refreshToken - token exists:', !!token, 'refreshToken exists:', !!refreshToken);
     
     if (!refreshToken) {
       console.error('AuthService - No refresh token available');
@@ -82,30 +93,69 @@ export class AuthService {
     }
     
     const tokenModel = {
-      token: token || '',
+      accessToken: token || '',
       refreshToken: refreshToken
     };
     
-    console.log('AuthService - Sending refresh request to:', `${this.apiUrl}/RefreshToken`);
-    console.log('AuthService - Token model:', tokenModel);
+    console.log('AuthService - Initiating token refresh');
     
-    return this.http.post<AuthenticationResponseDto>(`${this.apiUrl}/RefreshToken`, tokenModel)
+    this.refreshTokenInProgress$ = this.http.post<AuthenticationResponseDto>(`${this.apiUrl}/refresh`, tokenModel)
       .pipe(
         tap(response => {
-          console.log('AuthService - Refresh token response received:', response);
-          if (response && response.token) {
-            // Update with new access token and existing refresh token
+          console.log('AuthService - Refresh token response received');
+          if (response && response.accessToken) {
             const newRefreshToken = response.refreshToken || refreshToken;
-            this.tokenService.setTokens(response.token, newRefreshToken);
+            this.tokenService.setTokens(response.accessToken, newRefreshToken);
             console.log('AuthService - Tokens updated successfully');
-          } else {
-            console.warn('AuthService - No token in refresh response');
           }
         }),
         catchError((error: any) => {
-          console.error('AuthService - Refresh token HTTP error:', error);
+          console.error('AuthService - Refresh token failed, logging out:', error);
           this.logout();
           return throwError(() => error);
+        }),
+        finalize(() => {
+          this.refreshTokenInProgress$ = null;
+        }),
+        shareReplay(1)
+      );
+
+    return this.refreshTokenInProgress$;
+  }
+  
+  confirmEmail(dto: ConfirmEmailDto): Observable<string> {
+    return this.http.get(`${this.apiUrl}/ConfirmEmail`, {
+      params: { userId: dto.userId, token: dto.token },
+      responseType: 'text'
+    });
+  }
+
+  resendEmailConfirmation(dto: ResendEmailConfirmationDto): Observable<string> {
+    return this.http.post(`${this.apiUrl}/ResendEmailConfirmation`, dto, { responseType: 'text' });
+  }
+
+  forgotPassword(dto: ForgotPasswordDto): Observable<string> {
+    return this.http.post(`${this.apiUrl}/ForgotPassword`, dto, { responseType: 'text' });
+  }
+
+  resetPassword(dto: ResetPasswordDto): Observable<string> {
+    return this.http.post(`${this.apiUrl}/ResetPassword`, dto, { responseType: 'text' });
+  }
+
+  googleLogin(dto: GoogleLoginDto): Observable<AuthenticationResponseDto> {
+    return this.http.post<AuthenticationResponseDto>(`${this.apiUrl}/google-login`, dto)
+      .pipe(
+        tap(response => {
+          console.log('Google login response:', response);
+          if (response && response.accessToken) {
+            this.tokenService.setTokens(response.accessToken, response.refreshToken || '');
+            this.isLoggedInSignal.set(true);
+            this.loadCurrentUser();
+            // Trigger cart sync
+            this.loginSuccess.next(true);
+          } else {
+            console.error('No token in google login response:', response);
+          }
         })
       );
   }
@@ -143,16 +193,15 @@ export class AuthService {
     return user?.id || '';
   }
   
-  getUserProfile(userId: string): Observable<UserProfile> {
-    return this.http.get<UserProfile>(`${this.apiUrl}/Profile`, {
-      params: { UserId: userId }
-    });
+  getUserProfile(userId?: string): Observable<UserProfile> {
+    const url = userId ? `${this.apiUrl}/profile/${userId}` : `${this.apiUrl}/profile`;
+    return this.http.get<UserProfile>(url);
   }
   
-  changeUserPhoto(file: File, userId: string): Observable<any> {
+  changeUserPhoto(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post(`${environment.apiUrl}/Photo/ChangePhoto?UserId=${userId}`, formData);
+    return this.http.post(`${environment.apiUrl}/Photo/ChangePhoto`, formData);
   }
   
   isAuthenticated(): boolean {

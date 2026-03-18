@@ -186,9 +186,9 @@ import { environment } from '../../../../environments/environment';
                 }
                 
                 <!-- Action Buttons -->
-                <div class="flex gap-4">
+                <div class="flex flex-col gap-4">
                   <button 
-                    class="flex-1 py-4 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30"
+                    class="w-full py-4 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30"
                     [class.opacity-50]="product()!.shownQuantity! <= 0"
                     [class.cursor-not-allowed]="product()!.shownQuantity! <= 0"
                     [disabled]="product()!.shownQuantity! <= 0"
@@ -196,6 +196,24 @@ import { environment } from '../../../../environments/environment';
                     <span class="text-xl">🛒</span>
                     {{ product()!.shownQuantity! > 0 ? ('product.addToCart' | translate) : ('product.outOfStock' | translate) }}
                   </button>
+
+                  <!-- Owner Actions -->
+                  @if (canEditProduct()) {
+                    <div class="flex gap-4">
+                      <button 
+                        class="flex-1 py-3 px-6 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-amber-500/30"
+                        (click)="editProduct()">
+                        <span class="text-xl">✏️</span>
+                        {{ 'admin.editProduct' | translate }}
+                      </button>
+                      <button 
+                        class="flex-1 py-3 px-6 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-red-600/30"
+                        (click)="deleteProduct()">
+                        <span class="text-xl">🗑️</span>
+                        {{ 'admin.deleteProduct' | translate }}
+                      </button>
+                    </div>
+                  }
                 </div>
               </div>
             </div>
@@ -378,10 +396,23 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   });
   
   // Computed signal to get total review count (from product + loaded reviews)
+  // Computed signal to calculate total review count (from product + loaded reviews)
   totalReviewCount = computed(() => {
     const productReviews = this.product()?.reviewCount || 0;
     const loadedReviews = this.reviews().length;
     return Math.max(productReviews, loadedReviews);
+  });
+
+  // Computed signal to check if product can be edited/deleted
+  canEditProduct = computed(() => {
+    const p = this.product();
+    if (!p || !this.authService.isLoggedIn()) return false;
+    
+    const userId = this.tokenService.getUserId();
+    const isOwner = p.supplierId === userId || p.SupplierId === userId;
+    const canManage = this.tokenService.isSeller() || this.tokenService.hasRole('Admin');
+    
+    return isOwner && canManage;
   });
   
   // Method to get reviewer photo URL
@@ -617,5 +648,32 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
         this.reviewError.set(error.message || 'Failed to submit review');
       }
     });
+  }
+
+  editProduct(): void {
+    const id = this.product()?.id;
+    if (id) {
+      // Redirect to edit page (using admin add path for now or seller dashboard)
+      const lang = this.getCurrentLang();
+      this.router.navigate([`/${lang}/admin/products/add`], { queryParams: { id: id } });
+    }
+  }
+
+  deleteProduct(): void {
+    const id = this.product()?.id;
+    if (!id) return;
+
+    if (confirm('Are you sure you want to delete this product?')) {
+      this.productService.delete(id).subscribe({
+        next: () => {
+          const lang = this.getCurrentLang();
+          this.router.navigate([`/${lang}/products`]);
+        },
+        error: (err) => {
+          console.error('Error deleting product:', err);
+          alert('Failed to delete product. Please try again.');
+        }
+      });
+    }
   }
 }

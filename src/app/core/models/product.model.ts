@@ -40,26 +40,30 @@ export interface ProductPhoto {
 export interface AddProductDto {
   name: string;
   description?: string;
-  price: number;
-  isFasting: boolean;
-  haveSale: boolean;
-  popularity: number;
-  stock: number;
-  categoryId: string;
-  supplierId: string;
+  price: number; 
+  isfasting: boolean; 
+  haveSale: boolean; 
+  popularity: number; 
+  stock: number; 
+  categoryId: string; 
+  supplierId: string; 
+  Photos?: File[];
 }
 
 export interface UpdateProductDto {
   id: string;
   name: string;
   description?: string;
-  price: number;
-  discountPrice?: number;
+  haveSale: boolean;
+  popularity: number;
+  oldPrice: number;
+  newPrice: number;
+  stockQuantity: number;
+  shownQuantity: number;
+  supplierId: string;
   categoryId: string;
-  supplier?: string;
-  quantityInStock: number;
-  isOnSale?: boolean;
-  isFasting?: boolean; // New property
+  Photos?: File[];
+  PhotoIdsToDelete?: string[];
 }
 
 export interface DeleteProductDto {

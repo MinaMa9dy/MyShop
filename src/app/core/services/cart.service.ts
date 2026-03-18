@@ -4,6 +4,7 @@ import { Observable, tap, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CartItem } from '../models/cart.model';
 import { TokenService } from './token.service';
+import { CouponResponse, Coupon } from '../models/coupon.models';
 
 // Helper function to get main photo URL from product
 function getProductMainPhoto(product: any): string {
@@ -28,14 +29,45 @@ export class CartService {
   // State using Signals
   private _items = signal<CartItem[]>([]);
   private _isOpen = signal<boolean>(false);
+  private _appliedCoupon = signal<CouponResponse | null>(null);
 
   // Public signals
   items = this._items.asReadonly();
   isOpen = this._isOpen.asReadonly();
+  appliedCoupon = this._appliedCoupon.asReadonly();
 
   // Computed values
   totalItems = computed(() => this._items().reduce((sum, item) => sum + item.quantity, 0));
-  totalPrice = computed(() => this._items().reduce((sum, item) => sum + (item.productPrice || 0) * item.quantity, 0));
+  
+  // Original Total (before any discounts)
+  originalTotalPrice = computed(() => this._items().reduce((sum, item) => sum + (item.productPrice || 0) * item.quantity, 0));
+
+  // The Final Deal Price Calculation
+  totalPrice = computed(() => {
+    const couponData = this._appliedCoupon();
+    if (couponData && couponData.finalSubtotal !== undefined) {
+      return couponData.finalSubtotal;
+    }
+    return this.originalTotalPrice();
+  });
+
+  getItemDiscountedValue(item: CartItem): number {
+    const original = item.productPrice || 0;
+    const couponData = this._appliedCoupon();
+    
+    if (!couponData || !couponData.itemPrices) return original;
+
+    // Use pre-calculated value from backend mapping
+    // We handle both Guid and string keys since JSON serialization might vary
+    const price = couponData.itemPrices[item.productId];
+    return price !== undefined ? price : original;
+  }
+
+  // Exported so UI knows exactly how much was saved
+  discountAmount = computed(() => {
+    const couponData = this._appliedCoupon();
+    return couponData ? (couponData.totalDiscount || 0) : 0;
+  });
 
   // Toggle cart sidebar
   toggle(): void {
@@ -48,6 +80,18 @@ export class CartService {
 
   close(): void {
     this._isOpen.set(false);
+  }
+
+  // Set the active coupon (called from Component after API validation)
+  setCoupon(couponResult: CouponResponse): void {
+    this._appliedCoupon.set(couponResult);
+    this.saveToStorage();
+  }
+
+  // Remove the active coupon
+  clearCoupon(): void {
+    this._appliedCoupon.set(null);
+    this.saveToStorage();
   }
 
   // Get userId from JWT token
@@ -163,6 +207,12 @@ export class CartService {
   // Get cart items for user - uses GET api/Cart
   getCartItems(): Observable<any> {
     const customerId = this.getCurrentUserId();
+    if (!customerId) {
+      console.log('CartService - No customerId found, returning empty cart.');
+      this._items.set([]);
+      return throwError(() => new Error('No customer ID'));
+    }
+    
     console.log('Getting cart - GET api/Cart for customerId:', customerId);
     
     return this.http.get<any>(`${this.apiUrl}?customerId=${customerId}`).pipe(
@@ -221,9 +271,18 @@ export class CartService {
     const saved = localStorage.getItem('cart');
     if (saved) {
       try {
-        const items = JSON.parse(saved);
-        console.log('Loaded cart from storage:', items);
-        this._items.set(items);
+        const parsed = JSON.parse(saved);
+        // Supports legacy carts array directly, or new object with {items, coupon}
+        if (Array.isArray(parsed)) {
+          console.log('Loaded cart items from storage:', parsed);
+          this._items.set(parsed);
+        } else if (parsed && parsed.items) {
+          console.log('Loaded cart data from storage:', parsed);
+          this._items.set(parsed.items);
+          if (parsed.coupon) {
+            this._appliedCoupon.set(parsed.coupon);
+          }
+        }
       } catch (e) {
         console.error('Error loading cart from storage:', e);
       }
@@ -232,6 +291,10 @@ export class CartService {
 
   // Save cart to local storage
   private saveToStorage(): void {
-    localStorage.setItem('cart', JSON.stringify(this._items()));
+    const dataToSave = {
+      items: this._items(),
+      coupon: this._appliedCoupon()
+    };
+    localStorage.setItem('cart', JSON.stringify(dataToSave));
   }
 }

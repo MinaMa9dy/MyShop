@@ -403,11 +403,8 @@ export class DashboardComponent implements OnInit {
   }
   
   uploadPhoto(file: File): void {
-    const userId = this.tokenService.getUserId();
-    if (!userId) return;
-    
     this.photoUploading.set(true);
-    this.authService.changeUserPhoto(file, userId).subscribe({
+    this.authService.changeUserPhoto(file).subscribe({
       next: () => {
         // Reload profile to get updated photo
         this.loadProfile();

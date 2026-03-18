@@ -17,7 +17,10 @@ export interface Order {
   buyerEmail: string;
   buyerPhone?: string;
   createdAt: Date;
+  subTotal: number;
+  discountAmount: number;
   totalAmount: number;
+  appliedCouponCode?: string;
   status: string;
   city: CityOption;
   street: string;
@@ -31,6 +34,7 @@ export interface AddOrderDto {
   street: string;
   phoneNumber: string;
   comment?: string;
+  couponCode?: string;
 }
 
 export type CityOption = 

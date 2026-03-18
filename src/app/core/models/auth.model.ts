@@ -13,13 +13,39 @@ export interface RegisterDto {
   confirmPassword: string;
 }
 
+export interface ConfirmEmailDto {
+  userId: string;
+  token: string;
+}
+
+export interface ResendEmailConfirmationDto {
+  email: string;
+  clientURI: string;
+}
+
+export interface ForgotPasswordDto {
+  email: string;
+  clientURI: string;
+}
+
+export interface ResetPasswordDto {
+  userId: string;
+  token: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+export interface GoogleLoginDto {
+  token: string;
+}
+
 export interface TokenModelDto {
-  token?: string;
+  accessToken?: string;
   refreshToken?: string;
 }
 
 export interface AuthenticationResponseDto {
-  token: string;
+  accessToken: string;
   expiresAt: string;
   personName?: string;
   email?: string;
@@ -27,6 +53,8 @@ export interface AuthenticationResponseDto {
   refreshTokenExpiryTime?: string;
   userId?: string;
   roles?: string[];
+  requiresEmailConfirmation?: boolean;
+  message?: string;
 }
 
 export interface User {

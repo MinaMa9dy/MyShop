@@ -107,12 +107,12 @@ import { PhotoService } from '../../../core/services/photo.service';
                         <!-- Product Info -->
                         <div class="flex-1 min-w-0">
                           <h4 class="font-medium text-gray-800 truncate">{{ item.productName }}</h4>
-                          <p class="text-sm text-gray-500">{{ item.unitPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }} × {{ item.quantity }}</p>
+                          <p class="text-sm text-gray-500">{{ item.unitPrice | currency:'EGP':'symbol':'1.2-2':'en-EG' }} × {{ item.quantity }}</p>
                         </div>
                         
                         <!-- Item Total -->
                         <div class="text-right">
-                          <span class="font-bold text-gray-800">{{ getItemTotal(item) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+                          <span class="font-bold text-gray-800">{{ getItemTotal(item) | currency:'EGP':'symbol':'1.2-2':'en-EG' }}</span>
                         </div>
                       </div>
                     }
@@ -141,7 +141,7 @@ import { PhotoService } from '../../../core/services/photo.service';
                       </div>
                       <div class="text-right">
                         <p class="text-sm text-gray-500 mb-1">{{ 'orders.total' | translate }}</p>
-                        <p class="text-2xl font-bold text-blue-600">{{ calculateOrderTotal(order) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
+                        <p class="text-2xl font-bold text-blue-600">{{ calculateOrderTotal(order) | currency:'EGP':'symbol':'1.2-2':'en-EG' }}</p>
                       </div>
                     </div>
                   </div>

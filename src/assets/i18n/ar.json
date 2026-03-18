@@ -8,7 +8,11 @@
     "PLACE_ORDER": "إتمام الطلب",
     "EMPTY": "سلة التسوق فارغة",
     "SUBTOTAL": "المجموع الفرعي",
-    "TOTAL": "الإجمالي"
+    "TOTAL": "الإجمالي",
+    "DISCOUNT": "الخصم",
+    "DISCOUNT_APPLIED": "تم تطبيق الخصم",
+    "COUPON_PLACEHOLDER": "أدخل كود الخصم",
+    "APPLY": "تطبيق"
   },
   "home": {
     "welcome": "مرحباً بكم في متجرنا",
@@ -50,7 +54,14 @@
     "hasAccount": "لديك حساب بالفعل؟",
     "registerLink": "سجل من هنا",
     "loginLink": "سجل الدخول من هنا",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "resendConfirmation": "إعادة إرسال التأكيد",
+    "resendConfirmationDesc": "أدخل بريدك الإلكتروني لتلقي رابط تأكيد جديد",
+    "resendConfirmationSuccess": "تم إرسال رابط تأكيد جديد إلى بريدك الإلكتروني. يرجى التحقق من صندوق الوارد الخاص بك.",
+    "resendConfirmationButton": "إعادة إرسال رابط التأكيد",
+    "resendConfirmationLink": "إعادة إرسال بريد التأكيد؟",
+    "backToLogin": "العودة إلى تسجيل الدخول",
+    "remembered": "هل تذكرت؟"
   },
   "product": {
     "addToCart": "إضافة للسلة",
@@ -209,8 +220,19 @@
       "popularityPlaceholder": "أدخل درجة الشعبية",
       "addProduct": "إضافة المنتج",
       "adding": "جاري إضافة المنتج...",
-      "cancel": "إلغاء"
-    }
+      "cancel": "إلغاء",
+      "photos": "صور المنتج",
+      "uploadPhotos": "رفع صور",
+      "uploadPhotosDesc": "اختر صورة واحدة أو أكثر",
+      "deletePhoto": "حذف الصورة",
+      "keepPhoto": "الحفاظ على الصورة",
+      "deleted": "تم الحذف"
+    },
+    "editProduct": "تعديل المنتج",
+    "deleteProduct": "حذف المنتج",
+    "editProductSubtitle": "تعديل تفاصيل المنتج أدناه",
+    "updateProduct": "تحديث المنتج",
+    "updating": "جاري التحديث..."
   },
   "WISH": {
     "title": "قائمة أمنياتي",

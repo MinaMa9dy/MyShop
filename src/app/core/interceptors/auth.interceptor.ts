@@ -45,10 +45,20 @@ export const authInterceptor: HttpInterceptorFn = (
   const refreshToken = tokenService.getRefreshToken();
   const isAuthenticated = isUserAuthenticated(tokenService);
   
-  // Skip for login, register, and refresh token endpoints
-  const isAuthEndpoint = req.url.includes('/Account/Login') || 
-                          req.url.includes('/Account/Register') ||
-                          req.url.includes('/Account/RefreshToken');
+  // Check if this is an authentication-related endpoint (login, register, refresh, etc.)
+  // These should not have the current token added to them and should not trigger a refresh 401 loop
+  const authEndpoints = [
+    '/account/login',
+    '/account/register',
+    '/account/refresh',
+    '/account/confirmemail',
+    '/account/forgotpassword',
+    '/account/resetpassword',
+    '/account/resendemailconfirmation',
+    '/account/google-login'
+  ];
+  
+  const isAuthEndpoint = authEndpoints.some(path => req.url.toLowerCase().includes(path));
   
   // Check if this is a public endpoint
   const isPublicEndpoint = publicEndpoints.some(endpoint => req.url.includes(endpoint));
@@ -93,12 +103,12 @@ export const authInterceptor: HttpInterceptorFn = (
             
             // Update tokens with new values
             const newRefreshToken = response.refreshToken || refreshToken || '';
-            tokenService.setTokens(response.token, newRefreshToken);
+            tokenService.setTokens(response.accessToken, newRefreshToken);
             
             // Retry original request with new token
             const clonedReq = req.clone({
               setHeaders: {
-                Authorization: `Bearer ${response.token}`
+                Authorization: `Bearer ${response.accessToken}`
               }
             });
             return next(clonedReq);

@@ -1,10 +1,13 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { LanguageService } from '../../../../core/services/language.service';
 import { TranslatePipe } from '@ngx-translate/core';
+import { environment } from '../../../../../environments/environment';
+
+declare var google: any;
 
 @Component({
   selector: 'app-login',
@@ -27,6 +30,13 @@ import { TranslatePipe } from '@ngx-translate/core';
               <div class="flex-1">
                 <p class="font-medium">Error</p>
                 <p class="text-sm">{{ error() }}</p>
+                @if (showResendLink()) {
+                  <div class="mt-2 text-sm">
+                    <a [routerLink]="'/' + currentLang + '/auth/resend-email-confirmation'" class="underline font-semibold hover:text-red-800">
+                      {{ 'auth.resendConfirmationLink' | translate }}
+                    </a>
+                  </div>
+                }
               </div>
               <button type="button" (click)="clearError()" class="text-red-500 hover:text-red-700 ml-2">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -78,6 +88,21 @@ import { TranslatePipe } from '@ngx-translate/core';
             }
           </button>
         </form>
+
+        <div class="mt-6">
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-gray-300"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="px-2 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
+
+          <div class="mt-6 flex justify-center">
+            <div id="google-btn"></div>
+          </div>
+        </div>
         
         <div class="mt-6 text-center">
           <p class="text-gray-500">
@@ -102,7 +127,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     }
   `]
 })
-export class LoginComponent {
+export class LoginComponent implements AfterViewInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -111,6 +136,7 @@ export class LoginComponent {
   
   loading = signal(false);
   error = signal<string | null>(null);
+  showResendLink = signal(false);
   
   // Get current language for routerLink
   get currentLang(): string {
@@ -119,12 +145,48 @@ export class LoginComponent {
   
   clearError(): void {
     this.error.set(null);
+    this.showResendLink.set(false);
   }
   
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]]
   });
+
+  ngAfterViewInit(): void {
+    if (typeof google !== 'undefined') {
+      google.accounts.id.initialize({
+        client_id: environment.googleClientId,
+        callback: (response: any) => this.handleGoogleLogin(response)
+      });
+
+      google.accounts.id.renderButton(
+        document.getElementById('google-btn'),
+        { theme: 'outline', size: 'large', width: '100%' }
+      );
+    }
+  }
+
+  handleGoogleLogin(response: any): void {
+    this.loading.set(true);
+    this.error.set(null);
+
+    this.authService.googleLogin({
+      token: response.credential
+    }).subscribe({
+      next: (res) => {
+        console.log('Google login successful:', res);
+        this.loading.set(false);
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/' + this.currentLang + '/';
+        this.router.navigateByUrl(returnUrl);
+      },
+      error: (err) => {
+        console.error('Google login failed:', err);
+        this.loading.set(false);
+        this.error.set('Google sign-in failed. Please try again.');
+      }
+    });
+  }
   
   onSubmit(): void {
     if (this.loginForm.invalid) return;
@@ -149,21 +211,29 @@ export class LoginComponent {
         // Let the global interceptor handle the toast notification
         // Just show local error for this form
         let errorMessage = 'Login failed. Please try again.';
-        
-        // Try to extract error message for local display
+        // Try to extract exact error message from the backend response
         const errorData = err.error;
         if (errorData) {
-          if (errorData.message) errorMessage = errorData.message;
-          else if (errorData.Message) errorMessage = errorData.Message;
-          else if (Array.isArray(errorData)) errorMessage = errorData[0] || errorMessage;
-          else if (typeof errorData === 'string') errorMessage = errorData;
-        }
-        
-        if (err.status === 401 || err.status === 400) {
-          errorMessage = 'Invalid email or password';
+          // If the backend returns a ResultPattern format, the error will often be in errorData directly if it's a string, or inside an Error object
+          if (typeof errorData === 'string') {
+            errorMessage = errorData;
+          } else if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (errorData.title) {
+            errorMessage = errorData.title; // for standard ProblemDetails
+          } else if (errorData.Message) {
+            errorMessage = errorData.Message;
+          } else if (Array.isArray(errorData)) {
+            errorMessage = errorData[0] || errorMessage;
+          }
+        } else if (err.message) {
+          errorMessage = err.message;
         }
         
         this.error.set(errorMessage);
+        if (errorMessage.toLowerCase().includes('email is not confirmed')) {
+          this.showResendLink.set(true);
+        }
       }
     });
   }

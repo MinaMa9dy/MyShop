@@ -262,4 +262,45 @@ export class ProductListComponent implements OnInit {
       }
     });
   }
+
+  canEditProduct(product: any): boolean {
+    if (!product || !this.authService.isLoggedIn()) return false;
+    
+    const userId = this.tokenService.getUserId();
+    const isOwner = product.supplierId === userId || product.SupplierId === userId;
+    const canManage = this.tokenService.isSeller() || this.tokenService.hasRole('Admin');
+    
+    return isOwner && canManage;
+  }
+
+  editProduct(product: any, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (product.id) {
+      const lang = this.currentLang;
+      this.router.navigate([`/${lang}/admin/products/add`], { queryParams: { id: product.id } });
+    }
+  }
+
+  deleteProduct(product: any, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (!product.id) return;
+
+    if (confirm(`Are you sure you want to delete "${product.name}"?`)) {
+      this.productService.delete(product.id).subscribe({
+        next: () => {
+          // Remove from local list
+          const currentProducts = this.products();
+          this.products.set(currentProducts.filter(p => p.id !== product.id));
+        },
+        error: (err) => {
+          console.error('Error deleting product:', err);
+          alert('Failed to delete product. Please try again.');
+        }
+      });
+    }
+  }
 }

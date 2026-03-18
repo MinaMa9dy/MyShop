@@ -68,7 +68,8 @@ export class App implements OnInit, OnDestroy {
     this.cartService.loadFromStorage();
     
     // If user is logged in, fetch cart from backend
-    if (this.authService.isAuthenticated()) {
+    const userId = this.tokenService.getUserId();
+    if (this.authService.isAuthenticated() && userId) {
       this.fetchUserCart();
       this.loadUserProfile();
     }

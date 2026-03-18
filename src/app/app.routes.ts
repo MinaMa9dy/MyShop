@@ -33,6 +33,21 @@ export const routes: Routes = [
             title: 'MyShop - Profile'
           },
           {
+            path: 'confirm-email',
+            loadComponent: () => import('./features/auth/components/confirm-email/confirm-email').then(m => m.ConfirmEmailComponent),
+            title: 'MyShop - Confirm Email'
+          },
+          {
+            path: 'reset-password',
+            loadComponent: () => import('./features/auth/components/reset-password/reset-password').then(m => m.ResetPasswordComponent),
+            title: 'MyShop - Reset Password'
+          },
+          {
+            path: 'resend-email-confirmation',
+            loadComponent: () => import('./features/auth/components/resend-email-confirmation/resend-email-confirmation.component').then(m => m.ResendEmailConfirmationComponent),
+            title: 'MyShop - Resend Confirmation'
+          },
+          {
             path: '',
             pathMatch: 'full',
             redirectTo: 'login'
@@ -124,6 +139,21 @@ export const routes: Routes = [
             path: 'profile',
             loadComponent: () => import('./features/auth/components/profile/profile.component').then(m => m.ProfileComponent),
             title: 'MyShop - الملف الشخصي'
+          },
+          {
+            path: 'confirm-email',
+            loadComponent: () => import('./features/auth/components/confirm-email/confirm-email').then(m => m.ConfirmEmailComponent),
+            title: 'MyShop - تأكيد البريد الإلكتروني'
+          },
+          {
+            path: 'reset-password',
+            loadComponent: () => import('./features/auth/components/reset-password/reset-password').then(m => m.ResetPasswordComponent),
+            title: 'MyShop - إعادة تعيين كلمة المرور'
+          },
+          {
+            path: 'resend-email-confirmation',
+            loadComponent: () => import('./features/auth/components/resend-email-confirmation/resend-email-confirmation.component').then(m => m.ResendEmailConfirmationComponent),
+            title: 'MyShop - إعادة إرسال التأكيد'
           },
           {
             path: '',
