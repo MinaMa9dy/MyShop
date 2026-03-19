@@ -180,11 +180,10 @@ export class CouponFormComponent implements OnInit {
     this.loading.set(true);
     this.couponService.getById(id).subscribe({
       next: (coupon) => {
-        // Format datetime-local string (YYYY-MM-DDThh:mm)
         let formattedDate = '';
         if (coupon.expirationDate) {
-          const date = new Date(coupon.expirationDate);
-          formattedDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+          // No logic here, backend sends local time formatted for standard datetime-local
+          formattedDate = coupon.expirationDate.toString().slice(0, 16);
         }
 
         this.couponForm.patchValue({
@@ -218,7 +217,7 @@ export class CouponFormComponent implements OnInit {
     const formValue = this.couponForm.value;
     const submissionData = {
       ...formValue,
-      expirationDate: formValue.expirationDate ? new Date(formValue.expirationDate).toISOString() : null
+      expirationDate: formValue.expirationDate || null
     };
 
     if (this.isEditMode() && this.couponCode()) {
