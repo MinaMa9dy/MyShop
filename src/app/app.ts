@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit, OnDestroy, Renderer2, computed } from '@angular/core';
-import { RouterOutlet, RouterLink, Router, Event, NavigationEnd } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, Event, NavigationEnd } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from './core/services/auth.service';
 import { CartService } from './core/services/cart.service';
@@ -14,7 +14,7 @@ import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, TranslateModule, CartComponent, ToastComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslateModule, CartComponent, ToastComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

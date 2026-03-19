@@ -11,113 +11,108 @@ import { Coupon, DiscountType } from '../../../../core/models/coupon.model';
   standalone: true,
   imports: [CommonModule, RouterLink, TranslatePipe],
   template: `
-    <div class="coupons-page py-8 min-h-screen bg-gray-50">
-      <div class="container mx-auto px-4 max-w-7xl">
-        <div class="flex justify-between items-center mb-8">
-          <div>
-            <h1 class="text-3xl font-bold text-gray-800">{{ 'admin.coupons.title' | translate }}</h1>
-            <p class="text-gray-500 mt-2">{{ 'admin.coupons.subtitle' | translate }}</p>
-          </div>
-          <button 
-            [routerLink]="['/' + currentLang + '/admin/coupons/add']"
-            class="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-600/20 transform hover:-translate-y-0.5 active:translate-y-0 text-sm md:text-base">
-            <span class="text-xl leading-none">+</span>
-            <span class="font-bold">{{ 'admin.coupons.addCoupon' | translate }}</span>
-          </button>
+    <main class="min-h-screen bg-surface pb-24" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
+      <!-- Hero Header -->
+      <header class="bg-surface-container-low pt-24 pb-16 border-b border-outline-variant/30 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(circle_at_bottom_left,_var(--primary)_0%,_transparent_70%)]"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10 flex flex-col md:flex-row justify-between items-end gap-8">
+           <div class="text-start">
+              <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-2">{{ 'admin.coupons.title' | translate }}</h1>
+              <p class="font-body text-on-surface-variant opacity-70">{{ 'admin.coupons.subtitle' | translate }}</p>
+           </div>
+           <button [routerLink]="['/' + currentLang + '/admin/coupons/add']"
+                   class="px-10 py-5 bg-primary text-on-primary rounded-[32px] font-headline font-bold shadow-[0_20px_40px_rgba(var(--primary-rgb),0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-3 group">
+              <span class="material-symbols-outlined group-hover:rotate-90 transition-transform">confirmation_number</span>
+              <span>{{ 'admin.coupons.addCoupon' | translate }}</span>
+           </button>
         </div>
+      </header>
 
+      <section class="max-w-7xl mx-auto px-6 py-16">
         @if (error()) {
-          <div class="mb-8 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg flex items-start">
-            <span class="mr-2">⚠️</span>
-            <span>{{ error() }}</span>
+          <div class="mb-12 p-6 bg-error/10 text-error rounded-3xl border border-error/20 flex items-start gap-4 animate-fade-in">
+             <span class="material-symbols-outlined">report</span>
+             <p class="text-xs font-black uppercase tracking-widest">{{ error() }}</p>
           </div>
         }
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-surface-container-lowest rounded-[48px] shadow-2xl border border-outline-variant/10 overflow-hidden animate-slide-up">
           @if (loading()) {
-            <div class="flex justify-center py-12">
-              <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <div class="flex flex-col items-center justify-center py-40 gap-4">
+               <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+               <p class="font-headline font-black text-xs uppercase tracking-widest text-outline">Synchronizing Incentives</p>
             </div>
           } @else if (coupons().length === 0) {
-            <div class="text-center py-16">
-              <div class="text-5xl mb-4">🎫</div>
-              <h3 class="text-xl font-bold text-gray-800 mb-2">{{ 'admin.coupons.noCoupons' | translate }}</h3>
+            <div class="text-center py-40 bg-surface-container-low/30">
+               <div class="w-32 h-32 rounded-[40px] bg-surface-container-high flex items-center justify-center text-outline-variant mx-auto mb-8">
+                  <span class="material-symbols-outlined text-6xl opacity-30">local_activity</span>
+               </div>
+               <h3 class="font-headline text-2xl font-black text-on-surface mb-2">{{ 'admin.coupons.noCoupons' | translate }}</h3>
+               <p class="font-body text-on-surface-variant opacity-60 mb-10">No active incentives discovered in the sequence.</p>
+               <button [routerLink]="['/' + currentLang + '/admin/coupons/add']" class="px-8 py-4 bg-outline text-surface rounded-2xl font-headline font-bold">Generate Protocol</button>
             </div>
           } @else {
             <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
+              <table class="w-full text-start border-collapse">
                 <thead>
-                  <tr class="bg-gray-50 text-gray-600 text-sm uppercase tracking-wider">
-                    <th class="p-4 font-semibold">{{ 'admin.coupons.name' | translate }}</th>
-                    <th class="p-4 font-semibold">{{ 'admin.coupons.discountValue' | translate }}</th>
-                    <th class="p-4 font-semibold">{{ 'admin.coupons.minAmount' | translate }}</th>
-                    <th class="p-4 font-semibold">{{ 'admin.coupons.expirationDate' | translate }}</th>
-                    <th class="p-4 font-semibold">{{ 'admin.coupons.isActive' | translate }}</th>
-                    <th class="p-4 font-semibold text-right">Actions</th>
+                  <tr class="bg-surface-container text-[10px] font-black uppercase tracking-[0.2em] text-outline border-b border-outline-variant/10">
+                    <th class="p-8 font-black">{{ 'admin.coupons.name' | translate }}</th>
+                    <th class="p-8 font-black">{{ 'admin.coupons.discountValue' | translate }}</th>
+                    <th class="p-8 font-black">{{ 'admin.coupons.minAmount' | translate }}</th>
+                    <th class="p-8 font-black">{{ 'admin.coupons.expirationDate' | translate }}</th>
+                    <th class="p-8 font-black">{{ 'admin.coupons.isActive' | translate }}</th>
+                    <th class="p-8 font-black text-end">Actions</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-outline-variant/10">
                   @for (coupon of coupons(); track coupon.couponCode) {
-                    <tr class="hover:bg-gray-50/50 transition-colors group">
-                      <td class="p-4">
-                        <div class="font-medium text-gray-800">{{ coupon.couponName }}</div>
-                        <div class="text-xs text-gray-500">{{ coupon.couponDescription }}</div>
+                    <tr class="hover:bg-primary/[0.02] transition-colors group">
+                      <td class="p-8">
+                        <div class="font-headline font-black text-on-surface">{{ coupon.couponName }}</div>
+                        <div class="text-[10px] font-black uppercase tracking-widest text-outline opacity-60 pt-1">{{ coupon.couponDescription }}</div>
                       </td>
-                      <td class="p-4 whitespace-nowrap">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                      <td class="p-8">
+                        <span class="px-5 py-2 rounded-full font-headline font-black text-[10px] uppercase tracking-widest"
                               [ngClass]="getDiscountTypeClass(coupon.discountType)">
                           {{ formatDiscount(coupon) }}
                         </span>
                       </td>
-                      <td class="p-4 whitespace-nowrap text-gray-600">
-                        {{ coupon.minAmount | currency:'EGP ' }}
+                      <td class="p-8">
+                        <div class="font-headline font-black text-sm text-on-surface">{{ coupon.minAmount | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</div>
                       </td>
-                      <td class="p-4 whitespace-nowrap text-gray-600">
-                        {{ coupon.expirationDate ? (coupon.expirationDate | date) : '∞' }}
+                      <td class="p-8">
+                        <div class="text-[10px] font-black uppercase tracking-widest text-outline-variant">
+                           {{ coupon.expirationDate ? (coupon.expirationDate | date:'dd MMM yyyy') : 'PERMANENT' }}
+                        </div>
                       </td>
-                      <td class="p-4 whitespace-nowrap">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                              [class.bg-green-100]="coupon.isActive" 
-                              [class.text-green-800]="coupon.isActive"
-                              [class.bg-gray-100]="!coupon.isActive" 
-                              [class.text-gray-800]="!coupon.isActive">
-                          {{ coupon.isActive ? 'Active' : 'Inactive' }}
-                        </span>
+                      <td class="p-8">
+                        <div class="flex items-center gap-2">
+                           <div class="w-2 h-2 rounded-full" [class]="coupon.isActive ? 'bg-success animate-pulse' : 'bg-outline-variant'"></div>
+                           <span class="text-[10px] font-black uppercase tracking-widest" [class]="coupon.isActive ? 'text-success' : 'text-outline-variant'">
+                             {{ coupon.isActive ? 'OPERATIONAL' : 'DORMANT' }}
+                           </span>
+                        </div>
                       </td>
-                      <td class="p-4 whitespace-nowrap text-right">
-                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <!-- Assign Products Button -->
-                          <button 
-                            [routerLink]="['/' + currentLang + '/admin/coupons/assign', coupon.couponCode]"
-                            class="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                            title="{{ 'admin.coupons.assignProducts' | translate }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                            </svg>
-                          </button>
-                          <!-- Edit Button -->
-                          <button 
-                            [routerLink]="['/' + currentLang + '/admin/coupons/edit', coupon.couponCode]"
-                            class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="{{ 'admin.coupons.editCoupon' | translate }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>
-                          <!-- Delete Button -->
-                          <button 
-                            (click)="deleteCoupon(coupon.couponCode)"
-                            [disabled]="deletingId() === coupon.couponCode"
-                            class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                            title="Delete">
-                            @if (deletingId() === coupon.couponCode) {
-                              <div class="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-                            } @else {
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            }
-                          </button>
+                      <td class="p-8">
+                        <div class="flex items-center justify-end gap-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                           <button [routerLink]="['/' + currentLang + '/admin/coupons/assign', coupon.couponCode]"
+                                   class="w-12 h-12 rounded-2xl bg-tertiary/10 text-tertiary hover:bg-tertiary hover:text-on-tertiary transition-all flex items-center justify-center shadow-sm"
+                                   title="{{ 'admin.coupons.assignProducts' | translate }}">
+                             <span class="material-symbols-outlined">link</span>
+                           </button>
+                           <button [routerLink]="['/' + currentLang + '/admin/coupons/edit', coupon.couponCode]"
+                                   class="w-12 h-12 rounded-2xl bg-primary/10 text-primary hover:bg-primary hover:text-on-primary transition-all flex items-center justify-center shadow-sm"
+                                   title="{{ 'admin.coupons.editCoupon' | translate }}">
+                             <span class="material-symbols-outlined">edit</span>
+                           </button>
+                           <button (click)="deleteCoupon(coupon.couponCode)" [disabled]="deletingId() === coupon.couponCode"
+                                   class="w-12 h-12 rounded-2xl bg-error/10 text-error hover:bg-error hover:text-on-error transition-all flex items-center justify-center shadow-sm disabled:opacity-50">
+                             @if (deletingId() === coupon.couponCode) {
+                               <span class="w-4 h-4 border-2 border-error/30 border-t-error rounded-full animate-spin"></span>
+                             } @else {
+                               <span class="material-symbols-outlined">delete</span>
+                             }
+                           </button>
                         </div>
                       </td>
                     </tr>
@@ -127,9 +122,10 @@ import { Coupon, DiscountType } from '../../../../core/models/coupon.model';
             </div>
           }
         </div>
-      </div>
-    </div>
-  `
+      </section>
+    </main>
+  `,
+  styles: []
 })
 export class CouponListComponent implements OnInit {
   private couponService = inject(CouponService);
@@ -140,56 +136,34 @@ export class CouponListComponent implements OnInit {
   error = signal<string | null>(null);
   deletingId = signal<string | null>(null);
 
-  get currentLang(): string {
-    return this.languageService.currentLanguage();
-  }
-
-  ngOnInit() {
-    this.loadCoupons();
-  }
+  get currentLang(): string { return this.languageService.currentLanguage(); }
+  ngOnInit() { this.loadCoupons(); }
 
   loadCoupons() {
-    this.loading.set(true);
-    this.error.set(null);
+    this.loading.set(true); this.error.set(null);
     this.couponService.getAll().subscribe({
-      next: (data) => {
-        this.coupons.set(data);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error('Error loading coupons', err);
-        this.error.set(err.error?.message || 'Failed to load coupons');
-        this.loading.set(false);
-      }
+      next: (data) => { this.coupons.set(data); this.loading.set(false); },
+      error: (err) => { this.error.set(err.error?.message || 'Failed to sync coupons.'); this.loading.set(false); }
     });
   }
 
   formatDiscount(coupon: Coupon): string {
-    if (coupon.discountType === DiscountType.Percentage) {
-      return `${coupon.discountValue}%`;
-    }
-    return `EGP ${coupon.discountValue}`;
+    return coupon.discountType === DiscountType.Percentage ? `${coupon.discountValue}% Reduction` : `${coupon.discountValue} EGP Fixed`;
   }
 
   getDiscountTypeClass(type: DiscountType): string {
-    return type === DiscountType.Percentage 
-      ? 'bg-blue-100 text-blue-800' 
-      : 'bg-indigo-100 text-indigo-800';
+    return type === DiscountType.Percentage ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-tertiary/10 text-tertiary border border-tertiary/20';
   }
 
   deleteCoupon(id: string) {
-    if (confirm('Are you sure you want to delete this coupon?')) {
+    if (confirm('Decommission this protocol?')) {
       this.deletingId.set(id);
       this.couponService.delete(id).subscribe({
         next: () => {
           this.coupons.update(list => list.filter(c => c.couponCode !== id));
           this.deletingId.set(null);
         },
-        error: (err) => {
-          console.error('Error deleting coupon', err);
-          this.error.set(err.error?.message || 'Failed to delete coupon');
-          this.deletingId.set(null);
-        }
+        error: (err) => { this.error.set(err.error?.message || 'Decommission failure.'); this.deletingId.set(null); }
       });
     }
   }

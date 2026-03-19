@@ -91,6 +91,7 @@ export interface ProductFilter {
   minPrice?: number;
   maxPrice?: number;
   isOnSale?: boolean;
+  isFasting?: boolean;
   searchTerm?: string;
   page?: number;
   pageSize?: number;

@@ -1,233 +1,193 @@
-<div class="app-container min-h-screen bg-gray-50" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
+<div class="app-container min-h-screen bg-surface" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
   <!-- Global Toast Notifications -->
   <app-toast></app-toast>
   
-  <!-- Header -->
-  <header class="header bg-white shadow-sm sticky top-0 z-50">
-    <nav class="container mx-auto px-4 py-3">
-      <div class="flex items-center justify-between">
-        <!-- Logo -->
-        <a [routerLink]="'/' + currentLanguage() + '/'" class="logo flex-shrink-0">
-          <img src="assets/logo.png" alt="MyShop Logo" class="h-8 sm:h-10 w-auto">
+  <!-- Premium Navigation Shell -->
+  <nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-xl border-b border-outline-variant/10 shadow-2xl shadow-black/[0.02]">
+    <div class="flex justify-between items-center px-6 py-4 w-full max-w-7xl mx-auto rtl:flex-row-reverse">
+      <!-- Brand Logo -->
+      <a [routerLink]="'/' + currentLanguage() + '/'" class="text-2xl font-black tracking-tighter text-primary dark:text-inverse-primary font-headline">
+        MyShop
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <div class="hidden md:flex items-center space-x-8 rtl:space-x-reverse font-headline font-medium text-sm tracking-tight">
+        <a [routerLink]="'/' + currentLanguage() + '/categories'" 
+           routerLinkActive="active" 
+           [routerLinkActiveOptions]="{exact: true}"
+           class="text-on-surface-variant hover:text-primary transition-all duration-300 py-1 font-medium nav-link-underline">
+          {{ 'nav.categories' | translate }}
         </a>
-        
-        <!-- Desktop Navigation Links -->
-        <div class="nav-links hidden lg:flex items-center gap-4">
-        </div>
-        
-        <!-- Desktop Right Actions -->
-        <div class="hidden md:flex items-center gap-2 sm:gap-3">
-          <!-- Language Switcher -->
-          <button 
-            (click)="toggleLanguage()"
-            class="language-btn flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors text-xs sm:text-sm">
-            <span class="text-sm sm:text-base">{{ currentLanguage() === 'en' ? '🌍' : '🌐' }}</span>
-            <span class="font-medium hidden sm:inline">{{ currentLanguage() === 'en' ? 'عربي' : 'EN' }}</span>
-          </button>
-          
-          <!-- Cart Button (opens sidebar) -->
-          <button 
-            (click)="toggleCart()"
-            class="cart-btn relative p-1.5 sm:p-2 text-gray-600 hover:text-blue-600">
-            <span class="text-lg sm:text-xl">🛒</span>
-            @if (cartItemCount() > 0) {
-              <span class="cart-badge absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-red-500 text-white text-xs w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center">
-                {{ cartItemCount() }}
-              </span>
-            }
-          </button>
-          
-          <!-- Wishlist Button -->
-          <a 
-            [routerLink]="'/' + currentLanguage() + '/wishes'"
-            class="cart-btn relative p-1.5 sm:p-2 text-gray-600 hover:text-red-500">
-            <span class="text-lg sm:text-xl">❤️</span>
-          </a>
-          
-          @if (isLoggedIn()) {
-            <a [routerLink]="'/' + currentLanguage() + '/orders'" class="btn btn-secondary text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-3 flex items-center gap-1">
-              <span>📋</span>
-              <span class="hidden sm:inline">{{ 'orders.title' | translate }}</span>
-            </a>
-            <!-- Profile Link with Avatar -->
-            <a [routerLink]="'/' + currentLanguage() + '/dashboard'" class="flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg hover:bg-indigo-50 transition-colors">
-              <div class="w-8 h-8 sm:w-9 sm:h-9 bg-indigo-100 rounded-full flex items-center justify-center overflow-hidden">
-                @if (getUserPhotoUrl()) {
-                  <img [src]="getUserPhotoUrl()" alt="Profile" class="w-full h-full object-cover">
-                } @else {
-                  <span class="text-sm sm:text-base font-bold text-indigo-600">{{ userInitials() }}</span>
-                }
-              </div>
-              <span class="hidden lg:inline text-indigo-600 font-medium">{{ 'dashboard.profile' | translate }}</span>
-            </a>
-            <button (click)="logout()" class="btn btn-danger text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-3">
-              {{ 'auth.logout' | translate }}
-            </button>
-          } @else {
-            <a [routerLink]="'/' + currentLanguage() + '/auth/login'" class="btn btn-secondary text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-3">
-              {{ 'auth.login' | translate }}
-            </a>
-            <a [routerLink]="'/' + currentLanguage() + '/auth/register'" class="btn btn-primary text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-3">
-              {{ 'auth.register' | translate }}
-            </a>
-          }
-        </div>
-        
-        <!-- Mobile Menu Button -->
-        <button 
-          (click)="toggleMobileMenu()"
-          class="md:hidden p-2 text-gray-600 hover:text-blue-600 focus:outline-none">
-          @if (mobileMenuOpen()) {
-            <span class="text-2xl">✕</span>
-          } @else {
-            <span class="text-2xl">☰</span>
+        <a [routerLink]="'/' + currentLanguage() + '/products'" 
+           routerLinkActive="active"
+           class="text-on-surface-variant hover:text-primary transition-all duration-300 py-1 font-medium nav-link-underline">
+          {{ 'nav.products' | translate }}
+        </a>
+        <a href="#" class="text-on-surface-variant hover:text-primary transition-all duration-300 py-1 font-medium nav-link-underline">
+          {{ 'nav.deals' | translate }}
+        </a>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center space-x-2 md:space-x-4 rtl:space-x-reverse">
+        <!-- Language Switcher -->
+        <button (click)="toggleLanguage()" 
+                class="p-2 rounded-full hover:bg-primary/5 transition-all duration-300 scale-105 active:scale-95 text-primary">
+          <span class="material-symbols-outlined font-black">language</span>
+        </button>
+
+        <!-- Cart Tray -->
+        <button (click)="toggleCart()" 
+                class="p-2 rounded-full hover:bg-surface-container-low transition-all duration-300 scale-105 active:scale-95 text-primary relative">
+          <span class="material-symbols-outlined font-black">shopping_cart</span>
+          @if (cartItemCount() > 0) {
+            <span class="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
           }
         </button>
+
+        <!-- Profile/Account -->
+        <button [routerLink]="isLoggedIn() ? '/' + currentLanguage() + '/dashboard' : '/' + currentLanguage() + '/auth/login'"
+                class="p-2 rounded-full hover:bg-primary/5 transition-all duration-300 scale-105 active:scale-95 text-primary">
+          @if (isLoggedIn() && getUserPhotoUrl()) {
+            <div class="w-7 h-7 rounded-full overflow-hidden border-2 border-primary/20 p-0.5">
+              <img [src]="getUserPhotoUrl()" alt="Profile" class="w-full h-full object-cover rounded-full">
+            </div>
+          } @else {
+            <span class="material-symbols-outlined font-black">account_circle</span>
+          }
+        </button>
+
+        <!-- Mobile Toggle -->
+        <button (click)="toggleMobileMenu()" class="md:hidden p-2 text-primary rounded-full hover:bg-surface-container-high">
+          <span class="material-symbols-outlined">{{ mobileMenuOpen() ? 'close' : 'menu' }}</span>
+        </button>
       </div>
-    </nav>
-  </header>
-  
+    </div>
+  </nav>
+
   <!-- Mobile Menu Overlay -->
   @if (mobileMenuOpen()) {
-    <div 
-      class="fixed inset-0 bg-black/50 z-40 md:hidden"
-      (click)="closeMobileMenu()">
-    </div>
-  }
-  
-  <!-- Mobile Side Menu -->
-  @if (mobileMenuOpen()) {
-    <div 
-      class="fixed top-0 h-full w-80 max-w-[85vw] bg-white shadow-xl z-50 md:hidden overflow-y-auto"
-      [class.right-0]="currentLanguage() === 'en'"
-      [class.left-0]="currentLanguage() === 'ar'"
-      [style.direction]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
-       
-      <!-- Mobile Menu Content -->
-      <div class="flex flex-col h-full">
-        <!-- Menu Header with Logo -->
-        <div class="flex items-center justify-between p-4 border-b border-gray-100 bg-white">
-          <div class="flex items-center gap-3">
-            <img src="assets/logo.png" alt="MyShop Logo" class="h-10 w-auto">
-            <span class="font-bold text-xl text-gray-800">MyShop</span>
-          </div>
-        </div>
+    <div class="fixed inset-0 bg-inverse-surface/40 backdrop-blur-sm z-40 md:hidden" (click)="closeMobileMenu()">
+      <div class="fixed top-0 h-full w-80 max-w-[85vw] bg-surface-container-lowest shadow-2xl z-50 transition-transform duration-300"
+           [class.right-0]="currentLanguage() === 'en'"
+           [class.left-0]="currentLanguage() === 'ar'"
+           (click)="$event.stopPropagation()">
         
-        <!-- Navigation Links -->
-        <div class="flex-1 p-4">
-          <div class="flex flex-col gap-2">
+        <div class="flex flex-col h-full">
+          <div class="flex items-center justify-between p-6 border-b border-outline-variant">
+            <span class="text-xl font-black text-primary font-headline">MyShop</span>
+            <button (click)="closeMobileMenu()" class="text-on-surface-variant">
+              <span class="material-symbols-outlined">close</span>
+            </button>
           </div>
-        </div>
-        
-        <!-- Bottom Actions -->
-        <div class="p-4 border-t border-gray-100 bg-white">
-          <div class="flex flex-col gap-3">
-            <!-- Language Switcher -->
-            <button 
-              (click)="toggleLanguage(); closeMobileMenu()"
-              class="flex items-center gap-3 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors w-full">
-              <span class="text-xl w-8 text-center">{{ currentLanguage() === 'en' ? '🌍' : '🌐' }}</span>
-              <span class="font-medium">{{ currentLanguage() === 'en' ? 'العربية' : 'English' }}</span>
-            </button>
-            
-            <!-- Cart Button -->
-            <button 
-              (click)="toggleCart(); closeMobileMenu()"
-              class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full">
-              <span class="text-xl w-8 text-center">🛒</span>
-              <span class="font-medium">{{ 'cart.cart' | translate }}</span>
-              @if (cartItemCount() > 0) {
-                <span class="bg-red-500 text-white text-sm px-2.5 py-0.5 rounded-full ml-auto font-medium">{{ cartItemCount() }}</span>
-              }
-            </button>
-            
-            <!-- Wishlist Button -->
-            <a 
-              [routerLink]="'/' + currentLanguage() + '/wishes'" 
-              (click)="closeMobileMenu()"
-              class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full">
-              <span class="text-xl w-8 text-center">❤️</span>
-              <span class="font-medium">{{ 'dashboard.wishlist' | translate }}</span>
+
+          <div class="flex-1 p-6 space-y-4 font-headline">
+            <a [routerLink]="'/' + currentLanguage() + '/'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-on-surface hover:text-primary py-2 font-bold animate-fade-in-up" style="animation-delay: 100ms">
+              <span class="material-symbols-outlined">home</span> {{ 'nav.home' | translate }}
             </a>
-            
+            <a [routerLink]="'/' + currentLanguage() + '/categories'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-on-surface hover:text-primary py-2 font-bold animate-fade-in-up" style="animation-delay: 150ms">
+              <span class="material-symbols-outlined">grid_view</span> {{ 'nav.categories' | translate }}
+            </a>
+            <a [routerLink]="'/' + currentLanguage() + '/products'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-on-surface hover:text-primary py-2 font-bold animate-fade-in-up" style="animation-delay: 200ms">
+              <span class="material-symbols-outlined">inventory_2</span> {{ 'nav.products' | translate }}
+            </a>
+            <a [routerLink]="'/' + currentLanguage() + '/wishes'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-on-surface hover:text-primary py-2 font-bold animate-fade-in-up" style="animation-delay: 250ms">
+              <span class="material-symbols-outlined">favorite</span> {{ 'dashboard.wishlist' | translate }}
+            </a>
+            <hr class="border-outline-variant animate-fade-in-up" style="animation-delay: 300ms">
             @if (isLoggedIn()) {
-              <a [routerLink]="'/' + currentLanguage() + '/orders'" (click)="closeMobileMenu()" class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full">
-                <span class="text-xl w-8 text-center">📋</span>
-                <span class="font-medium">{{ 'orders.title' | translate }}</span>
+              <a [routerLink]="'/' + currentLanguage() + '/orders'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-on-surface hover:text-primary py-2 font-bold animate-fade-in-up" style="animation-delay: 350ms">
+                <span class="material-symbols-outlined">receipt_long</span> {{ 'orders.title' | translate }}
               </a>
-              <!-- Profile Link with Avatar -->
-              <a [routerLink]="'/' + currentLanguage() + '/dashboard'" (click)="closeMobileMenu()" class="flex items-center gap-3 px-4 py-3 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors w-full">
-                <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center overflow-hidden">
-                  @if (getUserPhotoUrl()) {
-                    <img [src]="getUserPhotoUrl()" alt="Profile" class="w-full h-full object-cover">
-                  } @else {
-                    <span class="text-sm font-bold text-indigo-600">{{ userInitials() }}</span>
-                  }
-                </div>
-                <span class="font-medium">{{ 'dashboard.profile' | translate }}</span>
-              </a>
-              <button (click)="logout()" class="btn btn-danger w-full py-3">
-                {{ 'auth.logout' | translate }}
+              <button (click)="logout(); closeMobileMenu()" class="flex items-center gap-4 text-error py-2 font-bold w-full text-left animate-fade-in-up" style="animation-delay: 400ms">
+                <span class="material-symbols-outlined">logout</span> {{ 'auth.logout' | translate }}
               </button>
             } @else {
-              <a [routerLink]="'/' + currentLanguage() + '/auth/login'" (click)="closeMobileMenu()" class="btn btn-secondary w-full text-center py-3">
-                {{ 'auth.login' | translate }}
-              </a>
-              <a [routerLink]="'/' + currentLanguage() + '/auth/register'" (click)="closeMobileMenu()" class="btn btn-primary w-full text-center py-3">
-                {{ 'auth.register' | translate }}
+              <a [routerLink]="'/' + currentLanguage() + '/auth/login'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-primary py-2 font-bold animate-fade-in-up" style="animation-delay: 350ms">
+                <span class="material-symbols-outlined">login</span> {{ 'auth.login' | translate }}
               </a>
             }
           </div>
+
+          <div class="p-6 bg-surface-container-low">
+            <button (click)="toggleLanguage(); closeMobileMenu()" class="flex items-center justify-center gap-3 w-full py-3 bg-surface-container-lowest border border-outline-variant rounded-xl font-bold text-sm">
+              <span class="material-symbols-outlined text-lg">language</span>
+              {{ currentLanguage() === 'en' ? 'العربية' : 'English' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
   }
-  
-  <!-- Cart Sidebar -->
+
+  <!-- Cart Component Shell -->
   <app-cart></app-cart>
   
-  <!-- Main Content -->
-  <main class="main-content">
+  <!-- Main Execution Context -->
+  <main class="pt-16 min-h-[calc(100vh-400px)]">
     <router-outlet></router-outlet>
   </main>
   
-  <!-- Main Footer -->
-  <footer class="footer bg-gray-800 text-white py-6 sm:py-8">
-    <div class="container mx-auto px-4">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-        <div>
-          <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">MyShop</h3>
-          <p class="text-gray-400 text-xs sm:text-sm">
-            {{ 'footer.shopDescription' | translate }}
-          </p>
-        </div>
-        <div>
-          <h4 class="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">{{ 'footer.quickLinks' | translate }}</h4>
-          <ul class="space-y-1 sm:space-y-2 text-gray-400 text-xs sm:text-sm">
-            <li><a [routerLink]="'/' + currentLanguage() + '/products'" class="hover:text-white">{{ 'nav.products' | translate }}</a></li>
-            <li><a [routerLink]="'/' + currentLanguage() + '/categories'" class="hover:text-white">{{ 'nav.categories' | translate }}</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4 class="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">{{ 'footer.account' | translate }}</h4>
-          <ul class="space-y-1 sm:space-y-2 text-gray-400 text-xs sm:text-sm">
-            <li><a [routerLink]="'/' + currentLanguage() + '/auth/login'" class="hover:text-white">{{ 'auth.login' | translate }}</a></li>
-            <li><a [routerLink]="'/' + currentLanguage() + '/auth/register'" class="hover:text-white">{{ 'auth.register' | translate }}</a></li>
-            <li><a [routerLink]="'/' + currentLanguage() + '/dashboard'" class="hover:text-white">{{ 'footer.dashboard' | translate }}</a></li>
-            <li><a [routerLink]="'/' + currentLanguage() + '/orders'" class="hover:text-white">{{ 'orders.title' | translate }}</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4 class="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">{{ 'footer.contact' | translate }}</h4>
-          <p class="text-gray-400 text-xs sm:text-sm">
-            {{ 'footer.email' | translate }}<br>
-            {{ 'footer.phone' | translate }}
-          </p>
+  <!-- Premium 4-Column Footer -->
+  <footer class="w-full py-16 px-6 border-t border-outline-variant bg-surface-container-low transition-colors duration-300 mt-20">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-12 max-w-7xl mx-auto rtl:text-right">
+      <!-- Brand & Vision -->
+      <div class="space-y-4">
+        <div class="text-primary font-black text-2xl font-headline tracking-tighter">MyShop</div>
+        <p class="text-on-surface-variant font-body text-xs uppercase tracking-widest leading-loose">
+          {{ 'footer.shopDescription' | translate }}
+        </p>
+        <div class="flex gap-4 pt-4">
+          <span class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform">brand_awareness</span>
+          <span class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform">public</span>
         </div>
       </div>
-      <div class="border-t border-gray-700 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400 text-xs sm:text-sm">
-        © 2026 MyShop. {{ 'footer.allRightsReserved' | translate }}
+
+      <!-- Discovery Paths -->
+      <div class="space-y-6">
+        <h4 class="font-headline font-bold text-sm uppercase tracking-tight">{{ 'footer.quickLinks' | translate }}</h4>
+        <ul class="flex flex-col gap-3 font-label text-xs uppercase tracking-widest">
+          <li><a [routerLink]="'/' + currentLanguage() + '/products'" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'nav.products' | translate }}</a></li>
+          <li><a [routerLink]="'/' + currentLanguage() + '/categories'" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'nav.categories' | translate }}</a></li>
+          <li><a href="#" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'nav.deals' | translate }}</a></li>
+        </ul>
+      </div>
+
+      <!-- Legal & Privacy -->
+      <div class="space-y-6">
+        <h4 class="font-headline font-bold text-sm uppercase tracking-tight">Legal</h4>
+        <ul class="flex flex-col gap-3 font-label text-xs uppercase tracking-widest">
+          <li><a href="#" class="text-on-surface-variant hover:text-primary transition-colors">Privacy Policy</a></li>
+          <li><a href="#" class="text-on-surface-variant hover:text-primary transition-colors">Terms of Service</a></li>
+          <li><a href="#" class="text-on-surface-variant hover:text-primary transition-colors">Help Center</a></li>
+        </ul>
+      </div>
+
+      <!-- Audience Engagement -->
+      <div class="space-y-6">
+        <h4 class="font-headline font-bold text-sm uppercase tracking-tight">Newsletter</h4>
+        <div class="relative group">
+          <input type="email" 
+                 placeholder="Email address" 
+                 class="w-full bg-surface-container-lowest border-none rounded-xl px-4 py-4 text-sm focus:ring-2 focus:ring-primary/40 outline-none transition-all shadow-sm">
+          <button class="absolute inset-y-1 right-1 px-4 bg-primary text-on-primary rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center">
+            <span class="material-symbols-outlined text-sm">send</span>
+          </button>
+        </div>
+        <p class="text-[10px] text-on-surface-variant uppercase tracking-tighter opacity-70">Subscribe for early access to curated drops.</p>
+      </div>
+    </div>
+
+    <!-- Final Footnote -->
+    <div class="max-w-7xl mx-auto mt-16 pt-8 border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-6">
+      <p class="font-label text-xs uppercase tracking-widest text-on-surface-variant">
+        © 2026 MyShop Precision. {{ 'footer.allRightsReserved' | translate }}
+      </p>
+      <div class="flex gap-6 grayscale opacity-60">
+        <span class="material-symbols-outlined text-xl">credit_card</span>
+        <span class="material-symbols-outlined text-xl">account_balance_wallet</span>
       </div>
     </div>
   </footer>
 </div>
+

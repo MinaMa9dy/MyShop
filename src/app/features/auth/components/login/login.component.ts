@@ -1,4 +1,4 @@
-import { Component, inject, signal, AfterViewInit } from '@angular/core';
+import { Component, inject, signal, AfterViewInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
@@ -14,123 +14,133 @@ declare var google: any;
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslatePipe],
   template: `
-    <div class="auth-page min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4">
-      <div class="auth-card card max-w-md w-full">
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ 'auth.login' | translate }}</h1>
-          <p class="text-gray-500">{{ 'auth.login' | translate }}</p>
+    <div class="min-h-screen bg-surface flex flex-col md:flex-row overflow-hidden" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
+      <!-- Left Branding Side -->
+      <div class="hidden md:flex md:w-1/2 bg-gradient-to-br from-primary to-primary-dim relative items-center justify-center p-12 overflow-hidden">
+        <!-- Abstract Topo Background -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none" 
+             style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCrToAN7K9bxCYHNmah4SPbCguXNVlpK-DeQWeEBnHb8hhrK_YwTkoUXoEOh-RgjYVbFZj2ZzFPFjqLgEqS81zBG3mBRaFpNCTpPthaRKkjbY6cN5ywiH6wrgPH-fov4huJ80NbYSMgUyawNMMrAIHqttsqobdz8M4Yk_ERm3md8eXwLlW4PLs3aIXrOye6hD6Mc0OtdU9LpkjMLI7eeChndSjrvjUUdPvpHGIlYDvLm3UBFRbdvqH0krtaLiZxlv72URSOjaoPfUbP'); background-size: cover; background-position: center;">
         </div>
         
-        @if (error()) {
-          <div class="error-alert bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 relative">
-            <div class="flex items-start">
-              <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-              </svg>
-              <div class="flex-1">
-                <p class="font-medium">Error</p>
-                <p class="text-sm">{{ error() }}</p>
-                @if (showResendLink()) {
-                  <div class="mt-2 text-sm">
-                    <a [routerLink]="'/' + currentLang + '/auth/resend-email-confirmation'" class="underline font-semibold hover:text-red-800">
+        <div class="relative z-10 text-on-primary animate-fade-in text-center">
+            <h1 class="font-headline text-6xl font-black tracking-tighter mb-4">MyShop</h1>
+            <p class="font-body text-xl opacity-80 max-w-sm mx-auto leading-relaxed">
+              Curating architectural precision for the modern lifestyle.
+            </p>
+            <div class="mt-12 flex justify-center">
+              <span class="material-symbols-outlined text-8xl opacity-20 animate-float">shopping_bag</span>
+            </div>
+        </div>
+        
+        <!-- Bottom Attribution -->
+        <div class="absolute bottom-10 left-10 text-[10px] text-on-primary/60 uppercase tracking-widest font-black">
+          © 2026 PRECISION SERIES
+        </div>
+      </div>
+
+      <!-- Right Form Side -->
+      <div class="w-full md:w-1/2 flex items-center justify-center p-8 md:p-16 bg-surface-container-lowest">
+        <div class="w-full max-w-md animate-slide-up">
+          <div class="text-start mb-10">
+            <h2 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">
+              {{ 'auth.welcomeBack' | translate }}
+            </h2>
+            <p class="text-on-surface-variant font-body">Sign in to your curated collection</p>
+          </div>
+
+          @if (error()) {
+            <div class="bg-error/10 border border-error/20 text-error px-6 py-4 rounded-2xl mb-8 flex items-center justify-between group transition-all">
+              <div class="flex items-center gap-3 text-start">
+                <span class="material-symbols-outlined text-xl">error</span>
+                <div class="flex flex-col">
+                  <p class="text-sm font-bold">{{ error() }}</p>
+                  @if (showResendLink()) {
+                    <a [routerLink]="'/' + currentLang + '/auth/resend-email-confirmation'" class="text-xs underline font-black hover:opacity-80 transition-opacity">
                       {{ 'auth.resendConfirmationLink' | translate }}
                     </a>
-                  </div>
-                }
+                  }
+                </div>
               </div>
-              <button type="button" (click)="clearError()" class="text-red-500 hover:text-red-700 ml-2">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                </svg>
+              <button (click)="clearError()" class="hover:rotate-90 transition-transform duration-300">
+                <span class="material-symbols-outlined text-lg">close</span>
               </button>
             </div>
-          </div>
-        }
-        
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-          <div class="form-group">
-            <label for="email">{{ 'auth.email' | translate }}</label>
-            <input 
-              type="email" 
-              id="email" 
-              formControlName="email"
-              class="input"
-              [class.input-error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
-              [placeholder]="'auth.email' | translate">
-            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
-              <p class="error">{{ 'auth.email' | translate }}</p>
-            }
-          </div>
-          
-          <div class="form-group">
-            <div class="flex justify-between items-center mb-1">
-              <label for="password" class="mb-0">{{ 'auth.password' | translate }}</label>
-              <a [routerLink]="'/' + currentLang + '/auth/forgot-password'" class="text-sm text-blue-600 hover:text-blue-500 font-medium">
+          }
+
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+            <div class="form-input-container">
+               <input type="email" 
+                      id="email" 
+                      formControlName="email" 
+                      placeholder=" "
+                      class="w-full bg-surface-container-low border-b-2 border-outline-variant focus:border-primary px-4 py-4 rounded-t-xl outline-none transition-all font-body text-on-surface">
+               <label for="email">
+                 <span class="material-symbols-outlined text-lg">mail</span>
+                 {{ 'auth.email' | translate }}
+               </label>
+               @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+                 <p class="text-[10px] text-error font-bold uppercase tracking-widest mt-2 ml-4 text-start">Invalid email focus</p>
+               }
+            </div>
+
+            <div class="form-input-container">
+               <input type="password" 
+                      id="password" 
+                      formControlName="password" 
+                      placeholder=" "
+                      class="w-full bg-surface-container-low border-b-2 border-outline-variant focus:border-primary px-4 py-4 rounded-t-xl outline-none transition-all font-body text-on-surface">
+               <label for="password">
+                 <span class="material-symbols-outlined text-lg">lock</span>
+                 {{ 'auth.password' | translate }}
+               </label>
+            </div>
+
+            <div class="flex justify-end text-end">
+              <a [routerLink]="'/' + currentLang + '/auth/forgot-password'" 
+                 class="text-xs font-black text-primary uppercase tracking-widest hover:opacity-80 transition-opacity">
                 {{ 'auth.forgotPassword' | translate }}
               </a>
             </div>
-            <input 
-              type="password" 
-              id="password" 
-              formControlName="password"
-              class="input"
-              [class.input-error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-              [placeholder]="'auth.password' | translate">
-            @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-              <p class="error">{{ 'auth.password' | translate }}</p>
-            }
-          </div>
-          
-          <button 
-            type="submit" 
-            class="btn btn-primary w-full py-3 mt-4"
-            [disabled]="loading() || loginForm.invalid">
-            @if (loading()) {
-              <span class="loading-spinner mr-2"></span>
-              {{ 'common.loading' | translate }}
-            } @else {
-              {{ 'auth.loginButton' | translate }}
-            }
-          </button>
-        </form>
 
-        <div class="mt-6">
-          <div class="relative">
-            <div class="absolute inset-0 flex items-center">
-              <div class="w-full border-t border-gray-300"></div>
-            </div>
-            <div class="relative flex justify-center text-sm">
-              <span class="px-2 bg-white text-gray-500">Or continue with</span>
-            </div>
-          </div>
+            <button type="submit" 
+                    [disabled]="loading() || loginForm.invalid"
+                    class="w-full bg-primary text-on-primary font-headline font-bold py-5 rounded-2xl shadow-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100 transition-all duration-300 flex items-center justify-center gap-3">
+              @if (loading()) {
+                <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              } @else {
+                {{ 'auth.loginButton' | translate }}
+                <span class="material-symbols-outlined">login</span>
+              }
+            </button>
+          </form>
 
-          <div class="mt-6 flex justify-center">
-            <div id="google-btn"></div>
-          </div>
-        </div>
-        
-        <div class="mt-6 text-center">
-          <p class="text-gray-500">
-            {{ 'auth.noAccount' | translate }}
-            <a [routerLink]="'/' + currentLang + '/auth/register'" class="text-blue-600 hover:text-blue-700 font-medium">
-              {{ 'auth.registerLink' | translate }}
+          <div class="mt-10 flex flex-col items-center gap-6">
+            <div class="flex items-center gap-4 w-full text-outline-variant">
+              <hr class="flex-grow border-outline-variant/30">
+              <span class="text-[10px] uppercase font-black tracking-widest">Global Protocol</span>
+              <hr class="flex-grow border-outline-variant/30">
+            </div>
+
+            <!-- Google Login Container -->
+            <div id="google-btn" class="w-full shadow-sm hover:shadow-md transition-shadow rounded-xl overflow-hidden"></div>
+
+            <p class="text-on-surface-variant font-body text-sm mt-4 text-center">
+              {{ 'auth.noAccount' | translate }}
+              <a [routerLink]="'/' + currentLang + '/auth/register'" class="text-primary font-black hover:underline px-1">
+                {{ 'auth.registerLink' | translate }}
+              </a>
+            </p>
+            
+            <a [routerLink]="'/' + currentLang + '/'" class="text-on-surface-variant text-[10px] font-black uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-2">
+              <span class="material-symbols-outlined text-sm">arrow_back</span>
+              {{ 'common.backToProducts' | translate }}
             </a>
-          </p>
-        </div>
-        
-        <div class="mt-4 text-center">
-          <a [routerLink]="'/' + currentLang + '/'" class="text-gray-500 hover:text-gray-700 text-sm">
-            ← {{ 'common.backToProducts' | translate }}
-          </a>
+          </div>
         </div>
       </div>
     </div>
   `,
-  styles: [`
-    .auth-page {
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    }
-  `]
+  styles: []
 })
 export class LoginComponent implements AfterViewInit {
   private fb = inject(FormBuilder);

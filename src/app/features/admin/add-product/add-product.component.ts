@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
@@ -9,281 +9,220 @@ import { Category } from '../../../core/models/category.model';
 import { TokenService } from '../../../core/services/token.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { PhotoService } from '../../../core/services/photo.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-add-product',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, TranslatePipe],
   template: `
-    <div class="add-product-page min-h-screen bg-gray-50 py-8">
-      <div class="max-w-2xl mx-auto px-4">
-        <!-- Header -->
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-800 mb-2">
-            {{ (isEditMode() ? 'admin.editProduct' : 'admin.addProduct.title') | translate }}
-          </h1>
-          <p class="text-gray-500">
-            {{ (isEditMode() ? 'admin.editProductSubtitle' : 'admin.addProduct.subtitle') | translate }}
-          </p>
+    <main class="min-h-screen bg-surface pb-24" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
+      <!-- Hero Header -->
+      <header class="bg-surface-container-low pt-24 pb-16 border-b border-outline-variant/30 overflow-hidden relative">
+        <div class="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(circle_at_top_right,_var(--primary)_0%,_transparent_70%)]"></div>
+        <div class="max-w-4xl mx-auto px-6 relative z-10">
+          <div class="flex flex-col md:flex-row justify-between items-end gap-8 text-start">
+            <div>
+               <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-2">
+                 {{ (isEditMode() ? 'admin.editProduct' : 'admin.addProduct.title') | translate }}
+               </h1>
+               <p class="font-body text-on-surface-variant opacity-70">
+                 {{ (isEditMode() ? 'admin.editProductSubtitle' : 'admin.addProduct.subtitle') | translate }}
+               </p>
+            </div>
+            <div class="flex items-center gap-3 bg-surface px-6 py-3 rounded-2xl border border-outline-variant/20 shadow-sm">
+               <span class="material-symbols-outlined text-primary text-sm animate-pulse">monitoring</span>
+               <span class="text-[10px] font-black uppercase tracking-[0.2em] text-outline">{{ 'admin.addProduct.inventorySequence' | translate }}: {{ (isEditMode() ? ('admin.addProduct.modification' | translate) : ('admin.addProduct.creation' | translate)) }}</span>
+            </div>
+          </div>
         </div>
+      </header>
 
-        <!-- Loading Categories -->
+      <div class="max-w-4xl mx-auto px-6 py-16 animate-slide-up">
         @if (loadingCategories()) {
-          <div class="flex justify-center py-8">
-            <div class="loading-spinner w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <div class="flex flex-col items-center justify-center py-40 gap-4">
+            <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <p class="font-headline font-black text-xs uppercase tracking-widest text-outline">{{ 'admin.addProduct.mappingTaxonomy' | translate }}</p>
           </div>
         } @else {
-          <!-- Form Card -->
-          <div class="card bg-white rounded-xl shadow-sm p-6">
-            <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
-              <!-- Product Name -->
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'admin.addProduct.name' | translate }}</label>
-                <input 
-                  type="text" 
-                  formControlName="name"
-                  class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  [class.border-red-500]="isFieldInvalid('name')"
-                  [class.border-gray-300]="!isFieldInvalid('name')"
-                  [placeholder]="'admin.addProduct.namePlaceholder' | translate">
-                @if (isFieldInvalid('name')) {
-                  <p class="mt-1 text-sm text-red-500">
-                    @if (productForm.get('name')?.hasError('required')) {
-                      Product name is required
-                    } @else if (productForm.get('name')?.hasError('maxlength')) {
-                      Product name must not exceed 50 characters
-                    }
-                  </p>
-                }
-              </div>
-
-              <!-- Description -->
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'admin.addProduct.description' | translate }}</label>
-                <textarea 
-                  formControlName="description"
-                  rows="3" 
-                  class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                  [class.border-red-500]="isFieldInvalid('description')"
-                  [class.border-gray-300]="!isFieldInvalid('description')"
-                  [placeholder]="'admin.addProduct.descriptionPlaceholder' | translate">
-                </textarea>
-                @if (isFieldInvalid('description')) {
-                  <p class="mt-1 text-sm text-red-500">
-                    Description must not exceed 1000 characters
-                  </p>
-                }
-              </div>
-
-              <!-- Price and Stock -->
-              <div class="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'admin.addProduct.price' | translate }}</label>
-                  <input 
-                    type="number" 
-                    formControlName="price"
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    [class.border-red-500]="isFieldInvalid('price')"
-                    [class.border-gray-300]="!isFieldInvalid('price')"
-                    [placeholder]="'admin.addProduct.pricePlaceholder' | translate"
-                    min="0">
-                  @if (isFieldInvalid('price')) {
-                    <p class="mt-1 text-sm text-red-500">
-                      @if (productForm.get('price')?.hasError('required')) {
-                        Price is required
-                      } @else if (productForm.get('price')?.hasError('min')) {
-                        Price must be greater than or equal to 0
-                      }
-                    </p>
-                  }
+          <div class="bg-surface-container-lowest rounded-[48px] shadow-2xl border border-outline-variant/10 overflow-hidden">
+            <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="p-10 md:p-16 space-y-12">
+              
+              <!-- Basic Identity Section -->
+              <section class="space-y-8">
+                <div class="flex items-center gap-4 border-b border-outline-variant/10 pb-4">
+                  <span class="material-symbols-outlined text-primary">fingerprint</span>
+                  <h3 class="font-headline font-black text-xl text-on-surface">{{ 'admin.addProduct.entityIdentity' | translate }}</h3>
                 </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'admin.addProduct.stock' | translate }}</label>
-                  <input 
-                    type="number" 
-                    formControlName="stock"
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    [class.border-red-500]="isFieldInvalid('stock')"
-                    [class.border-gray-300]="!isFieldInvalid('stock')"
-                    [placeholder]="'admin.addProduct.stockPlaceholder' | translate"
-                    min="0">
-                  @if (isFieldInvalid('stock')) {
-                    <p class="mt-1 text-sm text-red-500">
-                      @if (productForm.get('stock')?.hasError('required')) {
-                        Stock is required
-                      } @else if (productForm.get('stock')?.hasError('min')) {
-                        Stock must be a non-negative number
-                      }
-                    </p>
-                  }
-                </div>
-              </div>
 
-              <!-- Category -->
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'admin.addProduct.category' | translate }}</label>
-                <select 
-                  formControlName="categoryId"
-                  class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  [class.border-red-500]="isFieldInvalid('categoryId')"
-                  [class.border-gray-300]="!isFieldInvalid('categoryId')">
-                  <option value="">{{ 'admin.addProduct.selectCategory' | translate }}</option>
-                  @for (cat of categories(); track cat.id) {
-                    <option [value]="cat.id">{{ cat.name }}</option>
-                  }
-                </select>
-                @if (isFieldInvalid('categoryId')) {
-                  <p class="mt-1 text-sm text-red-500">
-                    Category is required
-                  </p>
-                }
-              </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div class="space-y-3">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addProduct.name' | translate }}</label>
+                    <input type="text" formControlName="name"
+                           [class.border-error/30]="isFieldInvalid('name')"
+                           class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all">
+                    @if (isFieldInvalid('name')) { <p class="text-[10px] font-black text-error uppercase px-2">{{ 'admin.addProduct.idRequired' | translate }}</p> }
+                  </div>
 
-              <!-- Checkboxes -->
-              <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="flex items-center">
-                  <input 
-                    type="checkbox" 
-                    formControlName="isFasting" 
-                    id="isFasting"
-                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                  <label for="isFasting" class="ml-2 text-sm text-gray-700">{{ 'admin.addProduct.isFasting' | translate }}</label>
+                  <div class="space-y-3">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addProduct.category' | translate }}</label>
+                    <select formControlName="categoryId"
+                            class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all appearance-none cursor-pointer rtl:pr-6 rtl:pl-12 ltr:px-6">
+                      <option value="">{{ 'admin.addProduct.selectCategory' | translate }}</option>
+                      @for (cat of categories(); track cat.id) { <option [value]="cat.id">{{ cat.name }}</option> }
+                    </select>
+                    <span class="material-symbols-outlined absolute end-6 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none">expand_more</span>
+                  </div>
                 </div>
-                <div class="flex items-center">
-                  <input 
-                    type="checkbox" 
-                    formControlName="haveSale" 
-                    id="haveSale"
-                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                  <label for="haveSale" class="ml-2 text-sm text-gray-700">{{ 'admin.addProduct.haveSale' | translate }}</label>
-                </div>
-              </div>
 
-               <!-- Popularity -->
-               <div class="mb-6">
-                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'admin.addProduct.popularity' | translate }}</label>
-                 <input 
-                   type="number" 
-                   formControlName="popularity"
-                   class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                   [class.border-red-500]="isFieldInvalid('popularity')"
-                   [class.border-gray-300]="!isFieldInvalid('popularity')"
-                   [placeholder]="'admin.addProduct.popularityPlaceholder' | translate"
-                   min="0">
-                 @if (isFieldInvalid('popularity')) {
-                   <p class="mt-1 text-sm text-red-500">
-                     Popularity must be a non-negative number
-                   </p>
-                 }
-               </div>
- 
-               <!-- Photos Section -->
-               <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'admin.addProduct.photos' | translate }}</label>
-                
+                <div class="space-y-3">
+                  <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addProduct.description' | translate }}</label>
+                  <textarea formControlName="description" rows="4"
+                            class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all resize-none"></textarea>
+                </div>
+              </section>
+
+              <!-- Metrics Section -->
+              <section class="space-y-8">
+                <div class="flex items-center gap-4 border-b border-outline-variant/10 pb-4">
+                  <span class="material-symbols-outlined text-primary">data_usage</span>
+                  <h3 class="font-headline font-black text-xl text-on-surface">{{ 'admin.addProduct.valuationQuantum' | translate }}</h3>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                  <div class="space-y-3">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addProduct.price' | translate }} (EGP)</label>
+                    <input type="number" formControlName="price"
+                           class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-headline font-black text-lg text-primary transition-all">
+                  </div>
+                  <div class="space-y-3">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addProduct.stock' | translate }}</label>
+                    <input type="number" formControlName="stock"
+                           class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-headline font-black text-lg text-on-surface transition-all">
+                  </div>
+                  <div class="space-y-3">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addProduct.popularity' | translate }}</label>
+                    <input type="number" formControlName="popularity"
+                           class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-headline font-black text-lg text-on-surface transition-all">
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap gap-8 py-4 px-6 bg-surface rounded-[32px] border border-outline-variant/10">
+                   <label class="flex items-center gap-4 cursor-pointer group">
+                      <input type="checkbox" formControlName="isFasting" class="hidden peer">
+                      <div class="w-6 h-6 border-2 border-outline-variant peer-checked:border-primary peer-checked:bg-primary transition-all rounded-lg flex items-center justify-center">
+                         <span class="material-symbols-outlined text-white text-sm scale-0 peer-checked:scale-100 transition-transform">check</span>
+                      </div>
+                      <span class="text-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">{{ 'admin.addProduct.isFasting' | translate }}</span>
+                   </label>
+                   <label class="flex items-center gap-4 cursor-pointer group">
+                      <input type="checkbox" formControlName="haveSale" class="hidden peer">
+                      <div class="w-6 h-6 border-2 border-outline-variant peer-checked:border-primary peer-checked:bg-primary transition-all rounded-lg flex items-center justify-center">
+                         <span class="material-symbols-outlined text-white text-sm scale-0 peer-checked:scale-100 transition-transform">check</span>
+                      </div>
+                      <span class="text-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">{{ 'admin.addProduct.haveSale' | translate }}</span>
+                   </label>
+                </div>
+              </section>
+
+              <!-- Visualization Section -->
+              <section class="space-y-8">
+                <div class="flex items-center gap-4 border-b border-outline-variant/10 pb-4">
+                  <span class="material-symbols-outlined text-primary">collections</span>
+                  <h3 class="font-headline font-black text-xl text-on-surface">{{ 'admin.addProduct.visualProtocols' | translate }}</h3>
+                </div>
+
                 <!-- Existing Photos (Edit Mode) -->
-                @if (isEditMode() && (originalProduct()?.productPhotos?.length || originalProduct()?.productphotos?.length)) {
-                  <div class="grid grid-cols-4 gap-4 mb-4">
-                    @for (photo of (originalProduct().productPhotos || originalProduct().productphotos); track photo.id) {
-                      <div class="relative group aspect-square rounded-lg overflow-hidden border bg-gray-100">
-                        <img [src]="photoService.getPhotoUrl(photo.fileName)" class="w-full h-full object-cover" [class.opacity-40]="isPhotoMarkedForDeletion(photo.id)">
-                        <button 
-                          type="button"
-                          (click)="togglePhotoDeletion(photo.id)"
-                          class="absolute top-1 right-1 p-1 bg-white/80 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                          [title]="(isPhotoMarkedForDeletion(photo.id) ? 'admin.addProduct.keepPhoto' : 'admin.addProduct.deletePhoto') | translate">
-                          @if (isPhotoMarkedForDeletion(photo.id)) {
-                            <i class="fas fa-undo text-blue-600"></i>
-                          } @else {
-                            <i class="fas fa-trash text-red-600"></i>
-                          }
+                @if (isEditMode() && (allPhotos().length)) {
+                  <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-6">
+                    @for (photo of allPhotos(); track photo.id) {
+                      <div class="relative aspect-square rounded-[32px] overflow-hidden bg-surface-container-low border border-outline-variant/10 group">
+                        <img [src]="photoService.getPhotoUrl(photo.fileName)" class="w-full h-full object-cover transition-all duration-500" [class.grayscale]="isPhotoMarkedForDeletion(photo.id)" [class.opacity-40]="isPhotoMarkedForDeletion(photo.id)">
+                        <button type="button" (click)="togglePhotoDeletion(photo.id)" 
+                                class="absolute top-4 right-4 w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-300 z-10 shadow-lg"
+                                [class]="isPhotoMarkedForDeletion(photo.id) ? 'bg-primary text-on-primary' : 'bg-white/80 text-on-surface hover:bg-error hover:text-on-error'">
+                          <span class="material-symbols-outlined text-lg">{{ isPhotoMarkedForDeletion(photo.id) ? 'undo' : 'delete' }}</span>
                         </button>
                         @if (isPhotoMarkedForDeletion(photo.id)) {
-                          <div class="absolute inset-0 flex items-center justify-center bg-red-500/10 pointer-events-none">
-                            <span class="bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded">{{ 'admin.addProduct.deleted' | translate }}</span>
+                          <div class="absolute inset-x-0 bottom-4 text-center">
+                             <span class="text-[8px] font-black uppercase tracking-widest text-error bg-error/10 px-3 py-1 rounded-full">{{ 'admin.addProduct.decomissioned' | translate }}</span>
                           </div>
                         }
                       </div>
                     }
                   </div>
                 }
- 
+
                 <!-- New Photos Previews -->
                 @if (selectedFiles().length > 0) {
-                  <div class="grid grid-cols-4 gap-4 mb-4">
+                  <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-6">
                     @for (fileObj of selectedFiles(); track fileObj.name; let i = $index) {
-                      <div class="relative group aspect-square rounded-lg overflow-hidden border bg-gray-50">
+                      <div class="relative aspect-square rounded-[32px] overflow-hidden bg-primary/5 border-2 border-dashed border-primary/20 group animate-scale-in">
                         <img [src]="fileObj.preview" class="w-full h-full object-cover">
-                        <button 
-                          type="button"
-                          (click)="removeNewPhoto(i)"
-                          class="absolute top-1 right-1 p-1 bg-white/80 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                          <i class="fas fa-times text-gray-600"></i>
+                        <button type="button" (click)="removeNewPhoto(i)" 
+                                class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black transition-colors">
+                          <span class="material-symbols-outlined text-lg">close</span>
                         </button>
                       </div>
                     }
                   </div>
                 }
- 
-                <!-- Add Photos Input -->
+
+                <!-- Upload Trigger -->
                 <div class="relative">
-                  <input 
-                    type="file" 
-                    multiple 
-                    accept="image/*"
-                    (change)="onFileSelected($event)"
-                    class="hidden" 
-                    #fileInput>
-                  <button 
-                    type="button"
-                    (click)="fileInput.click()"
-                    class="w-full py-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-blue-500 hover:text-blue-500 transition-all flex flex-col items-center justify-center gap-1">
-                    <i class="fas fa-cloud-upload-alt text-2xl"></i>
-                    <span class="text-sm font-medium">{{ 'admin.addProduct.uploadPhotos' | translate }}</span>
-                  </button>
+                   <input type="file" multiple accept="image/*" (change)="onFileSelected($event)" class="hidden" #fileInput>
+                   <button type="button" (click)="fileInput.click()"
+                           class="w-full group py-12 border-2 border-dashed border-outline-variant/30 rounded-[40px] flex flex-col items-center justify-center gap-4 hover:border-primary/40 hover:bg-primary/5 transition-all">
+                      <div class="w-16 h-16 rounded-[24px] bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                         <span class="material-symbols-outlined text-primary text-3xl">upload_file</span>
+                      </div>
+                      <div class="text-center">
+                         <p class="font-headline font-black text-on-surface">{{ 'admin.addProduct.uploadPhotos' | translate }}</p>
+                         <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'admin.addProduct.maxResStrategy' | translate }}</p>
+                      </div>
+                   </button>
                 </div>
-              </div>
-              <!-- Error Message -->
-              @if (error()) {
-                <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p class="text-red-600 text-sm">{{ error() }}</p>
-                </div>
-              }
+              </section>
 
-              <!-- Success Message -->
-              @if (success()) {
-                <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p class="text-green-600 text-sm">{{ success() }}</p>
-                </div>
-              }
+              <!-- Final Protocol Control -->
+              <footer class="pt-16 border-t border-outline-variant/10 space-y-10">
+                 @if (error()) {
+                   <div class="p-6 bg-error/10 text-error rounded-3xl border border-error/20 flex items-start gap-4">
+                      <span class="material-symbols-outlined">report</span>
+                      <p class="text-xs font-black uppercase tracking-widest">{{ error() }}</p>
+                   </div>
+                 }
+                 @if (success()) {
+                   <div class="p-6 bg-success/10 text-success rounded-3xl border border-success/20 flex items-start gap-4">
+                      <span class="material-symbols-outlined">check_circle</span>
+                      <p class="text-xs font-black uppercase tracking-widest">{{ success() }}</p>
+                   </div>
+                 }
 
-              <!-- Submit Button -->
-              <div class="flex gap-4">
-                <button 
-                  type="submit" 
-                  [disabled]="submitting()"
-                  class="flex-1 py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                  @if (submitting()) {
-                    <span class="flex items-center justify-center gap-2">
-                      <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                      {{ (isEditMode() ? 'admin.updating' : 'admin.addProduct.adding') | translate }}
-                    </span>
-                  } @else {
-                    {{ (isEditMode() ? 'admin.updateProduct' : 'admin.addProduct.addProduct') | translate }}
-                  }
-                </button>
-                <a 
-                  [routerLink]="'/' + currentLang + '/products'"
-                  class="flex-1 py-3 px-4 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition-colors text-center">
-                  {{ 'admin.addProduct.cancel' | translate }}
-                </a>
-              </div>
+                 <div class="flex flex-col sm:flex-row gap-6">
+                    <button type="submit" [disabled]="submitting()"
+                            class="flex-[2] py-6 bg-on-surface text-surface rounded-[32px] font-headline font-bold text-lg shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 group">
+                       @if (submitting()) {
+                         <span class="w-6 h-6 border-4 border-surface/30 border-t-white rounded-full animate-spin"></span>
+                       } @else {
+                         <span>{{ (isEditMode() ? 'admin.updateProduct' : 'admin.addProduct.addProduct') | translate }}</span>
+                         <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">rocket_launch</span>
+                       }
+                    </button>
+                     <a [routerLink]="'/' + currentLang + '/products'"
+                        class="flex-1 py-6 bg-surface-container rounded-[32px] font-headline font-bold text-sm uppercase tracking-widest text-outline hover:bg-surface-container-high transition-all text-center flex items-center justify-center">
+                        {{ 'admin.addProduct.terminateProtocol' | translate }}
+                     </a>
+                 </div>
+              </footer>
+
             </form>
           </div>
         }
       </div>
-    </div>
-  `
+    </main>
+  `,
+  styles: []
 })
 export class AddProductComponent implements OnInit {
   private productService = inject(ProductService);
@@ -294,12 +233,8 @@ export class AddProductComponent implements OnInit {
   private router = inject(Router);
   private languageService = inject(LanguageService);
   public photoService = inject(PhotoService);
+  private translate = inject(TranslateService);
 
-  get currentLang(): string {
-    return this.languageService.currentLanguage();
-  }
-
-  // Reactive form with validation (supplierId removed - will be set from token)
   productForm: FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(50)]],
     description: ['', [Validators.maxLength(1000)]],
@@ -322,66 +257,40 @@ export class AddProductComponent implements OnInit {
   
   selectedFiles = signal<{file: File, name: string, preview: string}[]>([]);
   photoIdsToDelete = signal<string[]>([]);
+  
+  get currentLang(): string { return this.languageService.currentLanguage(); }
+  allPhotos = computed(() => this.originalProduct()?.productPhotos || this.originalProduct()?.productphotos || []);
 
   ngOnInit(): void {
     this.loadCategories();
-    
-    // Check for ID parameter to enable EDIT mode
-    this.route.queryParams.subscribe((params: any) => {
-      const id = params['id'];
-      if (id) {
-        this.productId.set(id);
-        this.isEditMode.set(true);
-        this.loadProductForEdit(id);
-      }
+    this.route.queryParams.subscribe(params => {
+      if (params['id']) { this.productId.set(params['id']); this.isEditMode.set(true); this.loadProductForEdit(params['id']); }
     });
   }
 
   loadProductForEdit(id: string): void {
     this.productService.getById(id).subscribe({
       next: (product: any) => {
-        // Authorization check: User must be the owner
         const userId = this.tokenService.getUserId();
-        const isOwner = product.supplierId === userId || product.SupplierId === userId;
-        const isAdmin = this.tokenService.hasRole('Admin');
-        
-        if (!isOwner && !isAdmin) {
-          this.error.set('You are not authorized to edit this product.');
-          return;
+        if ((product.supplierId !== userId && product.SupplierId !== userId) && !this.tokenService.hasRole('Admin')) {
+           this.error.set(this.translate.instant('admin.addProduct.authProtocolFailure')); return;
         }
-
-        // Populate form
         this.originalProduct.set(product);
         this.productForm.patchValue({
-          name: product.name,
-          description: product.description,
-          price: product.newPrice || product.price,
-          stock: product.stockQuantity || product.shownQuantity,
-          categoryId: product.categoryId,
-          isFasting: product.isFasting || product.isfasting,
-          haveSale: product.haveSale,
-          popularity: product.popularity
+          name: product.name, description: product.description,
+          price: product.newPrice || product.price, stock: product.stockQuantity || product.shownQuantity,
+          categoryId: product.categoryId, isFasting: product.isFasting || product.isfasting,
+          haveSale: product.haveSale, popularity: product.popularity
         });
       },
-      error: (err: any) => {
-        console.error('Error loading product for edit:', err);
-        this.error.set('Failed to load product data.');
-      }
+      error: () => this.error.set(this.translate.instant('admin.addProduct.syncEntityDataFailed'))
     });
   }
 
   loadCategories(): void {
     this.categoryService.getAll().subscribe({
-      next: (categories: any) => {
-        // Ensure categories is an array
-        this.categories.set(Array.isArray(categories) ? categories : []);
-        this.loadingCategories.set(false);
-      },
-      error: (error: any) => {
-        console.error('Error loading categories:', error);
-        this.error.set('Failed to load categories');
-        this.loadingCategories.set(false);
-      }
+      next: (cats: any) => { this.categories.set(Array.isArray(cats) ? cats : []); this.loadingCategories.set(false); },
+      error: () => { this.error.set(this.translate.instant('admin.addProduct.taxonomySyncFailed')); this.loadingCategories.set(false); }
     });
   }
 
@@ -392,160 +301,62 @@ export class AddProductComponent implements OnInit {
   
   onFileSelected(event: any): void {
     const files: FileList = event.target.files;
-    if (files.length > 0) {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          this.selectedFiles.update(current => [
-            ...current, 
-            { file, name: file.name, preview: e.target.result }
-          ]);
-        };
-        reader.readAsDataURL(file);
-      }
+    for (let i = 0; i < files.length; i++) {
+       const file = files[i];
+       const reader = new FileReader();
+       reader.onload = (e: any) => this.selectedFiles.update(curr => [...curr, { file, name: file.name, preview: e.target.result }]);
+       reader.readAsDataURL(file);
     }
   }
 
-  removeNewPhoto(index: number): void {
-    this.selectedFiles.update(current => {
-      const updated = [...current];
-      updated.splice(index, 1);
-      return updated;
-    });
-  }
+  removeNewPhoto(index: number): void { this.selectedFiles.update(curr => curr.filter((_, i) => i !== index)); }
+  togglePhotoDeletion(photoId: string): void { this.photoIdsToDelete.update(ids => ids.includes(photoId) ? ids.filter(id => id !== photoId) : [...ids, photoId]); }
+  isPhotoMarkedForDeletion(photoId: string): boolean { return this.photoIdsToDelete().includes(photoId); }
 
-  togglePhotoDeletion(photoId: string): void {
-    this.photoIdsToDelete.update(ids => {
-      if (ids.includes(photoId)) {
-        return ids.filter(id => id !== photoId);
-      } else {
-        return [...ids, photoId];
-      }
-    });
-  }
-
-  isPhotoMarkedForDeletion(photoId: string): boolean {
-    return this.photoIdsToDelete().includes(photoId);
-  }
-
-  onSubmit(): void {
-    if (this.isEditMode()) {
-      this.updateProduct();
-    } else {
-      this.addProduct();
-    }
-  }
+  onSubmit(): void { if (this.isEditMode()) this.updateProduct(); else this.addProduct(); }
 
   addProduct(): void {
-    // Mark all fields as touched to show validation errors
     this.productForm.markAllAsTouched();
-
-    if (this.productForm.invalid) {
-      return;
-    }
-
-    this.submitting.set(true);
-    this.error.set(null);
-    this.success.set(null);
-
-    // Get user ID from token claims to use as supplier ID
-    const userId = this.tokenService.getUserId() || '';
+    if (this.productForm.invalid) return;
+    this.submitting.set(true); this.error.set(null); this.success.set(null);
     
-    // Create product data with supplierId from token
-    const productData: any = {
-      name: this.productForm.value.name,
-      description: this.productForm.value.description,
-      price: this.productForm.value.price,
-      isfasting: this.productForm.value.isFasting,
-      haveSale: this.productForm.value.haveSale,
-      popularity: this.productForm.value.popularity,
-      stock: this.productForm.value.stock,
-      categoryId: this.productForm.value.categoryId,
-      supplierId: userId
+    const productData: any = { 
+       ...this.productForm.value, isfasting: this.productForm.value.isFasting, 
+       supplierId: this.tokenService.getUserId() || '' 
     };
-
-    if (this.selectedFiles().length > 0) {
-      productData.Photos = this.selectedFiles().map(f => f.file);
-    }
+    if (this.selectedFiles().length > 0) productData.Photos = this.selectedFiles().map(f => f.file);
 
     this.productService.addProduct(productData).subscribe({
-      next: (response: any) => {
-        console.log('Product added successfully:', response);
-        this.submitting.set(false);
-        this.success.set('Product added successfully!');
-        this.selectedFiles.set([]);
-        this.photoIdsToDelete.set([]);
-        
-        // Reset form
-        this.productForm.reset({
-          name: '',
-          description: '',
-          price: 0,
-          stock: 0,
-          categoryId: '',
-          isFasting: false,
-          haveSale: false,
-          popularity: 0
-        });
+      next: () => {
+        this.submitting.set(false); this.success.set(this.translate.instant('admin.addProduct.entityIntegrated'));
+        this.selectedFiles.set([]); this.productForm.reset();
       },
-      error: (error: any) => {
-        console.error('Error adding product:', error);
-        this.submitting.set(false);
-        this.error.set(error.error?.message || error.error?.error || 'Failed to add product. Please try again.');
-      }
+      error: (err) => { this.submitting.set(false); this.error.set(err.error?.message || this.translate.instant('admin.addProduct.integrationProtocolError')); }
     });
   }
 
   updateProduct(): void {
     this.productForm.markAllAsTouched();
     if (this.productForm.invalid) return;
+    this.submitting.set(true); this.error.set(null); this.success.set(null);
 
-    this.submitting.set(true);
-    this.error.set(null);
-    this.success.set(null);
-
-    const userId = this.tokenService.getUserId() || '';
-    const orig = this.originalProduct();
-    
-    // Explicitly mapping to UpdateProductDto fields
     const productData: any = {
-      id: this.productId()!,
-      name: this.productForm.value.name,
-      description: this.productForm.value.description,
-      haveSale: this.productForm.value.haveSale,
-      popularity: this.productForm.value.popularity || 0,
-      oldPrice: orig?.oldPrice || (orig?.newPrice || this.productForm.value.price), // Fallback logic
-      newPrice: this.productForm.value.price,
-      stockQuantity: this.productForm.value.stock,
-      shownQuantity: this.productForm.value.stock, // Usually same as stock if not specified otherwise
-      supplierId: userId,
-      categoryId: this.productForm.value.categoryId
+      id: this.productId()!, name: this.productForm.value.name, description: this.productForm.value.description,
+      haveSale: this.productForm.value.haveSale, popularity: this.productForm.value.popularity || 0,
+      oldPrice: this.originalProduct()?.oldPrice || this.productForm.value.price, newPrice: this.productForm.value.price,
+      stockQuantity: this.productForm.value.stock, shownQuantity: this.productForm.value.stock,
+      supplierId: this.tokenService.getUserId() || '', categoryId: this.productForm.value.categoryId
     };
 
-    // Add photos
-    if (this.selectedFiles().length > 0) {
-      productData.Photos = this.selectedFiles().map(f => f.file);
-    }
-
-    // Add photo IDs to delete
-    if (this.photoIdsToDelete().length > 0) {
-      productData.PhotoIdsToDelete = this.photoIdsToDelete();
-    }
+    if (this.selectedFiles().length > 0) productData.Photos = this.selectedFiles().map(f => f.file);
+    if (this.photoIdsToDelete().length > 0) productData.PhotoIdsToDelete = this.photoIdsToDelete();
 
     this.productService.update(productData).subscribe({
       next: () => {
-        this.submitting.set(false);
-        this.success.set('Product updated successfully!');
-        setTimeout(() => {
-          this.router.navigate([`/${this.currentLang}/products/${this.productId()}`]);
-        }, 1500);
+        this.submitting.set(false); this.success.set(this.translate.instant('admin.addProduct.modificationVerified'));
+        setTimeout(() => this.router.navigate([`/${this.currentLang}/products/${this.productId()}`]), 1000);
       },
-      error: (err: any) => {
-        console.error('Error updating product:', err);
-        this.submitting.set(false);
-        this.error.set('Failed to update product. Please try again.');
-      }
+      error: () => { this.submitting.set(false); this.error.set(this.translate.instant('admin.addProduct.entityUpdateFailed')); }
     });
   }
 }

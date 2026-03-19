@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -19,329 +19,321 @@ import { environment } from '../../../../environments/environment';
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, TranslatePipe],
   template: `
-    <div class="product-detail-page py-8 bg-gray-50 min-h-screen">
-      <div class="max-w-7xl mx-auto px-4">
+    <main class="min-h-screen bg-surface" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
+      <div class="max-w-7xl mx-auto px-6 py-12">
+        
         @if (loading()) {
-          <div class="flex justify-center py-20">
-            <div class="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <div class="flex flex-col items-center justify-center py-40 gap-4">
+            <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <p class="font-headline font-bold text-outline uppercase tracking-widest text-xs">{{ 'common.syncingDetails' | translate }}</p>
           </div>
         } @else if (!product()) {
-          <div class="card text-center py-16 bg-white rounded-2xl shadow">
-            <p class="text-gray-500 text-xl mb-6">{{ 'common.productNotFound' | translate }}</p>
-            <a routerLink="/products" class="btn btn-primary px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              {{ 'common.backToProducts' | translate }}
-            </a>
+          <div class="text-center py-40 bg-surface-container-lowest rounded-3xl border-2 border-dashed border-outline-variant/30 animate-fade-in">
+             <span class="material-symbols-outlined text-6xl text-outline-variant mb-4">error</span>
+             <p class="font-headline text-2xl font-black text-on-surface mb-6">{{ 'common.productNotFound' | translate }}</p>
+             <a routerLink="/products" class="inline-flex items-center gap-2 px-8 py-4 bg-primary text-on-primary rounded-2xl font-headline font-bold shadow-xl hover:scale-105 active:scale-95 transition-all">
+                <span class="material-symbols-outlined">arrow_back</span>
+                {{ 'common.backToProducts' | translate }}
+             </a>
           </div>
         } @else {
           <!-- Breadcrumb -->
-          <nav class="breadcrumb text-sm text-gray-500 mb-8 flex items-center gap-2">
-            <a routerLink="/" class="hover:text-blue-600 transition-colors">Home</a>
-            <span class="text-gray-400">/</span>
-            <a routerLink="/products" class="hover:text-blue-600 transition-colors">Products</a>
+          <nav class="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-outline mb-12 animate-fade-in">
+            <a routerLink="/" class="hover:text-primary transition-colors">{{ 'common.home' | translate }}</a>
+            <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+            <a routerLink="/products" class="hover:text-primary transition-colors">{{ 'common.catalog' | translate }}</a>
             @if (product()?.category) {
-              <span class="text-gray-400">/</span>
-              <span class="text-gray-600">{{ product()?.category }}</span>
+              <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+              <span class="text-on-surface">{{ product()?.category }}</span>
             }
           </nav>
           
-          <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
-              <!-- Product Images -->
-              <div #productImages class="product-images p-6 bg-gray-100" id="product-images">
-                <div class="main-image h-96 bg-white rounded-xl mb-4 overflow-hidden flex items-center justify-center shadow-sm relative">
-                  @if (mainImage() && product()) {
-                    <img [src]="mainImage()" 
-                         [alt]="product()?.name"
-                         class="h-full w-full object-contain p-4">
-                  } @else if (product() && (product()!.productPhotos && product()!.productPhotos!.length > 0) || (product()!.productphotos && product()!.productphotos!.length > 0)) {
-                    <img [src]="photoService.getPhotoUrl((product()!.productPhotos || product()!.productphotos)![0].fileName)" 
-                         [alt]="product()?.name"
-                         class="h-full w-full object-contain p-4">
-                  } @else {
-                    <div class="text-center">
-                      <span class="text-8xl text-gray-300">📦</span>
-                      <p class="text-gray-400 mt-4">No image available</p>
-                    </div>
-                  }
-                  
-                  <!-- Wish Heart Button -->
-                  <button 
-                    class="absolute top-4 right-4 z-10 p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors"
-                    [class.text-red-500]="isInWishlist()"
-                    [class.text-gray-400]="!isInWishlist()"
-                    (click)="toggleWishlist()">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" [class.fill-current]="isInWishlist()" viewBox="0 0 24 24">
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                    </svg>
-                  </button>
-                </div>
-                @if ((product()?.productPhotos && product()!.productPhotos!.length > 1) || (product()?.productphotos && product()!.productphotos!.length > 1)) {
-                  <div class="thumbnail-grid grid grid-cols-4 gap-3">
-                    @for (photo of (product()!.productPhotos || product()!.productphotos); track photo.id) {
-                      <button 
-                        class="thumbnail h-20 bg-white rounded-lg overflow-hidden border-2 transition-all hover:shadow-md"
-                        [class.border-blue-500]="mainImage() === photoService.getPhotoUrl(photo.fileName)"
-                        [class.border-transparent]="mainImage() !== photoService.getPhotoUrl(photo.fileName)"
-                        (click)="setMainImage(photo)">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+            
+            <!-- Gallery Section (6 cols) -->
+            <div class="lg:col-span-7 space-y-6 animate-slide-up">
+              <div class="relative aspect-square bg-surface-container-lowest rounded-[40px] overflow-hidden border border-outline-variant/10 shadow-2xl group">
+                
+                @if (allPhotos().length > 0) {
+                  <div class="flex h-full w-full overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-smooth" #carousel (scroll)="onScroll($event)">
+                    @for (photo of allPhotos(); track photo.id) {
+                      <div class="flex-shrink-0 w-full h-full snap-center flex items-center justify-center p-12">
                         <img [src]="photoService.getPhotoUrl(photo.fileName)" 
-                             [alt]="product()?.name"
-                             class="h-full w-full object-cover">
-                      </button>
+                             [alt]="product()?.name" 
+                             class="w-full h-full object-contain transition-transform duration-700 hover:scale-105">
+                      </div>
                     }
                   </div>
+
+                  <!-- Navigation Arrows (Desktop) -->
+                  @if (allPhotos().length > 1) {
+                    <button (click)="scrollPrev()" class="hidden lg:flex absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/60 backdrop-blur-md items-center justify-center text-on-surface hover:bg-primary hover:text-white transition-all z-10 opacity-0 group-hover:opacity-100 shadow-xl">
+                      <span class="material-symbols-outlined text-2xl">arrow_back</span>
+                    </button>
+                    <button (click)="scrollNext()" class="hidden lg:flex absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/60 backdrop-blur-md items-center justify-center text-on-surface hover:bg-primary hover:text-white transition-all z-10 opacity-0 group-hover:opacity-100 shadow-xl">
+                      <span class="material-symbols-outlined text-2xl">arrow_forward</span>
+                    </button>
+
+                    <!-- Indicators -->
+                    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                      @for (photo of allPhotos(); track photo.id; let i = $index) {
+                        <div class="w-2 h-2 rounded-full transition-all duration-300" 
+                             [class]="currentPhotoIndex() === i ? 'bg-primary w-6' : 'bg-outline-variant/30'"></div>
+                      }
+                    </div>
+                  }
+                } @else {
+                  <div class="w-full h-full flex items-center justify-center text-outline-variant">
+                    <span class="material-symbols-outlined text-9xl opacity-10">inventory_2</span>
+                  </div>
+                }
+                
+                <button (click)="toggleWishlist()"
+                        class="absolute top-8 right-8 w-14 h-14 rounded-full backdrop-blur-xl flex items-center justify-center transition-all duration-300 z-10 shadow-lg"
+                        [class]="isWishlisted() ? 'bg-error text-on-error scale-110' : 'bg-white/80 text-on-surface hover:bg-white'">
+                  <span class="material-symbols-outlined text-3xl" [class.fill-current]="isWishlisted()">favorite</span>
+                </button>
+
+                @if (isOnSale()) {
+                   <div class="absolute top-8 left-8 flex flex-col gap-3">
+                      <span class="bg-error text-on-error px-4 py-2 rounded-2xl font-headline font-black text-xs uppercase tracking-widest shadow-xl">{{ salePercentage() }}% OFF</span>
+                   </div>
                 }
               </div>
-              
-              <!-- Product Info -->
-              <div class="product-info p-8">
-                <div class="mb-4">
-                  <h1 class="text-3xl font-bold text-gray-800 mb-3">{{ product()?.name }}</h1>
-                  
-                  @if (product()?.description) {
-                    <p class="text-gray-600 leading-relaxed mb-4">
-                      {{ product()?.description }}
-                    </p>
+
+              @if (allPhotos().length > 1) {
+                <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                  @for (photo of allPhotos(); track photo.id; let i = $index) {
+                    <button (click)="scrollToPhoto(i)"
+                            class="flex-shrink-0 w-24 h-24 rounded-2xl bg-surface-container-lowest border-2 transition-all p-2 overflow-hidden"
+                            [class.border-primary]="currentPhotoIndex() === i"
+                            [class.border-transparent]="currentPhotoIndex() !== i">
+                      <img [src]="photoService.getPhotoUrl(photo.fileName)" class="w-full h-full object-contain">
+                    </button>
                   }
                 </div>
-                
-                <!-- Price Section -->
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6">
-                  @if (isOnSale()) {
-                    <div class="flex flex-col gap-2">
-                      <div class="flex items-baseline gap-3">
-                        <span class="text-4xl font-bold text-red-600">
-                          {{ product()?.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
-                        </span>
-                        <span class="text-xl text-gray-400 line-through">
-                          {{ product()?.oldPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
-                        </span>
-                      </div>
-                      <span class="bg-red-500 text-white text-sm px-3 py-1 rounded-full font-semibold inline-block w-fit">
-                        {{ salePercentage() }}% OFF
+              }
+            </div>
+
+            <!-- Content Section (5 cols) -->
+            <div class="lg:col-span-5 space-y-10 animate-slide-up" style="animation-delay: 100ms">
+              <div class="space-y-4">
+                <div class="flex items-center gap-3">
+                   <span class="text-[10px] font-black uppercase tracking-[0.3em] text-primary px-3 py-1 bg-primary/10 rounded-full">{{ product()?.category }}</span>
+                   <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+                   <span class="text-[10px] font-black uppercase tracking-[0.3em] text-outline">{{ totalReviewCount() }} {{ 'product.reviews' | translate }}</span>
+                </div>
+                <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface leading-tight">
+                  {{ product()?.name }}
+                </h1>
+                <p class="font-body text-on-surface-variant opacity-70 leading-relaxed text-lg">
+                  {{ product()?.description }}
+                </p>
+              </div>
+
+              <div class="p-8 bg-surface-container rounded-[32px] border border-outline-variant/10 space-y-8">
+                <!-- Price Display -->
+                <div class="flex items-baseline gap-4">
+                   <span class="font-headline text-4xl font-black text-on-surface tracking-tighter">
+                     {{ product()?.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
+                   </span>
+                   @if (isOnSale()) {
+                     <span class="font-body text-xl text-outline-variant line-through opacity-50">
+                        {{ product()?.oldPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
+                     </span>
+                   }
+                </div>
+
+                <!-- Stock Status Tag -->
+                <div class="flex items-center gap-4">
+                   <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/50 border border-outline-variant/20 shadow-sm">
+                      <div class="w-2 h-2 rounded-full" [class.bg-success]="product()?.shownQuantity > 0" [class.bg-error]="product()?.shownQuantity <= 0"></div>
+                      <span class="text-[10px] font-black uppercase tracking-widest" [class.text-success]="product()?.shownQuantity > 0" [class.text-error]="product()?.shownQuantity <= 0">
+                        {{ product()?.shownQuantity > 0 ? (('product.inStock' | translate) + ' (' + product()?.shownQuantity + ')') : ('product.outOfStock' | translate) }}
                       </span>
-                    </div>
-                  } @else {
-                    <span class="text-4xl font-bold text-gray-800">
-                      {{ product()?.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
-                    </span>
-                  }
+                   </div>
+                   @if (product()?.supplierName) {
+                    <span class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'product.source' | translate }}: {{ product()?.supplierName }}</span>
+                   }
                 </div>
-                
-                <!-- Stock Status -->
-                <div class="mb-6">
-                  @if (product()!.shownQuantity! > 0) {
-                    <div class="flex items-center gap-2 text-green-600">
-                      <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                      <span class="font-medium">{{ 'product.inStock' | translate }} ({{ product()?.shownQuantity }})</span>
+
+                <!-- Quantity & Add to Cart -->
+                @if (product()?.shownQuantity > 0) {
+                  <div class="space-y-6 pt-4">
+                    <div class="flex items-center justify-between">
+                       <span class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'product.configurationQuantity' | translate }}</span>
+                       <div class="flex items-center gap-6 bg-surface p-2 rounded-2xl border border-outline-variant/30">
+                          <button (click)="decreaseQuantity()" class="w-10 h-10 rounded-xl hover:bg-surface-container transition-colors flex items-center justify-center">
+                            <span class="material-symbols-outlined text-lg">remove</span>
+                          </button>
+                          <span class="font-headline font-black text-lg min-w-[20px] text-center">{{ quantity }}</span>
+                          <button (click)="increaseQuantity()" class="w-10 h-10 rounded-xl hover:bg-surface-container transition-colors flex items-center justify-center">
+                            <span class="material-symbols-outlined text-lg">add</span>
+                          </button>
+                       </div>
                     </div>
-                  } @else {
-                    <div class="flex items-center gap-2 text-red-500">
-                      <span class="w-3 h-3 bg-red-500 rounded-full"></span>
-                      <span class="font-medium">{{ 'product.outOfStock' | translate }}</span>
-                    </div>
-                  }
-                </div>
-                
-                <!-- Product Details Grid -->
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                  <div class="bg-gray-50 rounded-lg p-4">
-                    <p class="text-sm text-gray-500 mb-1">{{ 'product.category' | translate }}</p>
-                    <p class="font-medium text-gray-800">{{ product()?.category }}</p>
-                  </div>
-                  @if (product()?.supplierName) {
-                    <div class="bg-gray-50 rounded-lg p-4">
-                      <p class="text-sm text-gray-500 mb-1">{{ 'product.supplier' | translate }}</p>
-                      <p class="font-medium text-gray-800 text-sm truncate">{{ product()?.supplierName }}</p>
-                    </div>
-                  }
-                  <div class="bg-gray-50 rounded-lg p-4">
-                    <p class="text-sm text-gray-500 mb-1">{{ 'product.reviews' | translate }}</p>
-                    <p class="font-medium text-gray-800">{{ totalReviewCount() }}</p>
-                  </div>
-                </div>
-                
-                <!-- Quantity Selector -->
-                @if (product()!.shownQuantity! > 0) {
-                  <div class="mb-6">
-                    <label class="block text-gray-700 font-medium mb-3">{{ 'product.quantity' | translate }}</label>
-                    <div class="flex items-center gap-4">
-                      <div class="flex items-center border border-gray-300 rounded-lg bg-white">
-                        <button 
-                          class="px-4 py-2 hover:bg-gray-100 transition-colors text-gray-600"
-                          (click)="decreaseQuantity()">-</button>
-                        <input 
-                          type="text" 
-                          [(ngModel)]="quantity"
-                          class="w-16 text-center border-none focus:outline-none text-gray-800 font-medium"
-                          readonly>
-                        <button 
-                          class="px-4 py-2 hover:bg-gray-100 transition-colors text-gray-600"
-                          (click)="increaseQuantity()">+</button>
-                      </div>
-                      <span class="text-gray-500">
-                        Max: {{ product()?.shownQuantity }}
-                      </span>
-                    </div>
+
+                    <button (click)="addToCart()"
+                              [disabled]="loading() || product()?.shownQuantity === 0"
+                              class="w-full py-5 bg-primary text-on-primary rounded-[32px] font-headline font-black text-xs uppercase tracking-[0.3em] shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50 disabled:scale-100 group">
+                        <span class="material-symbols-outlined group-hover:rotate-12 transition-transform">shopping_bag</span>
+                        {{ 'product.initializeAcquisition' | translate }}
+                      </button>
                   </div>
                 }
-                
-                <!-- Action Buttons -->
-                <div class="flex flex-col gap-4">
-                  <button 
-                    class="w-full py-4 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30"
-                    [class.opacity-50]="product()!.shownQuantity! <= 0"
-                    [class.cursor-not-allowed]="product()!.shownQuantity! <= 0"
-                    [disabled]="product()!.shownQuantity! <= 0"
-                    (click)="addToCart()">
-                    <span class="text-xl">🛒</span>
-                    {{ product()!.shownQuantity! > 0 ? ('product.addToCart' | translate) : ('product.outOfStock' | translate) }}
-                  </button>
 
-                  <!-- Owner Actions -->
-                  @if (canEditProduct()) {
-                    <div class="flex gap-4">
-                      <button 
-                        class="flex-1 py-3 px-6 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-amber-500/30"
-                        (click)="editProduct()">
-                        <span class="text-xl">✏️</span>
-                        {{ 'admin.editProduct' | translate }}
-                      </button>
-                      <button 
-                        class="flex-1 py-3 px-6 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-red-600/30"
-                        (click)="deleteProduct()">
-                        <span class="text-xl">🗑️</span>
-                        {{ 'admin.deleteProduct' | translate }}
-                      </button>
-                    </div>
-                  }
-                </div>
+                @if (canEditProduct()) {
+                   <div class="grid grid-cols-2 gap-4 pt-4">
+                      <button (click)="editProduct()" class="py-4 bg-tertiary/10 text-tertiary rounded-2xl font-headline font-bold text-sm tracking-tight hover:bg-tertiary hover:text-on-tertiary transition-all">{{ 'dashboard.editProtocol' | translate }}</button>
+                      <button (click)="deleteProduct()" class="py-4 bg-error/10 text-error rounded-2xl font-headline font-bold text-sm tracking-tight hover:bg-error hover:text-on-error transition-all">{{ 'dashboard.decommission' | translate }}</button>
+                   </div>
+                }
+              </div>
+
+              <!-- Product Features / USPS -->
+              <div class="grid grid-cols-2 gap-6 pt-10 border-t border-outline-variant/10">
+                 <div class="flex items-start gap-3">
+                   <div class="p-2 bg-surface-container rounded-lg"><span class="material-symbols-outlined text-primary">verified</span></div>
+                   <div>
+                     <p class="text-[10px] font-black uppercase tracking-widest text-on-surface">{{ 'product.authenticated' | translate }}</p>
+                     <p class="text-xs text-outline leading-tight">{{ 'product.originalDesign' | translate }}</p>
+                   </div>
+                 </div>
+                 <div class="flex items-start gap-3">
+                   <div class="p-2 bg-surface-container rounded-lg"><span class="material-symbols-outlined text-primary">local_shipping</span></div>
+                   <div>
+                     <p class="text-[10px] font-black uppercase tracking-widest text-on-surface">{{ 'product.accelerated' | translate }}</p>
+                     <p class="text-xs text-outline leading-tight">{{ 'product.priorityExpress' | translate }}</p>
+                   </div>
+                 </div>
               </div>
             </div>
           </div>
 
           <!-- Reviews Section -->
-          <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-            <div class="p-8">
-              <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ 'product.writeReview' | translate }}</h2>
-              
-              <!-- Review Form -->
-              @if (isLoggedIn()) {
-                <div class="bg-gray-50 rounded-xl p-6 mb-8">
-                  <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">{{ 'product.rating' | translate }}</label>
-                    <div class="flex gap-2">
-                      @for (star of [1, 2, 3, 4, 5]; track star) {
-                        <button 
-                          type="button"
-                          class="text-3xl transition-transform hover:scale-110 focus:outline-none"
-                          [class.text-yellow-400]="star <= newReviewStars"
-                          [class.text-gray-300]="star > newReviewStars"
-                          (click)="setRating(star)">
-                          ★
-                        </button>
-                      }
-                    </div>
+          <section class="mt-40 animate-slide-up">
+            <div class="flex flex-col md:flex-row justify-between items-end gap-12 mb-16">
+               <div class="max-w-xl text-start">
+                  <p class="font-label text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-2">{{ 'product.customerIntelligence' | translate }}</p>
+                  <h2 class="font-headline text-4xl font-black text-on-surface tracking-tighter mb-4">{{ 'product.customerReviews' | translate }}</h2>
+                  <p class="font-body text-sm text-on-surface-variant max-w-lg opacity-70">{{ 'product.reviewDesc' | translate }}</p>
+               </div>
+               
+               <div class="flex items-center gap-8 bg-surface-container px-10 py-6 rounded-3xl border border-outline-variant/10">
+                  <div class="text-center">
+                    <p class="font-headline text-3xl font-black text-primary">{{ averageRating() }}</p>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'product.meanRating' | translate }}</p>
                   </div>
-                  
-                  <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">{{ 'product.reviewContent' | translate }}</label>
-                    <textarea 
-                      [(ngModel)]="newReviewContent"
-                      rows="4"
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                      placeholder="{{ 'product.reviewPlaceholder' | translate }}"></textarea>
+                  <div class="w-px h-10 bg-outline-variant/30"></div>
+                  <div class="text-center">
+                    <p class="font-headline text-3xl font-black text-on-surface">{{ totalReviewCount() }}</p>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'product.totalLogs' | translate }}</p>
                   </div>
-                  
-                  @if (reviewError()) {
-                    <div class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
-                      {{ reviewError() }}
-                    </div>
-                  }
-                  
-                  @if (reviewSuccess()) {
-                    <div class="mb-4 p-3 bg-green-100 text-green-700 rounded-lg">
-                      {{ 'product.reviewSubmitted' | translate }}
-                    </div>
-                  }
-                  
-                  <button 
-                    type="button"
-                    class="py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    [disabled]="reviewSubmitting() || newReviewStars === 0 || !newReviewContent.trim()"
-                    (click)="submitReview()">
-                    @if (reviewSubmitting()) {
-                      <span class="flex items-center gap-2">
-                        <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        {{ 'product.submitting' | translate }}
-                      </span>
-                    } @else {
-                      {{ 'product.submitReview' | translate }}
-                    }
-                  </button>
-                </div>
-              } @else {
-                <div class="bg-gray-50 rounded-xl p-6 mb-8 text-center">
-                  <p class="text-gray-600 mb-4">{{ 'product.loginToReview' | translate }}</p>
-                  <a [routerLink]="'/' + getCurrentLang() + '/auth/login'" class="inline-block py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
-                    {{ 'product.login' | translate }}
-                  </a>
-                </div>
-              }
-              
-              <!-- Existing Reviews -->
-              <h3 class="text-xl font-bold text-gray-800 mb-4">{{ 'product.customerReviews' | translate }}</h3>
-              
-              @if (loadingReviews()) {
-                <div class="flex justify-center py-8">
-                  <div class="w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
-                </div>
-              } @else if (reviews().length === 0) {
-                <div class="text-center py-8 text-gray-500">
-                  <p class="text-lg">{{ 'product.noReviews' | translate }}</p>
-                  <p class="text-sm mt-2">{{ 'product.beFirstToReview' | translate }}</p>
-                </div>
-              } @else {
-                <div class="space-y-4">
-                  @for (review of reviews(); track review.id) {
-                    <div class="bg-gray-50 rounded-xl p-6">
-                      <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-3">
-                          <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold overflow-hidden">
-                            @if (getReviewerPhotoUrl(review.photoUrl)) {
-                              <img [src]="getReviewerPhotoUrl(review.photoUrl)" alt="Reviewer photo" class="w-full h-full object-cover">
-                            } @else {
-                              {{ review.personName ? review.personName.charAt(0) : 'U' }}
+               </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+               <!-- Review Submission (4 cols) -->
+               <div class="lg:col-span-4 lg:sticky lg:top-24 h-fit">
+                  @if (isLoggedIn()) {
+                    <div class="bg-surface-container-low p-8 rounded-[40px] border border-outline-variant/20 shadow-xl space-y-8">
+                       <h3 class="font-headline font-black text-xl tracking-tight text-on-surface">{{ 'product.logNewIntelligence' | translate }}</h3>
+                       
+                       <div class="space-y-4">
+                          <label class="text-[10px] font-black uppercase tracking-widest text-outline block">{{ 'product.satisfactionScore' | translate }}</label>
+                          <div class="flex gap-2">
+                            @for (star of [1, 2, 3, 4, 5]; track star) {
+                              <button (click)="setRating(star)" class="group focus:outline-none transition-transform hover:scale-125">
+                                <span class="material-symbols-outlined text-3xl transition-colors" [class]="star <= newReviewStars ? 'text-primary fill-current' : 'text-outline-variant'">star</span>
+                              </button>
                             }
                           </div>
-                          <div>
-                            <a [routerLink]="['/' + getCurrentLang() + '/auth/profile']" [queryParams]="{UserId: review.customerId}" class="font-medium text-gray-800 hover:text-blue-600 transition-colors">
-                              {{ review.personName || 'Anonymous' }}
-                            </a>
-                            <p class="text-sm text-gray-500">{{ review.createdAt | date:'mediumDate' }}</p>
-                          </div>
-                        </div>
-                        <div class="flex gap-1">
-                          @for (star of [1, 2, 3, 4, 5]; track star) {
-                            <span 
-                              class="text-lg"
-                              [class.text-yellow-400]="star <= review.stars"
-                              [class.text-gray-300]="star > review.stars">
-                              ★
-                            </span>
-                          }
-                        </div>
-                      </div>
-                      <p class="text-gray-600">{{ review.content }}</p>
+                       </div>
+
+                       <div class="space-y-4">
+                          <label class="text-[10px] font-black uppercase tracking-widest text-outline block">{{ 'product.intelligenceContent' | translate }}</label>
+                          <textarea [(ngModel)]="newReviewContent" rows="5" 
+                                    class="w-full bg-surface border-2 border-transparent focus:border-primary/20 p-5 rounded-2xl outline-none font-body text-sm text-on-surface transition-all resize-none"
+                                    [placeholder]="'product.quantifyExperience' | translate"></textarea>
+                       </div>
+
+                       @if (reviewError()) {
+                        <div class="p-4 bg-error/10 text-error rounded-xl text-xs font-bold">{{ reviewError() }}</div>
+                       }
+
+                       @if (reviewSuccess()) {
+                        <div class="p-4 bg-success/10 text-success rounded-xl text-xs font-bold">{{ 'product.feedbackIntegrated' | translate }}</div>
+                       }
+
+                       <button (click)="submitReview()"
+                                [disabled]="reviewSubmitting() || newReviewStars === 0 || !newReviewContent.trim()"
+                                class="w-full py-5 bg-on-surface text-surface rounded-2xl font-headline font-bold shadow-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none">
+                           @if (reviewSubmitting()) {
+                             <span class="w-5 h-5 border-2 border-surface/30 border-t-white rounded-full animate-spin"></span>
+                           } @else {
+                             {{ 'product.commitIntelligence' | translate }}
+                           }
+                        </button>
+                    </div>
+                  } @else {
+                    <div class="bg-surface-container-low p-10 rounded-[40px] text-center border border-dashed border-outline-variant/40 space-y-6">
+                       <span class="material-symbols-outlined text-5xl text-outline-variant">lock</span>
+                       <p class="font-headline font-bold text-on-surface-variant leading-relaxed">{{ 'product.loggingRestricted' | translate }}</p>
+                       <a [routerLink]="'/' + currentLang + '/auth/login'" class="inline-block px-8 py-4 bg-primary text-on-primary rounded-2xl font-headline font-bold shadow-lg hover:scale-105 transition-all">{{ 'product.signInToCommit' | translate }}</a>
                     </div>
                   }
-                </div>
-              }
+               </div>
+
+               <!-- Review List (8 cols) -->
+               <div class="lg:col-span-8 space-y-8">
+                  @if (loadingReviews()) {
+                    <div class="flex justify-center py-20">
+                      <div class="w-10 h-10 border-4 border-primary/10 border-t-primary rounded-full animate-spin"></div>
+                    </div>
+                  } @else if (reviews().length === 0) {
+                    <div class="text-center py-32 bg-surface-container-lowest rounded-[40px] border border-outline-variant/10">
+                       <p class="font-headline font-bold text-outline-variant opacity-60">{{ 'product.zeroLogs' | translate }}</p>
+                    </div>
+                  } @else {
+                    @for (review of reviews(); track review.id) {
+                      <div class="bg-surface-container-lowest p-8 rounded-[40px] border border-outline-variant/10 hover:border-primary/20 transition-all group shadow-sm hover:shadow-xl">
+                         <div class="flex flex-col sm:flex-row items-start justify-between gap-6">
+                            <div class="flex items-center gap-5">
+                               <div class="w-14 h-14 bg-surface-container rounded-2xl border border-outline-variant/20 overflow-hidden flex items-center justify-center relative">
+                                  @if (getReviewerPhotoUrl(review.photoUrl)) {
+                                    <img [src]="getReviewerPhotoUrl(review.photoUrl)" class="w-full h-full object-cover">
+                                  } @else {
+                                    <span class="material-symbols-outlined text-outline-variant text-2xl">person</span>
+                                  }
+                               </div>
+                               <div>
+                                  <h4 class="font-headline font-black text-on-surface group-hover:text-primary transition-colors">{{ review.personName || 'Unidentified Civilian' }}</h4>
+                                  <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ review.createdAt | date:'longDate' }}</p>
+                               </div>
+                            </div>
+                            <div class="flex gap-1 bg-surface px-4 py-2 rounded-xl border border-outline-variant/10">
+                               @for (star of [1, 2, 3, 4, 5]; track star) {
+                                 <span class="material-symbols-outlined text-lg" [class]="star <= review.stars ? 'text-primary fill-current' : 'text-outline-variant'">star</span>
+                               }
+                            </div>
+                         </div>
+                         <div class="mt-8 relative">
+                           <span class="material-symbols-outlined absolute -left-2 -top-4 opacity-5 text-4xl transform -scale-x-100">format_quote</span>
+                           <p class="font-body text-on-surface-variant leading-relaxed text-lg pl-6">
+                              {{ review.content }}
+                           </p>
+                         </div>
+                      </div>
+                    }
+                  }
+               </div>
             </div>
-          </div>
+          </section>
         }
       </div>
-    </div>
-  `
+    </main>
+  `,
+  styles: []
 })
 export class ProductDetailComponent implements OnInit, AfterViewInit {
   private route = inject(ActivatedRoute);
@@ -355,18 +347,12 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   private reviewService = inject(ReviewService);
   private wishService = inject(WishService);
   
-  // Element refs for scrolling
-  productImagesRef!: ElementRef;
-  
   product = signal<any>(null);
   loading = signal(true);
   mainImage = signal<string | null>(null);
   quantity = 1;
   
-  // Wishlist state
   isWishlisted = signal<boolean>(false);
-  
-  // Review-related signals
   reviews = signal<Review[]>([]);
   loadingReviews = signal(false);
   newReviewStars = 0;
@@ -375,47 +361,39 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   reviewError = signal<string | null>(null);
   reviewSuccess = signal(false);
   
-  // Computed signal to calculate sale percentage
   salePercentage = computed(() => {
     const p = this.product();
-    if (!p || !p.oldPrice || !p.newPrice) {
-      return 0;
-    }
-    if (p.oldPrice <= p.newPrice) {
-      return 0;
-    }
+    if (!p || !p.oldPrice || !p.newPrice || p.oldPrice <= p.newPrice) return 0;
     return Math.round(((p.oldPrice - p.newPrice) / p.oldPrice) * 100);
   });
   
-  // Computed signal to check if product is on sale (only based on price comparison)
   isOnSale = computed(() => {
     const p = this.product();
-    if (!p) return false;
-    // Only show sale if oldPrice > newPrice
-    return p.oldPrice > p.newPrice;
+    return p ? p.oldPrice > p.newPrice : false;
   });
   
-  // Computed signal to get total review count (from product + loaded reviews)
-  // Computed signal to calculate total review count (from product + loaded reviews)
-  totalReviewCount = computed(() => {
-    const productReviews = this.product()?.reviewCount || 0;
-    const loadedReviews = this.reviews().length;
-    return Math.max(productReviews, loadedReviews);
+  totalReviewCount = computed(() => Math.max(this.product()?.reviewCount || 0, this.reviews().length));
+
+  averageRating = computed(() => {
+     const revs = this.reviews();
+     if (revs.length === 0) return this.product()?.averageRating || '0.0';
+     const sum = revs.reduce((acc, curr) => acc + curr.stars, 0);
+     return (sum / revs.length).toFixed(1);
   });
 
-  // Computed signal to check if product can be edited/deleted
   canEditProduct = computed(() => {
     const p = this.product();
     if (!p || !this.authService.isLoggedIn()) return false;
-    
     const userId = this.tokenService.getUserId();
-    const isOwner = p.supplierId === userId || p.SupplierId === userId;
-    const canManage = this.tokenService.isSeller() || this.tokenService.hasRole('Admin');
-    
-    return isOwner && canManage;
+    return (p.supplierId === userId || p.SupplierId === userId) && (this.tokenService.isSeller() || this.tokenService.hasRole('Admin'));
+  });
+
+  allPhotos = computed(() => {
+     const p = this.product();
+     if (!p) return [];
+     return p.productPhotos || p.productphotos || [];
   });
   
-  // Method to get reviewer photo URL
   getReviewerPhotoUrl(photoPath: string | undefined): string {
     if (!photoPath) return '';
     const normalizedPath = photoPath.replace(/\\/g, '/');
@@ -424,108 +402,78 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     return `${environment.apiUrl}/Photo/UserPhoto/${fileName}`;
   }
   
-  ngOnInit(): void {
-    this.loadProduct();
+  @ViewChild('carousel') carouselElement!: ElementRef;
+  currentPhotoIndex = signal(0);
+
+  scrollToPhoto(index: number): void {
+    if (this.carouselElement) {
+      const element = this.carouselElement.nativeElement;
+      const width = element.offsetWidth;
+      element.scrollTo({ left: width * index, behavior: 'smooth' });
+      this.currentPhotoIndex.set(index);
+    }
+  }
+
+  scrollNext(): void {
+    const nextIndex = (this.currentPhotoIndex() + 1) % this.allPhotos().length;
+    this.scrollToPhoto(nextIndex);
+  }
+
+  scrollPrev(): void {
+    const prevIndex = (this.currentPhotoIndex() - 1 + this.allPhotos().length) % this.allPhotos().length;
+    this.scrollToPhoto(prevIndex);
+  }
+
+  onScroll(event: Event): void {
+    const element = event.target as HTMLElement;
+    const index = Math.round(element.scrollLeft / element.offsetWidth);
+    if (this.currentPhotoIndex() !== index) {
+      this.currentPhotoIndex.set(index);
+    }
   }
   
-  ngAfterViewInit(): void {
-    // Will scroll after product is loaded
-  }
+  ngOnInit(): void { this.loadProduct(); }
+  ngAfterViewInit(): void {}
   
   loadProduct(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
-      this.loading.set(false);
-      return;
-    }
+    if (!id) { this.loading.set(false); return; }
     
-    // Clear previous product data
-    this.product.set(null);
-    this.mainImage.set(null);
-    
+    this.product.set(null); this.mainImage.set(null);
     this.productService.getById(id).subscribe({
       next: (response: any) => {
-        console.log('Product detail API Response:', response);
-        console.log('Available properties:', Object.keys(response));
-        this.product.set(response);
-        
-        // Set main image
-        if (response && (response.productPhotos?.length > 0 || response.productphotos?.length > 0)) {
-          const firstPhoto = (response.productPhotos || response.productphotos)[0];
-          this.mainImage.set(this.photoService.getPhotoUrl(firstPhoto.fileName));
+        const normalized = this.normalizeProduct(response);
+        this.product.set(normalized);
+        const photos = normalized.productPhotos;
+        if (photos && photos.length > 0) {
+          this.mainImage.set(this.photoService.getPhotoUrl(photos[0].fileName));
         }
         this.loading.set(false);
-        
-        // Scroll to product images section
-        this.scrollToProductImages();
-        
-        // Load reviews for this product
         this.loadReviews(id);
-        
-        // Check if product is in wishlist
         this.checkWishlistStatus(id);
       },
-      error: (error) => {
-        console.error('Error loading product:', error);
-        this.loading.set(false);
-      }
+      error: () => this.loading.set(false)
     });
   }
   
   checkWishlistStatus(productId: string): void {
     const userId = this.tokenService.getUserId();
-    if (!userId) {
-      this.isWishlisted.set(false);
-      return;
-    }
-    
+    if (!userId) return;
     this.wishService.getWishes(userId).subscribe({
-      next: (wishes) => {
-        const isInWishlist = wishes.some(w => w.productId === productId);
-        this.isWishlisted.set(isInWishlist);
-      },
-      error: (error) => {
-        console.error('Error checking wishlist status:', error);
-      }
+      next: (wishes) => this.isWishlisted.set(wishes.some(w => w.productId === productId))
     });
-  }
-  
-  isInWishlist(): boolean {
-    return this.isWishlisted();
   }
   
   toggleWishlist(): void {
     const userId = this.tokenService.getUserId();
     const productId = this.product()?.id;
-    
-    if (!userId) {
-      // Redirect to login if not logged in
-      this.router.navigate(['/' + this.getCurrentLang() + '/auth/login']);
-      return;
-    }
-    
+    if (!userId) { this.router.navigate(['/' + this.currentLang + '/auth/login']); return; }
     if (!productId) return;
     
     if (this.isWishlisted()) {
-      // Remove from wishlist
-      this.wishService.removeWish(userId, productId).subscribe({
-        next: () => {
-          this.isWishlisted.set(false);
-        },
-        error: (error) => {
-          console.error('Error removing from wishlist:', error);
-        }
-      });
+      this.wishService.removeWish(userId, productId).subscribe({ next: () => this.isWishlisted.set(false) });
     } else {
-      // Add to wishlist
-      this.wishService.addWish({ userId, productId }).subscribe({
-        next: () => {
-          this.isWishlisted.set(true);
-        },
-        error: (error) => {
-          console.error('Error adding to wishlist:', error);
-        }
-      });
+      this.wishService.addWish({ userId, productId }).subscribe({ next: () => this.isWishlisted.set(true) });
     }
   }
   
@@ -533,18 +481,10 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     this.loadingReviews.set(true);
     this.reviewService.getReviewsByProductId(productId).subscribe({
       next: (response: Review[]) => {
-        console.log('Reviews API Response:', response);
-        if (Array.isArray(response)) {
-          this.reviews.set(response);
-        } else if (response && Array.isArray((response as any).data)) {
-          this.reviews.set((response as any).data);
-        }
+        this.reviews.set(Array.isArray(response) ? response : (response as any).data || []);
         this.loadingReviews.set(false);
       },
-      error: (error) => {
-        console.error('Error loading reviews:', error);
-        this.loadingReviews.set(false);
-      }
+      error: () => this.loadingReviews.set(false)
     });
   }
   
@@ -554,126 +494,67 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   
   increaseQuantity(): void {
     const maxStock = this.product()?.shownQuantity || 99;
-    if (this.quantity < maxStock) {
-      this.quantity++;
-    }
+    if (this.quantity < maxStock) this.quantity++;
   }
   
-  decreaseQuantity(): void {
-    if (this.quantity > 1) {
-      this.quantity--;
-    }
-  }
+  decreaseQuantity(): void { if (this.quantity > 1) this.quantity--; }
   
   addToCart(): void {
-    console.log('Adding to cart:', this.product()?.id, 'quantity:', this.quantity);
-    
-    // User is logged in, add to cart (auth interceptor will handle 401 by redirecting to login)
-    // userId is now automatically extracted from JWT token in cartService
-    this.cartService.addToCart(this.product()?.id, this.quantity).subscribe({
-      next: () => {
-        console.log('Added to cart successfully');
-      },
-      error: (error) => {
-        console.error('Error adding to cart:', error);
-      }
-    });
+    this.cartService.addToCart(this.product()?.id, this.quantity).subscribe();
   }
   
-  isLoggedIn(): boolean {
-    return this.authService.isLoggedIn();
-  }
-  
-  getCurrentLang(): string {
-    return this.languageService.getCurrentLanguage();
-  }
-  
-  scrollToProductImages(): void {
-    setTimeout(() => {
-      const element = document.getElementById('product-images');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
-  }
-  
-  setRating(stars: number): void {
-    this.newReviewStars = stars;
-  }
+  isLoggedIn(): boolean { return this.authService.isLoggedIn(); }
+  get currentLang(): string { return this.languageService.currentLanguage(); }
+  setRating(stars: number): void { this.newReviewStars = stars; }
   
   submitReview(): void {
-    if (this.newReviewStars === 0 || !this.newReviewContent.trim()) {
-      this.reviewError.set('Please provide a rating and review content');
-      return;
-    }
-    
     const productId = this.product()?.id;
-    if (!productId) {
-      this.reviewError.set('Product ID not found');
-      return;
-    }
+    const userId = this.tokenService.getUserId() || '';
+    if (!productId || !userId) return;
     
     this.reviewSubmitting.set(true);
-    this.reviewError.set(null);
-    this.reviewSuccess.set(false);
-    
-    // Get customer ID from JWT token claims
-    const userId = this.tokenService.getUserId() || '';
-    
-    if (!userId) {
-      this.reviewSubmitting.set(false);
-      this.reviewError.set('User not authenticated');
-      return;
-    }
-    
-    this.reviewService.addReview({
-      customerId: userId,
-      productId,
-      stars: this.newReviewStars,
-      content: this.newReviewContent,
-      personName: ''
-    }).subscribe({
-      next: (response) => {
-        console.log('Review submitted successfully:', response);
-        this.reviewSubmitting.set(false);
-        this.reviewSuccess.set(true);
-        this.newReviewStars = 0;
-        this.newReviewContent = '';
-        // Reload reviews
+    this.reviewService.addReview({ customerId: userId, productId, stars: this.newReviewStars, content: this.newReviewContent, personName: '' }).subscribe({
+      next: () => {
+        this.reviewSubmitting.set(false); this.reviewSuccess.set(true);
+        this.newReviewStars = 0; this.newReviewContent = '';
         this.loadReviews(productId);
       },
-      error: (error) => {
-        console.error('Error submitting review:', error);
-        this.reviewSubmitting.set(false);
-        this.reviewError.set(error.message || 'Failed to submit review');
-      }
+      error: (err) => { this.reviewSubmitting.set(false); this.reviewError.set(err.message); }
     });
   }
 
   editProduct(): void {
-    const id = this.product()?.id;
-    if (id) {
-      // Redirect to edit page (using admin add path for now or seller dashboard)
-      const lang = this.getCurrentLang();
-      this.router.navigate([`/${lang}/admin/products/add`], { queryParams: { id: id } });
-    }
+    if (this.product()?.id) this.router.navigate([`/${this.currentLang}/admin/products/add`], { queryParams: { id: this.product().id } });
   }
 
   deleteProduct(): void {
-    const id = this.product()?.id;
-    if (!id) return;
-
-    if (confirm('Are you sure you want to delete this product?')) {
-      this.productService.delete(id).subscribe({
-        next: () => {
-          const lang = this.getCurrentLang();
-          this.router.navigate([`/${lang}/products`]);
-        },
-        error: (err) => {
-          console.error('Error deleting product:', err);
-          alert('Failed to delete product. Please try again.');
-        }
-      });
+    if (this.product()?.id && confirm('Delete product?')) {
+      this.productService.delete(this.product().id).subscribe({ next: () => this.router.navigate([`/${this.currentLang}/products`]) });
     }
+  }
+
+  private normalizeProduct(p: any): any {
+    if (!p) return p;
+    return {
+      ...p,
+      id: p.id || p.Id,
+      name: p.name || p.Name,
+      description: p.description || p.Description,
+      price: p.price || p.Price,
+      newPrice: p.newPrice || p.NewPrice,
+      oldPrice: p.oldPrice || p.OldPrice,
+      categoryId: p.categoryId || p.CategoryId,
+      categoryName: p.categoryName || p.CategoryName,
+      category: p.category || p.Category || p.categoryName || p.CategoryName,
+      supplierId: p.supplierId || p.SupplierId,
+      supplierName: p.supplierName || p.SupplierName || p.supplier || p.Supplier,
+      shownQuantity: p.shownQuantity || (p.shownQuantity === 0 ? 0 : (p.ShownQuantity || 0)),
+      quantityInStock: p.quantityInStock || p.QuantityInStock,
+      productPhotos: p.productPhotos || p.ProductPhotos || p.productphotos || [],
+      haveSale: p.haveSale ?? p.HaveSale ?? false,
+      isFasting: p.isFasting ?? p.IsFasting ?? false,
+      popularity: p.popularity || p.Popularity || 0,
+      reviewCount: p.reviewCount || p.ReviewCount || 0
+    };
   }
 }

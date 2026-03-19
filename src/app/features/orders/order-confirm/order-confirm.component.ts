@@ -1,6 +1,6 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { OrderService } from '../../../core/services/order.service';
@@ -9,229 +9,217 @@ import { LanguageService } from '../../../core/services/language.service';
 import { TokenService } from '../../../core/services/token.service';
 import { PhotoService } from '../../../core/services/photo.service';
 import { CouponService } from '../../../core/services/coupon.service';
-import { CouponResponse } from '../../../core/models/coupon.models';
 import { extractErrorMessage } from '../../../core/models/result.model';
 import { AddOrderDto, CityOption, CITIES } from '../../../core/models/order.model';
 
 @Component({
   selector: 'app-order-confirm',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, TranslateModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   template: `
-    <div class="order-confirm-page min-h-screen bg-gray-50 py-8">
-      <div class="max-w-4xl mx-auto px-4">
-        <!-- Header -->
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ 'orderConfirm.title' | translate }}</h1>
-          <p class="text-gray-500">{{ 'orderConfirm.subtitle' | translate }}</p>
+    <main class="min-h-screen bg-surface pb-20" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
+      <!-- Hero Area -->
+      <section class="bg-surface-container-low pt-24 pb-16 border-b border-outline-variant/30">
+        <div class="max-w-7xl mx-auto px-6">
+          <div class="flex flex-col md:flex-row justify-between items-end gap-8">
+            <div class="text-start">
+               <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-2">{{ 'orderConfirm.finalizeAcquisition' | translate }}</h1>
+               <p class="font-body text-on-surface-variant opacity-70">{{ 'orderConfirm.confirmOrder' | translate }}</p>
+            </div>
+            <!-- Progress Stepper -->
+            <div class="flex items-center gap-4">
+               <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-black">1</div>
+                  <span class="text-[10px] font-black uppercase tracking-widest text-on-surface">{{ 'orderConfirm.curation' | translate }}</span>
+               </div>
+               <div class="w-8 h-px bg-outline-variant/30"></div>
+               <div class="flex items-center gap-2 text-primary">
+                  <div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-black shadow-[0_0_20px_rgba(var(--primary-rgb),0.5)]">2</div>
+                  <span class="text-[10px] font-black uppercase tracking-widest">{{ 'orderConfirm.protocol' | translate }}</span>
+               </div>
+               <div class="w-8 h-px bg-outline-variant/30"></div>
+               <div class="flex items-center gap-2 opacity-30">
+                  <div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-xs font-black">3</div>
+                  <span class="text-[10px] font-black uppercase tracking-widest text-on-surface">{{ 'orderConfirm.execution' | translate }}</span>
+               </div>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <!-- Shipping Form -->
-          <div class="card bg-white rounded-xl shadow-sm p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ 'orderConfirm.shippingInfo' | translate }}</h2>
-            
-            <form (ngSubmit)="placeOrder()">
-              <!-- City Selection -->
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'orderConfirm.city' | translate }}</label>
-                <select 
-                  [(ngModel)]="selectedCity" 
-                  name="city" 
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required>
-                  <option value="" disabled>{{ 'orderConfirm.selectCity' | translate }}</option>
-                  @for (city of cities; track city) {
-                    <option [value]="city">{{ city }}</option>
+      <div class="max-w-7xl mx-auto px-6 py-16">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+          
+          <!-- Shipping Form (7 cols) -->
+          <div class="lg:col-span-7 space-y-10 animate-slide-up">
+            <div class="p-10 bg-surface-container-lowest rounded-[48px] shadow-2xl border border-outline-variant/10">
+               <div class="flex items-center gap-4 mb-10">
+                  <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined">local_shipping</span>
+                  </div>
+                  <h2 class="font-headline text-2xl font-black tracking-tight text-on-surface">{{ 'orderConfirm.destinationProtocols' | translate }}</h2>
+               </div>
+
+               <form (ngSubmit)="placeOrder()" class="space-y-8">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <!-- City Selection -->
+                     <div class="space-y-3">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2 text-start block">{{ 'orderConfirm.deploymentSector' | translate }}</label>
+                        <div class="relative group">
+                          <select [(ngModel)]="selectedCity" name="city" required
+                                  class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all appearance-none cursor-pointer rtl:pr-6 rtl:pl-12 ltr:px-6">
+                            <option value="" disabled>{{ 'orderConfirm.selectCity' | translate }}</option>
+                            @for (city of cities; track city) {
+                              <option [value]="city">{{ city }}</option>
+                            }
+                          </select>
+                          <span class="material-symbols-outlined absolute end-6 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:rotate-180 transition-transform">expand_more</span>
+                        </div>
+                     </div>
+
+                     <!-- Phone Number -->
+                     <div class="space-y-3 text-start">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2 text-start block">{{ 'orderConfirm.communicationLink' | translate }}</label>
+                        <input type="tel" [(ngModel)]="phoneNumber" name="phoneNumber" required
+                               class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all"
+                               [placeholder]="'orderConfirm.phoneNumberPlaceholder' | translate">
+                     </div>
+                  </div>
+
+                  <!-- Street Address -->
+                  <div class="space-y-3 text-start">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2 text-start block">{{ 'orderConfirm.specificCoordinates' | translate }}</label>
+                    <input type="text" [(ngModel)]="street" name="street" required
+                           class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all"
+                           [placeholder]="'orderConfirm.streetPlaceholder' | translate">
+                  </div>
+
+                  <!-- Comment -->
+                  <div class="space-y-3 text-start">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2 text-start block">{{ 'orderConfirm.additionalInstructions' | translate }}</label>
+                    <textarea [(ngModel)]="comment" name="comment" rows="4"
+                              class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all resize-none"
+                              [placeholder]="'orderConfirm.commentPlaceholder' | translate"></textarea>
+                  </div>
+
+                  @if (error()) {
+                    <div class="p-6 bg-error/10 text-error rounded-3xl border border-error/20 flex items-start gap-4">
+                       <span class="material-symbols-outlined">report</span>
+                       <p class="text-xs font-black uppercase tracking-widest">{{ error() }}</p>
+                    </div>
                   }
-                </select>
-              </div>
 
-              <!-- Street Address -->
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'orderConfirm.street' | translate }}</label>
-                <input 
-                  type="text" 
-                  [(ngModel)]="street" 
-                  name="street" 
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  [placeholder]="'orderConfirm.streetPlaceholder' | translate"
-                  required>
-              </div>
-
-              <!-- Phone Number -->
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'orderConfirm.phoneNumber' | translate }}</label>
-                <input 
-                  type="tel" 
-                  [(ngModel)]="phoneNumber" 
-                  name="phoneNumber" 
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  [placeholder]="'orderConfirm.phoneNumberPlaceholder' | translate"
-                  required>
-              </div>
-
-              <!-- Comment -->
-              <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'orderConfirm.comment' | translate }}</label>
-                <textarea 
-                  [(ngModel)]="comment" 
-                  name="comment" 
-                  rows="3" 
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                  [placeholder]="'orderConfirm.commentPlaceholder' | translate">
-                </textarea>
-              </div>
-
-              <!-- Error Message -->
-              @if (error()) {
-                <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p class="text-red-600 text-sm">{{ error() }}</p>
-                </div>
-              }
-
-              <!-- Submit Button -->
-              <button 
-                type="submit" 
-                [disabled]="!isFormValid() || submitting()"
-                class="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                @if (submitting()) {
-                  <span class="flex items-center justify-center gap-2">
-                    <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    {{ 'orderConfirm.placingOrder' | translate }}
-                  </span>
-                } @else {
-                  {{ 'orderConfirm.confirmOrder' | translate }}
-                }
-              </button>
-            </form>
+                  <button type="submit" [disabled]="!isFormValid() || submitting()"
+                     class="w-full py-6 bg-primary text-on-primary rounded-[32px] font-headline font-black text-xs uppercase tracking-[0.3em] shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50 disabled:scale-100 group">
+                     @if (submitting()) {
+                       <span class="w-6 h-6 border-4 border-on-primary/30 border-t-white rounded-full animate-spin"></span>
+                       <span>{{ 'orderConfirm.placingOrder' | translate }}</span>
+                     } @else {
+                       <span class="material-symbols-outlined group-hover:rotate-12 transition-transform">verified_user</span>
+                       <span>{{ 'orderConfirm.authorizeAcquisition' | translate }}</span>
+                     }
+                  </button>
+               </form>
+            </div>
           </div>
 
-          <!-- Order Summary -->
-          <div class="card bg-white rounded-xl shadow-sm p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ 'orderConfirm.orderSummary' | translate }}</h2>
-
-            @if (cartItems().length === 0) {
-              <div class="text-center py-8">
-                <div class="text-5xl mb-4">🛒</div>
-                <p class="text-gray-500">{{ 'cart.emptyCart' | translate }}</p>
-                <a 
-                  [routerLink]="'/' + getCurrentLang() + '/products'" 
-                  class="inline-block mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                  {{ 'home.shopNow' | translate }}
-                </a>
-              </div>
-            } @else {
-              <!-- Cart Items -->
-              <div class="space-y-4 mb-6 max-h-80 overflow-y-auto">
-                @for (item of cartItems(); track item.productId) {
-                  <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                    <!-- Product Image -->
-                    <div class="w-14 h-14 bg-white rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
-                      @if (item.productImage) {
-                        <img 
-                          [src]="photoService.getPhotoUrlFromPath(item.productImage)" 
-                          [alt]="item.productName"
-                          class="w-full h-full object-cover"
-                          (error)="handleImageError($event)">
-                      } @else {
-                        <span class="text-2xl">📦</span>
-                      }
-                    </div>
-                    
-                    <!-- Product Info -->
-                    <div class="flex-1 min-w-0">
-                      <h4 class="font-medium text-gray-800 truncate text-sm">{{ item.productName }}</h4>
-                      <p class="text-sm text-gray-500">
-                        <del *ngIf="isItemDiscounted(item.productId) && getItemDiscountedPrice(item) < (item.productPrice || 0)" class="text-xs mr-1 opacity-70">
-                          {{ item.productPrice | currency:'EGP':'symbol':'1.2-2':'en-EG' }}
-                        </del>
-                        <span [class.text-green-600]="isItemDiscounted(item.productId)">
-                          {{ getItemDiscountedPrice(item) | currency:'EGP':'symbol':'1.2-2':'en-EG' }}
-                        </span>
-                        × {{ item.quantity }}
-                      </p>
-                    </div>
-                    
-                    <!-- Item Total -->
-                    <div class="text-right">
-                      <span class="font-bold text-gray-800">{{ getItemSubtotal(item) | currency:'EGP':'symbol':'1.2-2':'en-EG' }}</span>
-                    </div>
+          <!-- Summary Sidebar (5 cols) -->
+          <div class="lg:col-span-5 space-y-10 animate-slide-up" style="animation-delay: 100ms">
+            <div class="p-10 bg-surface-container rounded-[48px] border border-outline-variant/10 sticky top-24">
+               <div class="flex items-center gap-4 mb-4">
+                  <div class="w-10 h-10 rounded-xl bg-on-surface/5 flex items-center justify-center text-on-surface flex-shrink-0 overflow-hidden">
+                    <span class="material-symbols-outlined text-xl">receipt_short</span>
                   </div>
-                }
-              </div>
+                  <h3 class="font-headline font-black text-on-surface">{{ 'orderConfirm.inventoryValuation' | translate }}</h3>
+               </div>
 
-              <!-- Coupon Section -->
-              <div class="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                <label class="block text-sm font-semibold text-blue-800 mb-2">Have a coupon?</label>
-                
-                @if (appliedCoupon()) {
-                  <div class="flex items-center justify-between bg-white p-2 px-3 rounded-lg border border-blue-200">
-                    <div class="flex items-center gap-2">
-                      <span class="text-lg">🏷️</span>
-                      <div>
-                        <span class="font-bold text-blue-700 text-sm">{{ appliedCoupon()?.coupon?.couponName }}</span>
-                        <span class="text-xs text-blue-500 ml-1">
-                          (-{{ appliedCoupon()?.coupon?.discountType == 1 ? (appliedCoupon()?.coupon?.discountValue + '%') : (appliedCoupon()?.coupon?.discountValue | currency:'EGP':'symbol':'1.2-2':'en-EG') }})
-                        </span>
+               <!-- Cart Items -->
+               <div class="space-y-6 mb-10 max-h-96 overflow-y-auto pe-4 scrollbar-hide">
+                 @for (item of cartItems(); track item.productId) {
+                   <div class="flex items-center gap-5 p-4 bg-surface-container-low rounded-3xl border border-outline-variant/5">
+                      <div class="w-16 h-16 bg-surface-container-lowest rounded-2xl overflow-hidden flex-shrink-0 border border-outline-variant/10 p-1">
+                        <img [src]="photoService.getPhotoUrlFromPath(item.productImage || '')" 
+                             class="w-full h-full object-contain"
+                             (error)="handleImageError($event)">
                       </div>
+                      <div class="flex-grow min-w-0 text-start">
+                        <h4 class="font-headline font-bold text-xs text-on-surface truncate">{{ item.productName }}</h4>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-outline pt-1">{{ 'orderConfirm.qty' | translate }}: {{ item.quantity }}</p>
+                      </div>
+                      <div class="text-end">
+                        <p class="font-headline font-black text-sm text-on-surface">
+                           {{ getItemSubtotal(item) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
+                        </p>
+                      </div>
+                   </div>
+                 }
+               </div>
+
+               <!-- Coupon Control -->
+               <div class="mb-10 p-6 bg-primary/5 rounded-[32px] border border-primary/10">
+                  <p class="text-[10px] font-black uppercase tracking-widest text-primary mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">confirmation_number</span>
+                    {{ 'orderConfirm.protocolOverride' | translate }}
+                  </p>
+                  
+                  @if (appliedCoupon()) {
+                    <div class="flex items-center justify-between bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-primary/20">
+                       <div>
+                          <p class="font-headline font-black text-xs text-primary">{{ appliedCoupon()?.coupon?.couponCode }}</p>
+                          <p class="text-[8px] font-black uppercase text-outline">{{ 'orderConfirm.verifiedReduction' | translate:{'value': (appliedCoupon()?.coupon?.discountValue + (appliedCoupon()?.coupon?.discountType == 1 ? '%' : ' EGP'))} }}</p>
+                       </div>
+                       <button (click)="removeCoupon()" class="text-outline-variant hover:text-error transition-colors">
+                          <span class="material-symbols-outlined">cancel</span>
+                       </button>
                     </div>
-                    <button type="button" (click)="removeCoupon()" class="text-gray-400 hover:text-red-500 transition-colors">✕</button>
-                  </div>
-                } @else {
-                  <div class="flex gap-2">
-                    <input 
-                      type="text" 
-                      [(ngModel)]="couponInput" 
-                      name="couponCode"
-                      class="flex-1 px-3 py-2 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter code (e.g. Guid)">
-                    <button 
-                      type="button"
-                      (click)="applyCoupon()"
-                      [disabled]="isApplyingCoupon || !couponInput.trim()"
-                      class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
-                      Apply
-                    </button>
-                  </div>
-                  @if (couponError) {
-                    <p class="text-red-500 text-xs mt-2">{{ couponError }}</p>
+                  } @else {
+                    <div class="flex gap-3">
+                       <input type="text" [(ngModel)]="couponInput" 
+                              class="flex-grow bg-white px-4 py-3 rounded-xl border border-transparent focus:border-primary/10 outline-none font-body text-xs text-on-surface uppercase tracking-widest"
+                              [placeholder]="'orderConfirm.codePlaceholder' | translate">
+                       <button (click)="applyCoupon()" [disabled]="isApplyingCoupon || !couponInput.trim()"
+                               class="px-6 bg-primary text-on-primary rounded-xl font-headline font-bold text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all">
+                          {{ 'CART.APPLY' | translate }}
+                       </button>
+                    </div>
+                    @if (couponError) {
+                      <p class="text-[8px] font-black uppercase text-error mt-2 px-2">{{ couponError }}</p>
+                    }
                   }
-                }
-              </div>
+               </div>
 
-              <!-- Totals -->
-              <div class="border-t border-gray-200 pt-4">
-                <div class="flex justify-between items-center mb-2">
-                  <span class="text-gray-600">{{ 'cart.subtotal' | translate }}</span>
-                  <span class="font-medium" [class.line-through]="appliedCoupon()" [class.text-gray-400]="appliedCoupon()">
-                    {{ originalTotalPrice() | currency:'EGP':'symbol':'1.2-2':'en-EG' }}
-                  </span>
-                </div>
-                
-                <div *ngIf="appliedCoupon()" class="flex justify-between items-center mb-2 text-green-600 font-medium">
-                  <span>{{ 'CART.DISCOUNT' | translate }}</span>
-                  <span>
-                    -{{ appliedCoupon()?.coupon?.discountType == 1 ? (appliedCoupon()?.coupon?.discountValue + '%') : (discountAmount() | currency:'EGP':'symbol':'1.2-2':'en-EG') }}
-                  </span>
+               <!-- Final Accounting -->
+                <div class="space-y-4 pt-4 border-t border-outline-variant/10">
+                   <div class="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                      <span class="text-outline">{{ 'orderConfirm.alphaValuation' | translate }}</span>
+                      <span class="text-on-surface" [class.line-through]="appliedCoupon()">{{ originalTotalPrice() | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+                   </div>
+                   @if (discountAmount() > 0) {
+                      <div class="flex justify-between text-[10px] font-black uppercase tracking-widest text-error">
+                         <span>{{ 'orderConfirm.protocolReduction' | translate }}</span>
+                         <span>-{{ discountAmount() | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+                      </div>
+                   }
+                   <div class="flex justify-between text-[10px] font-black uppercase tracking-widest text-outline">
+                      <span>{{ 'orderConfirm.logistics' | translate }}</span>
+                      <span class="text-primary font-black animate-pulse">{{ 'orderConfirm.freeOfCharge' | translate }}</span>
+                   </div>
                 </div>
 
-                <div class="flex justify-between items-center mb-2">
-                  <span class="text-gray-600">{{ 'cart.shipping' | translate }}</span>
-                  <span class="font-medium text-green-600">{{ 'cart.free' | translate }}</span>
+                <div class="mt-12 pt-8 border-t-2 border-dashed border-outline-variant/30 text-end">
+                   <p class="text-[10px] font-black uppercase tracking-[0.4em] text-outline mb-1">{{ 'orderConfirm.finalValuation' | translate }}</p>
+                   <p class="font-headline text-4xl font-black text-on-surface leading-none">{{ totalPrice() | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
                 </div>
-                
-                <div class="flex justify-between items-center pt-2 border-t border-gray-100">
-                  <span class="text-lg font-semibold text-gray-800">{{ 'cart.total' | translate }}</span>
-                  <span class="text-xl font-bold text-blue-600">{{ totalPrice() | currency:'EGP':'symbol':'1.2-2':'en-EG' }}</span>
-                </div>
-              </div>
-            }
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  `
+    </main>
+  `,
+  styles: [`
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  `]
 })
 export class OrderConfirmComponent implements OnInit {
   private orderService = inject(OrderService);
@@ -242,7 +230,6 @@ export class OrderConfirmComponent implements OnInit {
   private couponService = inject(CouponService);
   photoService = inject(PhotoService);
 
-  // Coupon state
   couponInput = '';
   couponError = '';
   isApplyingCoupon = false;
@@ -255,173 +242,82 @@ export class OrderConfirmComponent implements OnInit {
   phoneNumber = '';
   comment = '';
 
-  // States
   submitting = signal(false);
   error = signal<string | null>(null);
-
-  // Cart data
   cartItems = this.cartService.items;
-
-  // Cities from enum
   cities = CITIES;
 
-  // Track image errors
   private imageErrors = new Set<string>();
 
-  getItemSubtotal(item: any): number {
-    return this.getItemDiscountedPrice(item) * item.quantity;
-  }
-
-  getCurrentLang(): string {
-    return this.languageService.currentLanguage();
-  }
+  getItemSubtotal(item: any): number { return this.getItemDiscountedPrice(item) * item.quantity; }
+  get currentLang(): string { return this.languageService.currentLanguage(); }
 
   ngOnInit(): void {
-    // Redirect if cart is empty
-    if (this.cartItems().length === 0) {
-      this.router.navigate(['/' + this.getCurrentLang() + '/products']);
-    }
+    if (this.cartItems().length === 0) this.router.navigate(['/' + this.currentLang + '/products']);
   }
 
-  isFormValid(): boolean {
-    return !!this.selectedCity && this.street.trim().length > 0 && this.phoneNumber.trim().length > 0;
-  }
+  isFormValid(): boolean { return !!this.selectedCity && this.street.trim().length > 0 && this.phoneNumber.trim().length > 0; }
 
   handleImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
-    if (img.src && !this.imageErrors.has(img.src)) {
-      this.imageErrors.add(img.src);
-      img.src = 'assets/images/placeholder.svg';
-    }
+    img.src = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCrToAN7K9bxCYHNmah4SPbCguXNVlpK-DeQWeEBnHb8hhrK_YwTkoUXoEOh-RgjYVbFZj2ZzFPFjqLgEqS81zBG3mBRaFpNCTpPthaRKkjbY6cN5ywiH6wrgPH-fov4huJ80NbYSMgUyawNMMrAIHqttsqobdz8M4Yk_ERm3md8eXwLlW4PLs3aIXrOye6hD6Mc0OtdU9LpkjMLI7eeChndSjrvjUUdPvpHGIlYDvLm3UBFRbdvqH0krtaLiZxlv72URSOjaoPfUbP';
   }
 
   placeOrder(): void {
-    if (!this.isFormValid()) {
-      this.error.set('Please fill in all required fields');
-      return;
-    }
-
-    this.submitting.set(true);
-    this.error.set(null);
-
-    // Get customer ID from token
+    if (!this.isFormValid()) { this.error.set('Data fields incomplete.'); return; }
+    this.submitting.set(true); this.error.set(null);
     const userId = this.tokenService.getUserId() || '';
 
-    // Create order DTO
-    const orderDto: AddOrderDto = {
-      customerId: userId,
-      city: this.selectedCity,
-      street: this.street.trim(),
-      phoneNumber: this.phoneNumber.trim(),
-      comment: this.comment.trim() || undefined,
+    this.orderService.createOrder({
+      customerId: userId, city: this.selectedCity, street: this.street.trim(),
+      phoneNumber: this.phoneNumber.trim(), comment: this.comment.trim() || undefined,
       couponCode: this.appliedCoupon()?.coupon?.couponCode || undefined
-    };
-
-    this.orderService.createOrder(orderDto).subscribe({
-      next: (order) => {
-        console.log('Order created successfully:', order);
+    }).subscribe({
+      next: () => {
         this.submitting.set(false);
-        
-        // Clear the cart and coupon after successful order
         this.cartService.clear();
         this.cartService.clearCoupon();
-        
-        // Navigate to orders page
-        this.router.navigate(['/' + this.getCurrentLang() + '/orders']);
+        this.router.navigate(['/' + this.currentLang + '/orders']);
       },
-      error: (error) => {
-        console.error('Error creating order:', error);
-        this.submitting.set(false);
-        
-        // Try to extract error message from different response formats
-        const errorMessage = 
-          error.error?.message || 
-          error.error?.error ||
-          error.message ||
-          (typeof error.error === 'string' ? error.error : 'Failed to place order. Please try again.');
-        
-        this.error.set(errorMessage);
-      }
+      error: (err) => { this.submitting.set(false); this.error.set(extractErrorMessage(err) || 'Execution protocol failed.'); }
     });
   }
 
   applyCoupon(): void {
     if (!this.couponInput.trim()) return;
-
-    this.isApplyingCoupon = true;
-    this.couponError = '';
-
+    this.isApplyingCoupon = true; this.couponError = '';
     this.couponService.applyCoupon(this.couponInput).subscribe({
       next: (data: any) => {
         const responseData = this.normalizeCouponData(data);
-        
-        if (responseData && responseData.coupon) {
-          this.cartService.setCoupon(responseData);
-          this.couponInput = '';
-          this.couponError = '';
-        } else {
-          this.couponError = 'Invalid coupon data received.';
-        }
+        if (responseData?.coupon) { this.cartService.setCoupon(responseData); this.couponInput = ''; }
+        else { this.couponError = 'Invalid protocol response.'; }
         this.isApplyingCoupon = false;
       },
-      error: (err) => {
-        console.error('Error applying coupon:', err);
-        this.couponError = extractErrorMessage(err) || 'Failed to apply coupon.';
-        this.isApplyingCoupon = false;
-      }
+      error: (err) => { this.couponError = extractErrorMessage(err) || 'Validation failed.'; this.isApplyingCoupon = false; }
     });
   }
 
-  removeCoupon(): void {
-    this.cartService.clearCoupon();
-  }
-
-  isItemDiscounted(productId: string): boolean {
-    const coupon = this.appliedCoupon();
-    if (!coupon || !coupon.itemPrices) return false;
-    
-    const item = this.cartItems().find(i => i.productId === productId);
-    if (!item) return false;
-
-    const discountedPrice = coupon.itemPrices[productId];
-    return discountedPrice !== undefined && discountedPrice < (item.productPrice || 0);
-  }
-
-  getItemDiscountedPrice(item: any): number {
-    return this.cartService.getItemDiscountedValue(item);
-  }
+  removeCoupon(): void { this.cartService.clearCoupon(); }
+  getItemDiscountedPrice(item: any): number { return this.cartService.getItemDiscountedValue(item); }
 
   private normalizeCouponData(data: any): any {
     if (!data) return null;
     const rawCoupon = data.coupon || data.Coupon;
-    const rawProductIds = data.discountedProductIds || data.DiscountedProductIds;
     if (!rawCoupon) return null;
-
-    let parsedDiscountType = 0;
-    const rawDiscountType = rawCoupon.discountType !== undefined ? rawCoupon.discountType : rawCoupon.DiscountType;
-    if (typeof rawDiscountType === 'string') {
-      const lower = rawDiscountType.toLowerCase();
-      if (lower === 'percentage') parsedDiscountType = 1;
-      else if (lower === 'fixedamount') parsedDiscountType = 2;
-      else parsedDiscountType = Number(rawDiscountType);
-    } else {
-      parsedDiscountType = Number(rawDiscountType);
+    let type = rawCoupon.discountType ?? rawCoupon.DiscountType;
+    if (typeof type === 'string') {
+      const l = type.toLowerCase();
+      type = l === 'percentage' ? 1 : l === 'fixedamount' ? 2 : Number(type);
     }
-
     return {
       coupon: {
         couponCode: rawCoupon.couponCode || rawCoupon.CouponCode,
-        discountType: parsedDiscountType,
-        discountValue: Number(rawCoupon.discountValue !== undefined ? rawCoupon.discountValue : rawCoupon.DiscountValue),
+        discountType: type,
+        discountValue: Number(rawCoupon.discountValue ?? rawCoupon.DiscountValue),
         couponName: rawCoupon.couponName || rawCoupon.CouponName,
-        couponDescription: rawCoupon.couponDescription || rawCoupon.CouponDescription,
-        minAmount: Number(rawCoupon.minAmount !== undefined ? rawCoupon.minAmount : rawCoupon.MinAmount),
-        isActive: rawCoupon.isActive !== undefined ? rawCoupon.isActive : rawCoupon.IsActive,
-        createdDate: rawCoupon.createdDate || rawCoupon.CreatedDate,
-        expirationDate: rawCoupon.expirationDate || rawCoupon.ExpirationDate
       },
-      totalDiscount: data.totalDiscount !== undefined ? data.totalDiscount : data.TotalDiscount,
-      finalSubtotal: data.finalSubtotal !== undefined ? data.finalSubtotal : data.FinalSubtotal,
+      totalDiscount: data.totalDiscount ?? data.TotalDiscount,
+      finalSubtotal: data.finalSubtotal ?? data.FinalSubtotal,
       itemPrices: data.itemPrices || data.ItemPrices || {}
     };
   }

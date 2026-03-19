@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -56,15 +56,15 @@ export class ProductListComponent implements OnInit {
   minPrice: number | null = null;
   maxPrice: number | null = null;
   onSaleOnly = false;
+  isFastingOnly = false;
 
   ngOnInit(): void {
     this.loadCategories();
     this.loadWishlist();
 
-    // First, check if there's already a categoryId in the URL
     this.route.queryParams.subscribe(params => {
-      const categoryId = params['categoryId'] || params['categoryId'];
-      this.selectedCategory = categoryId || '';
+      const categoryId = params['categoryId'];
+      if (categoryId) this.selectedCategory = categoryId;
       this.loadProducts();
     });
   }
@@ -78,44 +78,28 @@ export class ProductListComponent implements OnInit {
       minPrice: this.minPrice || undefined,
       maxPrice: this.maxPrice || undefined,
       isOnSale: this.onSaleOnly || undefined,
+      isFasting: this.isFastingOnly || undefined,
       page: this.currentPage(),
       pageSize: this.pageSize
     }).subscribe({
       next: (response: any) => {
-        console.log('Products API Response:', JSON.stringify(response, null, 2));
-        
+        console.log('Product Response Debug:', response);
         let prods: any[] = [];
-        
-        // Handle different response formats
         if (Array.isArray(response)) {
           prods = response;
         } else if (response && typeof response === 'object') {
-          // Try common property names for the products array
-          if (Array.isArray(response.items)) {
-            prods = response.items;
-          } else if (Array.isArray(response.data)) {
-            prods = response.data;
-          } else if (Array.isArray(response.products)) {
-            prods = response.products;
-          } else if (Array.isArray(response.result)) {
-            prods = response.result;
-          } else {
-            // Try to find any array property
-            const arrayProp = Object.keys(response).find(key => Array.isArray(response[key]));
-            if (arrayProp) {
-              prods = response[arrayProp];
-            }
-          }
+          // Check for common data wrappers
+          prods = response.getProducts || response.GetProducts ||
+                  response.items || response.Items || 
+                  response.data || response.Data || 
+                  response.products || response.Products || [];
         }
-        
-        console.log('Parsed products:', prods.length, 'items');
-        this.products.set(prods);
+        this.products.set(prods.map(p => this.normalizeProduct(p)));
 
         let totalPages = 1;
-        if (response && response.totalPages) {
-          totalPages = response.totalPages;
-        } else if (response && response.totalCount && this.pageSize) {
-          totalPages = Math.ceil(response.totalCount / this.pageSize);
+        if (response) {
+          totalPages = response.totalPages || response.TotalPages || 
+                       (response.totalCount || response.TotalCount ? Math.ceil((response.totalCount || response.TotalCount) / this.pageSize) : 1);
         }
         this.totalPages.set(Math.max(1, totalPages));
         this.loading.set(false);
@@ -131,16 +115,11 @@ export class ProductListComponent implements OnInit {
     this.categoryService.getAll().subscribe({
       next: (response: any) => {
         let cats: any[] = [];
-        if (Array.isArray(response)) {
-          cats = response;
-        } else if (response && Array.isArray(response.data)) {
-          cats = response.data;
-        }
-        this.categories.set(cats);
+        if (Array.isArray(response)) cats = response;
+        else if (response && Array.isArray(response.data)) cats = response.data;
+        this.categories.set(cats.map(c => this.normalizeCategory(c)));
       },
-      error: (error) => {
-        console.error('Error loading categories:', error);
-      }
+      error: (error) => console.error('Error loading categories:', error)
     });
   }
 
@@ -151,66 +130,41 @@ export class ProductListComponent implements OnInit {
     this.wishService.getWishes(userId).subscribe({
       next: (wishes) => {
         const ids = new Set<string>();
-        wishes.forEach(w => {
-          if (w.productId) ids.add(w.productId);
-        });
+        wishes.forEach(w => { if (w.productId) ids.add(w.productId); });
         this.wishlistIds.set(ids);
       },
-      error: (error) => {
-        console.error('Error loading wishlist:', error);
-      }
+      error: (error) => console.error('Error loading wishlist:', error)
     });
   }
 
   toggleWishlist(product: any, event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-
+    event.preventDefault(); event.stopPropagation();
     const userId = this.tokenService.getUserId();
-    if (!userId) {
-      this.router.navigate(['/' + this.currentLang + '/auth/login']);
-      return;
-    }
+    if (!userId) { this.router.navigate(['/' + this.currentLang + '/auth/login']); return; }
 
     const productId = product.id;
     const isCurrentlyInWishlist = this.wishlistIds().has(productId);
-
-    // Set processing state
     this.processingId.set(productId);
 
     if (isCurrentlyInWishlist) {
-      // Remove from wishlist - wait for API response
       this.wishService.removeWish(userId, productId).subscribe({
         next: () => {
-          // Update UI after successful API response
-          const currentIds = this.wishlistIds();
-          const newIds = new Set<string>();
-          currentIds.forEach(id => newIds.add(id));
+          const newIds = new Set(this.wishlistIds());
           newIds.delete(productId);
           this.wishlistIds.set(newIds);
           this.processingId.set(null);
         },
-        error: (error) => {
-          console.error('Error removing from wishlist:', error);
-          this.processingId.set(null);
-        }
+        error: () => this.processingId.set(null)
       });
     } else {
-      // Add to wishlist - wait for API response
       this.wishService.addWish({ userId, productId }).subscribe({
         next: () => {
-          // Update UI after successful API response
-          const currentIds = this.wishlistIds();
-          const newIds = new Set<string>();
-          currentIds.forEach(id => newIds.add(id));
+          const newIds = new Set(this.wishlistIds());
           newIds.add(productId);
           this.wishlistIds.set(newIds);
           this.processingId.set(null);
         },
-        error: (error) => {
-          console.error('Error adding to wishlist:', error);
-          this.processingId.set(null);
-        }
+        error: () => this.processingId.set(null)
       });
     }
   }
@@ -221,13 +175,10 @@ export class ProductListComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.searchTerm = '';
-    this.selectedCategory = '';
-    this.minPrice = null;
-    this.maxPrice = null;
-    this.onSaleOnly = false;
-    this.currentPage.set(1);
-    this.loadProducts();
+    this.searchTerm = ''; this.selectedCategory = '';
+    this.minPrice = null; this.maxPrice = null; 
+    this.onSaleOnly = false; this.isFastingOnly = false;
+    this.currentPage.set(1); this.loadProducts();
   }
 
   goToPage(page: number): void {
@@ -239,72 +190,81 @@ export class ProductListComponent implements OnInit {
 
   getPages(): number[] {
     const pages: number[] = [];
-    const total = this.totalPages();
-    const current = this.currentPage();
-
-    for (let i = Math.max(1, current - 2); i <= Math.min(total, current + 2); i++) {
+    for (let i = Math.max(1, this.currentPage() - 2); i <= Math.min(this.totalPages(), this.currentPage() + 2); i++) {
       pages.push(i);
     }
-
     return pages;
   }
 
   addToCart(product: any, event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (product.shownQuantity <= 0) {
-      return;
-    }
-
+    event.preventDefault(); event.stopPropagation();
+    if (product.shownQuantity <= 0) return;
     this.cartService.addToCart(product.id, 1).subscribe({
-      next: () => {
-        console.log('Added to cart successfully');
-      },
-      error: (error) => {
-        console.error('Error adding to cart:', error);
-      }
+      next: () => console.log('Added to cart'),
+      error: (err) => console.error('Cart error:', err)
     });
   }
 
   canEditProduct(product: any): boolean {
     if (!product || !this.authService.isLoggedIn()) return false;
-    
     const userId = this.tokenService.getUserId();
-    const isOwner = product.supplierId === userId || product.SupplierId === userId;
-    const canManage = this.tokenService.isSeller() || this.tokenService.hasRole('Admin');
-    
-    return isOwner && canManage;
+    return (product.supplierId === userId || product.SupplierId === userId) && (this.tokenService.isSeller() || this.tokenService.hasRole('Admin'));
   }
 
   editProduct(product: any, event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    if (product.id) {
-      const lang = this.currentLang;
-      this.router.navigate([`/${lang}/admin/products/add`], { queryParams: { id: product.id } });
-    }
+    event.preventDefault(); event.stopPropagation();
+    if (product.id) this.router.navigate([`/${this.currentLang}/admin/products/add`], { queryParams: { id: product.id } });
   }
 
   deleteProduct(product: any, event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    if (!product.id) return;
-
-    if (confirm(`Are you sure you want to delete "${product.name}"?`)) {
+    event.preventDefault(); event.stopPropagation();
+    if (product.id && confirm(`Delete "${product.name}"?`)) {
       this.productService.delete(product.id).subscribe({
-        next: () => {
-          // Remove from local list
-          const currentProducts = this.products();
-          this.products.set(currentProducts.filter(p => p.id !== product.id));
-        },
-        error: (err) => {
-          console.error('Error deleting product:', err);
-          alert('Failed to delete product. Please try again.');
-        }
+        next: () => this.products.set(this.products().filter(p => p.id !== product.id))
       });
     }
+  }
+
+  getCategoryIcon(name: string): string {
+    const iconMap: { [key: string]: string } = {
+       'Electronics': 'devices', 'Phones': 'smartphone', 'Computers': 'laptop_mac',
+       'Home': 'home', 'Fashion': 'apparel', 'Beauty': 'content_cut',
+       'Sports': 'sports_basketball', 'Toys': 'toys', 'Grocery': 'shopping_basket',
+       'Health': 'health_and_safety', 'Automotive': 'directions_car', 'Books': 'menu_book'
+    };
+    return iconMap[name] || 'label';
+  }
+
+  private normalizeProduct(p: any): any {
+    if (!p) return p;
+    return {
+      ...p,
+      id: p.id || p.Id,
+      name: p.name || p.Name,
+      description: p.description || p.Description,
+      price: p.price || p.Price,
+      newPrice: p.newPrice || p.NewPrice,
+      oldPrice: p.oldPrice || p.OldPrice,
+      categoryId: p.categoryId || p.CategoryId,
+      categoryName: p.categoryName || p.CategoryName,
+      supplierId: p.supplierId || p.SupplierId,
+      shownQuantity: p.shownQuantity || (p.shownQuantity === 0 ? 0 : (p.ShownQuantity || 0)),
+      quantityInStock: p.quantityInStock || p.QuantityInStock,
+      productPhotos: p.productPhotos || p.ProductPhotos || p.productphotos || [],
+      haveSale: p.haveSale ?? p.HaveSale ?? false,
+      isFasting: p.isFasting ?? p.IsFasting ?? false,
+      popularity: p.popularity || p.Popularity || 0,
+      reviewCount: p.reviewCount || p.ReviewCount || 0
+    };
+  }
+
+  private normalizeCategory(c: any): any {
+    if (!c) return c;
+    return {
+      ...c,
+      id: c.id || c.Id,
+      name: c.name || c.Name,
+      description: c.description || c.Description
+    };
   }
 }

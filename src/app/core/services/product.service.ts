@@ -58,6 +58,9 @@ export class ProductService {
     if (filter.isOnSale !== undefined && filter.isOnSale !== null) {
       params = params.set('IsOnSale', filter.isOnSale.toString());
     }
+    if (filter.isFasting !== undefined && filter.isFasting !== null) {
+      params = params.set('IsFasting', filter.isFasting.toString());
+    }
     if (filter.sortBy) {
       params = params.set('SortBy', filter.sortBy);
     }

@@ -12,119 +12,92 @@ import { AddCategoryDto, Category } from '../../../core/models/category.model';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslatePipe],
   template: `
-    <div class="add-category-page py-12 bg-gray-50 min-h-screen">
-      <div class="container mx-auto px-4 max-w-2xl">
-        <!-- Back Link -->
-        <a [routerLink]="['/' + currentLang + '/categories']" 
-           class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium mb-8 group transition-all">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          {{ 'common.backToProducts' | translate }}
-        </a>
+    <main class="min-h-screen bg-surface pb-24" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
+      <!-- Hero Header -->
+      <header class="bg-surface-container-low pt-24 pb-16 border-b border-outline-variant/30 overflow-hidden relative">
+        <div class="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(circle_at_top_right,_var(--tertiary)_0%,_transparent_70%)]"></div>
+        <div class="max-w-3xl mx-auto px-6 relative z-10 text-center">
+           <div class="w-16 h-16 bg-white/50 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl border border-white/20">
+              <span class="material-symbols-outlined text-3xl text-primary">category</span>
+           </div>
+           <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-2">
+             {{ 'admin.addCategory.title' | translate }}
+           </h1>
+           <p class="font-body text-on-surface-variant opacity-70">
+             {{ 'admin.addProduct.subtitle' | translate }}
+           </p>
+        </div>
+      </header>
 
-        <div class="card p-8 shadow-xl border-0 rounded-2xl bg-white">
-          <div class="text-center mb-10">
-            <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-sm">
-              📁
-            </div>
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ 'admin.addCategory.title' | translate }}</h1>
-            <p class="text-gray-500">{{ 'admin.addProduct.subtitle' | translate }}</p>
-          </div>
-
-          <!-- Alert Messages -->
-          @if (error()) {
-            <div class="mb-8 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-lg flex items-start animate-fade-in">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-              </svg>
-              <span>{{ error() }}</span>
-            </div>
-          }
-
-          @if (success()) {
-            <div class="mb-8 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-r-lg flex items-start animate-fade-in">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              <span>{{ success() }}</span>
-            </div>
-          }
-
-          <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" class="space-y-6">
-            <!-- Name -->
-            <div class="form-group">
-              <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">{{ 'admin.addCategory.name' | translate }} *</label>
-              <input 
-                type="text" 
-                id="name" 
-                formControlName="name" 
-                placeholder="{{ 'admin.addCategory.namePlaceholder' | translate }}"
-                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
-                [class.border-red-500]="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched"
-              >
+      <div class="max-w-2xl mx-auto px-6 py-16 animate-slide-up">
+        <div class="bg-surface-container-lowest rounded-[48px] shadow-2xl border border-outline-variant/10 overflow-hidden">
+          <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" class="p-10 md:p-16 space-y-10">
+            
+            <div class="space-y-3">
+              <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addCategory.name' | translate }} *</label>
+              <input type="text" formControlName="name" 
+                     [placeholder]="'admin.addCategory.namePlaceholder' | translate"
+                     class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all">
               @if (categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched) {
-                <p class="mt-1.5 text-xs text-red-500 flex items-center">
-                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                   </svg>
-                   Name is required
-                </p>
+                <p class="text-[10px] font-black text-error uppercase px-2">Taxonomy Label Required</p>
               }
             </div>
 
-            <!-- Super Category -->
-            <div class="form-group">
-              <label for="superCategoryId" class="block text-sm font-semibold text-gray-700 mb-2">{{ 'admin.addCategory.superCategory' | translate }}</label>
-              <select 
-                id="superCategoryId" 
-                formControlName="superCategoryId"
-                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none appearance-none bg-white"
-              >
-                <option value="">{{ 'admin.addCategory.selectSuperCategory' | translate }}</option>
-                @for (cat of categories(); track cat.id) {
-                  <option [value]="cat.id">{{ cat.name }}</option>
-                }
-              </select>
+            <div class="space-y-3">
+              <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addCategory.superCategory' | translate }}</label>
+              <div class="relative group">
+                <select formControlName="superCategoryId"
+                        class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all appearance-none cursor-pointer">
+                  <option value="">{{ 'admin.addCategory.selectSuperCategory' | translate }}</option>
+                  @for (cat of categories(); track cat.id) {
+                    <option [value]="cat.id">{{ cat.name }}</option>
+                  }
+                </select>
+                <span class="material-symbols-outlined absolute right-6 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:rotate-180 transition-transform">expand_more</span>
+              </div>
             </div>
 
-            <!-- Description -->
-            <div class="form-group">
-              <label for="description" class="block text-sm font-semibold text-gray-700 mb-2">{{ 'admin.addCategory.description' | translate }}</label>
-              <textarea 
-                id="description" 
-                formControlName="description" 
-                rows="4"
-                placeholder="{{ 'admin.addCategory.descriptionPlaceholder' | translate }}"
-                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none resize-none"
-              ></textarea>
+            <div class="space-y-3">
+              <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addCategory.description' | translate }}</label>
+              <textarea formControlName="description" rows="5"
+                        [placeholder]="'admin.addCategory.descriptionPlaceholder' | translate"
+                        class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all resize-none"></textarea>
             </div>
 
-            <!-- Submit Buttons -->
-            <div class="flex gap-4 pt-4">
-              <button 
-                type="button" 
-                [routerLink]="['/' + currentLang + '/categories']"
-                class="flex-1 py-4 px-6 border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-all active:scale-95">
-                {{ 'admin.addProduct.cancel' | translate }}
+            @if (error()) {
+              <div class="p-6 bg-error/10 text-error rounded-3xl border border-error/20 flex items-start gap-4">
+                 <span class="material-symbols-outlined">report</span>
+                 <p class="text-xs font-black uppercase tracking-widest">{{ error() }}</p>
+              </div>
+            }
+            @if (success()) {
+              <div class="p-6 bg-success/10 text-success rounded-3xl border border-success/20 flex items-start gap-4">
+                 <span class="material-symbols-outlined">check_circle</span>
+                 <p class="text-xs font-black uppercase tracking-widest">{{ success() }}</p>
+              </div>
+            }
+
+            <div class="flex flex-col sm:flex-row gap-6 pt-4">
+              <button type="submit" [disabled]="categoryForm.invalid || submitting()"
+                      class="flex-[2] py-6 bg-primary text-on-primary rounded-[32px] font-headline font-bold text-lg shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 group">
+                 @if (submitting()) {
+                   <span class="w-6 h-6 border-4 border-on-primary/30 border-t-white rounded-full animate-spin"></span>
+                 } @else {
+                   <span>Establish Category</span>
+                   <span class="material-symbols-outlined group-hover:translate-y-1 transition-transform">schema</span>
+                 }
               </button>
-              <button 
-                type="submit" 
-                [disabled]="categoryForm.invalid || submitting()"
-                class="flex-1 py-4 px-6 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-600/20 active:scale-95 flex items-center justify-center">
-                @if (submitting()) {
-                  <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  {{ 'admin.addProduct.adding' | translate }}
-                } @else {
-                  {{ 'admin.addCategory.button' | translate }}
-                }
-              </button>
+              <a [routerLink]="['/' + currentLang + '/categories']"
+                 class="flex-1 py-6 bg-surface-container rounded-[32px] font-headline font-bold text-xs uppercase tracking-widest text-outline hover:bg-surface-container-high transition-all text-center flex items-center justify-center">
+                 Cancel Protocol
+              </a>
             </div>
           </form>
         </div>
       </div>
-    </div>
-  `
+    </main>
+  `,
+  styles: []
 })
 export class AddCategoryComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -143,34 +116,20 @@ export class AddCategoryComponent implements OnInit {
   success = signal<string | null>(null);
   error = signal<string | null>(null);
 
-  get currentLang(): string {
-    return this.languageService.currentLanguage();
-  }
+  get currentLang(): string { return this.languageService.currentLanguage(); }
 
-  ngOnInit(): void {
-    this.loadCategories();
-  }
+  ngOnInit(): void { this.loadCategories(); }
 
   loadCategories(): void {
     this.categoryService.getAll().subscribe({
-      next: (cats) => {
-        this.categories.set(cats);
-      },
-      error: (err) => {
-        console.error('Error loading categories:', err);
-      }
+      next: (cats) => this.categories.set(cats),
+      error: () => this.error.set('Failed to synchronize taxon data.')
     });
   }
 
   onSubmit(): void {
-    if (this.categoryForm.invalid) {
-      this.categoryForm.markAllAsTouched();
-      return;
-    }
-
-    this.submitting.set(true);
-    this.success.set(null);
-    this.error.set(null);
+    if (this.categoryForm.invalid) { this.categoryForm.markAllAsTouched(); return; }
+    this.submitting.set(true); this.success.set(null); this.error.set(null);
 
     const categoryData: AddCategoryDto = {
       name: this.categoryForm.value.name,
@@ -179,24 +138,12 @@ export class AddCategoryComponent implements OnInit {
     };
 
     this.categoryService.create(categoryData).subscribe({
-      next: (response) => {
-        console.log('Category added successfully:', response);
-        this.submitting.set(false);
-        this.success.set('Category added successfully!');
-        
-        // Reset form
+      next: () => {
+        this.submitting.set(false); this.success.set('Taxonomy established successfully.');
         this.categoryForm.reset();
-        
-        // Redirect after a short delay
-        setTimeout(() => {
-          this.router.navigate(['/', this.currentLang, 'categories']);
-        }, 1500);
+        setTimeout(() => this.router.navigate(['/', this.currentLang, 'categories']), 1000);
       },
-      error: (err) => {
-        console.error('Error adding category:', err);
-        this.submitting.set(false);
-        this.error.set(err.error?.message || err.error?.error || 'Failed to add category. Please try again.');
-      }
+      error: (err) => { this.submitting.set(false); this.error.set(err.error?.message || 'Creation protocol failed.'); }
     });
   }
 }

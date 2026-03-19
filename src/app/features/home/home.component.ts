@@ -16,188 +16,198 @@ import { TokenService } from '../../core/services/token.service';
   standalone: true,
   imports: [CommonModule, RouterLink, TranslatePipe],
   template: `
-    <div class="home-page">
-      <!-- Hero Section -->
-      <section class="hero bg-gradient-to-br from-blue-600 to-indigo-700 text-white py-20">
-        <div class="container mx-auto px-4 text-center">
-          <h1 class="text-4xl md:text-6xl font-bold mb-6">
-            {{ 'home.welcome' | translate }}
-          </h1>
-          <p class="text-xl md:text-2xl mb-8 opacity-90">
-            {{ 'home.subtitle' | translate }}
-          </p>
-          <div class="flex justify-center gap-4">
-            <a [routerLink]="'/' + currentLang + '/products'" 
-               class="btn bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors">
-              {{ 'home.shopNow' | translate }}
-            </a>
-            @if (!isLoggedIn()) {
-              <a [routerLink]="'/' + currentLang + '/auth/register'" 
-                 class="btn border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-lg font-semibold transition-colors">
-                {{ 'home.createAccount' | translate }}
-              </a>
-            }
+    <main class="home-page min-h-screen bg-surface">
+      <!-- Premium Hero Section -->
+      <section class="relative px-6 py-10 md:py-20 max-w-7xl mx-auto overflow-hidden">
+        <div class="relative rounded-2xl md:rounded-3xl overflow-hidden min-h-[400px] md:min-h-[550px] flex items-center p-8 md:p-16 bg-gradient-to-br from-primary to-primary-container text-on-primary">
+          <!-- Topographic Decorative Background -->
+          <div class="absolute inset-0 opacity-20 pointer-events-none" 
+               style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCrToAN7K9bxCYHNmah4SPbCguXNVlpK-DeQWeEBnHb8hhrK_YwTkoUXoEOh-RgjYVbFZj2ZzFPFjqLgEqS81zBG3mBRaFpNCTpPthaRKkjbY6cN5ywiH6wrgPH-fov4huJ80NbYSMgUyawNMMrAIHqttsqobdz8M4Yk_ERm3md8eXwLlW4PLs3aIXrOye6hD6Mc0OtdU9LpkjMLI7eeChndSjrvjUUdPvpHGIlYDvLm3UBFRbdvqH0krtaLiZxlv72URSOjaoPfUbP'); background-size: cover; background-position: center;">
           </div>
-        </div>
-      </section>
-
-      <!-- Categories Section -->
-      <section class="categories py-16 bg-gray-50">
-        <div class="container mx-auto px-4">
-          <h2 class="section-title text-center text-2xl font-bold mb-8 text-gray-800">
-            {{ 'home.categories' | translate }}
-          </h2>
-          @if (categories().length > 0) {
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-              @for (category of categories(); track category.id) {
-                <a [routerLink]="['/' + currentLang + '/products']" 
-                   [queryParams]="{categoryId: category.id}"
-                   class="category-card card bg-white hover:shadow-xl hover:-translate-y-1 cursor-pointer text-center p-6 rounded-xl transform transition-all duration-300">
-                  <div class="category-icon text-5xl mb-4">
-                    📦
-                  </div>
-                  <h3 class="font-semibold text-lg text-gray-800">{{ category.name }}</h3>
-                  <p class="text-gray-500 text-sm mt-2">
-                    {{ category.productsCount || 0 }} {{ 'nav.products' | translate }}
-                  </p>
+          
+          <div class="relative z-10 max-w-2xl animate-fade-in text-start">
+            <h1 class="font-headline text-5xl md:text-7xl font-extrabold tracking-tighter leading-none mb-6">
+              {{ 'home.welcome' | translate }}
+            </h1>
+            <p class="font-body text-lg md:text-xl opacity-90 mb-10 max-w-lg leading-relaxed">
+              {{ 'home.subtitle' | translate }}
+            </p>
+            <div class="flex flex-wrap gap-4">
+              <a [routerLink]="'/' + currentLang + '/products'" 
+                 class="bg-surface-container-lowest text-primary font-headline font-bold px-10 py-4 rounded-full hover:scale-105 active:scale-95 transition-transform duration-300 shadow-xl flex items-center gap-3">
+                {{ 'home.shopNow' | translate }}
+                <span class="material-symbols-outlined">arrow_forward</span>
+              </a>
+              @if (!isLoggedIn()) {
+                <a [routerLink]="'/' + currentLang + '/auth/register'" 
+                   class="bg-white/10 backdrop-blur-md border border-white/20 text-white font-headline font-bold px-10 py-4 rounded-full hover:bg-white/20 transition-all duration-300">
+                  {{ 'home.createAccount' | translate }}
                 </a>
               }
             </div>
-          } @else {
-            <div class="col-span-full text-center py-12 text-gray-500 bg-white rounded-xl shadow">
-              {{ 'home.noProducts' | translate }}
-            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bento-Style Categories -->
+      <section class="categories px-6 py-12 max-w-7xl mx-auto">
+        <div class="flex justify-between items-end mb-10">
+          <div>
+            <h2 class="font-headline text-3xl font-extrabold tracking-tight text-on-surface">
+              {{ 'home.categories' | translate }}
+            </h2>
+            <p class="text-on-surface-variant font-body text-xs uppercase tracking-widest animate-fade-in-up" style="animation-delay: 100ms">{{ 'home.browseByDept' | translate }}</p>
+          </div>
+          <a [routerLink]="['/' + currentLang + '/categories']" 
+             class="text-primary font-semibold flex items-center gap-1 hover:gap-2 transition-all group">
+            {{ 'home.viewAll' | translate }}
+            <span class="material-symbols-outlined transform group-hover:translate-x-1 transition-transform">chevron_right</span>
+          </a>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          @for (category of categories(); track category.id) {
+            <a [routerLink]="['/' + currentLang + '/products']" 
+               [queryParams]="{categoryId: category.id}"
+               class="group cursor-pointer aspect-square rounded-2xl bg-surface-container-low flex flex-col items-center justify-center p-6 hover:bg-white hover:shadow-2xl transition-all duration-500 relative overflow-hidden text-center">
+              
+              <div class="w-20 h-20 rounded-full bg-primary/5 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-500">
+                <span class="material-symbols-outlined text-4xl text-primary">{{ getCategoryIcon(category.name) }}</span>
+              </div>
+              
+              <span class="font-headline font-bold text-lg text-on-surface">{{ category.name }}</span>
+              <p class="text-on-surface-variant text-xs mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                {{ category.productsCount || 0 }} {{ 'nav.products' | translate }}
+              </p>
+              
+              <!-- Subtle inner glow on hover -->
+              <div class="absolute inset-0 border-2 border-primary/0 group-hover:border-primary/5 rounded-2xl transition-all pointer-events-none"></div>
+            </a>
           }
         </div>
       </section>
 
-      <!-- Featured Products Section -->
-      <section class="featured-products py-16">
-        <div class="max-w-7xl mx-auto px-4">
-          <!-- Centered Header -->
-          <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-            <div class="text-center md:text-left">
-              <h2 class="text-3xl font-bold mb-3 text-gray-800">
-                {{ 'home.featuredProducts' | translate }}
-              </h2>
-              <a [routerLink]="'/' + currentLang + '/products'" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-1 transition-colors">
-                {{ 'home.viewAll' | translate }}
-              </a>
-            </div>
+      <!-- Premium Featured Products Grid -->
+      <section class="featured-products px-6 py-12 max-w-7xl mx-auto mb-20 text-start">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+          <h2 class="font-headline text-3xl font-extrabold tracking-tight text-on-surface">
+            {{ 'home.featuredProducts' | translate }}
+          </h2>
+          
+          <div class="flex gap-4">
             @if (canAddProduct()) {
               <button 
                 [routerLink]="['/' + currentLang + '/admin/products/add']"
-                class="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all shadow-lg hover:shadow-green-600/20 transform hover:-translate-y-0.5 active:translate-y-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
+                class="flex items-center gap-2 px-6 py-3 bg-secondary text-on-secondary rounded-xl hover:bg-secondary-dim transition-all shadow-lg hover:shadow-secondary/20 transform hover:-translate-y-0.5">
+                <span class="material-symbols-outlined">add_circle</span>
                 <span class="font-semibold">{{ 'admin.addProduct.addProduct' | translate }}</span>
               </button>
             }
+            <a [routerLink]="'/' + currentLang + '/products'" class="flex items-center gap-2 px-6 py-3 bg-surface-container border border-outline-variant text-on-surface rounded-xl hover:bg-surface-container-high transition-all">
+               {{ 'home.viewAll' | translate }}
+            </a>
           </div>
-          
-          @if (featuredProducts().length > 0) {
-            <div class="flex justify-center">
-              <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 max-w-6xl px-2 sm:px-0">
-                @for (product of featuredProducts(); track product.id) {
-                  <div class="product-card card bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer rounded-lg overflow-hidden"
-                       style="min-height: auto;">
-                    <!-- Product Image Container -->
-                    <a [routerLink]="['/' + currentLang + '/products', product.id]" class="block relative group">
-                      <div class="h-40 sm:h-48 bg-gray-100 flex items-center justify-center overflow-hidden relative">
-                          @if (photoService.getMainPhotoUrl(product.productPhotos || product.productphotos)) {
-                            <img [src]="photoService.getMainPhotoUrl(product.productPhotos || product.productphotos)" 
-                                 [alt]="product.name"
-                                 class="h-full w-full object-cover">
-                          } @else {
-                            <img [src]="placeholder" 
-                                 [alt]="product.name"
-                                 class="h-full w-full object-cover p-4">
-                          }
-                          
-                          <!-- Sale and Fasting Labels -->
-                          <div class="absolute top-2 left-2 flex flex-col gap-1 pointer-events-none z-10">
-                            @if (product.haveSale) {
-                              <span class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold">
-                                {{ 'product.sale' | translate }}
-                              </span>
-                            }
-                            @if (product.isFasting) {
-                              <span class="bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold">
-                                {{ 'product.fasting' | translate }}
-                              </span>
-                            }
-                          </div>
-                          
-                          <!-- Heart Button -->
-                          <button 
-                            class="absolute top-2 right-2 z-20 p-1.5 bg-white/90 rounded-full shadow-md hover:bg-red-50 transition-all duration-200 transform hover:scale-110"
-                            [class.text-red-500]="wishlistIds().has(product.id)"
-                            [class.text-gray-400]="!wishlistIds().has(product.id)"
-                            [disabled]="processingId() === product.id"
-                            (click)="toggleWishlist(product, $event)">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" [class.fill-current]="wishlistIds().has(product.id)" viewBox="0 0 24 24">
-                              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                            </svg>
-                          </button>
-                      </div>
+        </div>
+
+        @if (featuredProducts().length > 0) {
+          <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
+            @for (product of featuredProducts(); track product.id) {
+              <div class="group animate-fade-in-up relative bg-surface-container-lowest rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-transparent hover:border-outline-variant/30 flex flex-col">
+                
+                <!-- Product Media Area -->
+                <div class="relative aspect-[4/5] overflow-hidden bg-surface-container-low">
+                  <a [routerLink]="['/' + currentLang + '/products', product.id]">
+                    <img [src]="photoService.getMainPhotoUrl(product.productPhotos || product.productphotos) || placeholder" 
+                         [alt]="product.name"
+                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                  </a>
+                  
+                  <!-- Quality Badges -->
+                  <div class="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none">
+                    @if (product.haveSale) {
+                      <span class="bg-error text-on-error text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">
+                        {{ 'product.sale' | translate }}
+                      </span>
+                    }
+                    @if (product.isFasting) {
+                      <span class="bg-primary text-on-primary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">
+                        {{ 'product.fasting' | translate }}
+                      </span>
+                    }
+                  </div>
+
+                  <!-- Quick Action Button (Wishlist) -->
+                  <button 
+                    class="absolute top-2 right-2 md:top-4 md:right-4 z-20 p-2 md:p-2.5 bg-white/80 backdrop-blur-md rounded-full shadow-xl hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-110 active:scale-90"
+                    [class.text-primary]="wishlistIds().has(product.id)"
+                    [class.text-on-surface-variant]="!wishlistIds().has(product.id)"
+                    (click)="toggleWishlist(product, $event)">
+                    <span class="material-symbols-outlined text-lg md:text-xl flex items-center justify-center leading-none" 
+                          [style.font-variation-settings]="wishlistIds().has(product.id) ? '\\'FILL\\' 1' : '\\'FILL\\' 0'">
+                      favorite
+                    </span>
+                  </button>
+
+                  <!-- Glassmorphism Add to Cart Tray -->
+                  <div class="absolute inset-x-4 bottom-4 glass-tray p-4 rounded-xl translate-y-20 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-between shadow-2xl overflow-hidden">
+                    <span class="font-headline font-bold text-sm text-on-surface">{{ 'product.quickAdd' | translate }}</span>
+                    <button 
+                      class="bg-primary text-on-primary p-2 rounded-full hover:scale-110 active:scale-95 transition-all shadow-lg"
+                      [disabled]="product.shownQuantity <= 0"
+                      (click)="addToCart(product, $event)">
+                      <span class="material-symbols-outlined text-sm">add</span>
+                    </button>
+                    <!-- Glass effect overlay for the tray -->
+                    <div class="absolute inset-0 bg-white/10 -z-10"></div>
+                  </div>
+                </div>
+
+                <!-- Product Content Info -->
+                <div class="p-3 md:p-6 flex flex-col flex-grow text-start">
+                  <div class="flex justify-between items-start mb-1 md:mb-3">
+                    <a [routerLink]="['/' + currentLang + '/products', product.id]" class="hover:text-primary transition-colors">
+                      <h3 class="font-headline font-bold text-xs md:text-lg leading-tight line-clamp-1 truncate block max-w-[120px] md:max-w-[180px]">
+                        {{ product.name }}
+                      </h3>
                     </a>
-                    
-                    <!-- Product Info -->
-                    <div class="p-2 sm:p-3 text-center">
-                      <a [routerLink]="['/' + currentLang + '/products', product.id]" class="block">
-                        <h3 class="font-bold text-[10px] sm:text-sm text-gray-800 line-clamp-2 px-1 leading-tight hover:text-blue-600 transition-colors">
-                          {{ product.name }}
-                        </h3>
-                      </a>
-                      <!-- Price -->
-                      <div class="mt-1 mb-1">
-                        <span class="text-sm sm:text-base font-bold text-red-600">
-                          {{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
-                        </span>
-                      </div>
-                      <!-- Quantity -->
-                      <div class="mb-2">
-                        @if (product.shownQuantity > 0) {
-                          <span class="inline-flex items-center gap-1 text-green-600 text-xs font-medium">
-                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                            {{ 'product.inStock' | translate }}
-                          </span>
-                        } @else {
-                          <span class="inline-flex items-center gap-1 text-red-500 text-xs font-medium">
-                            <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
-                            {{ 'product.outOfStock' | translate }}
-                          </span>
-                        }
-                      </div>
-                      <!-- Add to Cart Button -->
-                      <button 
-                        class="w-full py-1.5 px-2 sm:px-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition-colors duration-200 text-xs"
-                        [class.opacity-50]="product.shownQuantity <= 0"
-                        [class.cursor-not-allowed]="product.shownQuantity <= 0"
-                        [disabled]="product.shownQuantity <= 0"
-                        (click)="addToCart(product, $event)">
-                        {{ product.shownQuantity > 0 ? ('product.addToCart' | translate) : ('product.outOfStock' | translate) }}
-                      </button>
+                    <div class="hidden md:flex items-center gap-1 text-tertiary">
+                      <span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+                      <span class="text-xs font-black">4.9</span>
                     </div>
                   </div>
-                }
+                  
+                  <p class="text-on-surface-variant text-[10px] md:text-xs mb-2 md:mb-6 line-clamp-1 md:line-clamp-2 leading-relaxed flex-grow">
+                    {{ 'product.premiumNote' | translate }}
+                  </p>
+
+                  <div class="flex items-center justify-between mt-auto">
+                    <div class="flex flex-col">
+                      <span class="text-sm md:text-2xl font-black text-primary font-headline">{{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+                      @if (product.oldPrice > product.newPrice) {
+                        <span class="text-[8px] md:text-xs text-outline line-through">{{ product.oldPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+                      }
+                    </div>
+                    
+                    @if (product.shownQuantity <= 0) {
+                      <span class="px-3 py-1 bg-surface-container-high text-on-surface-variant text-[10px] font-bold rounded-full">
+                        {{ 'product.outOfStock' | translate }}
+                      </span>
+                    }
+                  </div>
+                </div>
               </div>
-            </div>
-          } @else {
-            <div class="text-center py-12 text-gray-500 bg-white rounded-xl shadow">
-              {{ 'home.noProducts' | translate }}
-            </div>
-          }
-        </div>
+            }
+          </div>
+        } @else {
+          <div class="text-center py-20 bg-surface-container-low rounded-3xl border-2 border-dashed border-outline-variant/30 text-on-surface-variant">
+            <span class="material-symbols-outlined text-6xl mb-4 opacity-20">inventory_2</span>
+            <p class="font-headline font-bold">{{ 'home.noProducts' | translate }}</p>
+          </div>
+        }
       </section>
-    </div>
+    </main>
   `,
-  styles: [`
-    .card {
-      box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
-    }
-  `]
+  styles: []
 })
 export class HomeComponent implements OnInit {
   private productService = inject(ProductService);
@@ -232,6 +242,25 @@ export class HomeComponent implements OnInit {
     return this.languageService.currentLanguage();
   }
 
+  getCategoryIcon(name: string): string {
+    const iconMap: { [key: string]: string } = {
+      'Electronics': 'devices',
+      'Phones': 'smartphone',
+      'Computers': 'laptop_mac',
+      'Home': 'home',
+      'Fashion': 'apparel',
+      'Beauty': 'content_cut',
+      'Sports': 'sports_basketball',
+      'Toys': 'toys',
+      'Grocery': 'shopping_basket',
+      'Health': 'health_and_safety',
+      'Automotive': 'directions_car',
+      'Books': 'menu_book'
+    };
+    return iconMap[name] || 'inventory_2';
+  }
+
+
   ngOnInit(): void {
     this.loadFeaturedProducts();
     this.loadCategories();
@@ -244,10 +273,12 @@ export class HomeComponent implements OnInit {
         let products: any[] = [];
         if (Array.isArray(response)) {
           products = response;
-        } else if (response && Array.isArray(response.items)) {
-          products = response.items;
+        } else if (response && typeof response === 'object') {
+          products = response.getProducts || response.GetProducts ||
+                     response.items || response.Items || 
+                     response.data || response.Data || [];
         }
-        this.featuredProducts.set(products);
+        this.featuredProducts.set(products.map(p => this.normalizeProduct(p)));
       },
       error: (error) => {
         console.error('Error loading hotest products:', error);
@@ -359,5 +390,28 @@ export class HomeComponent implements OnInit {
         console.error('Error adding to cart:', error);
       }
     });
+  }
+
+  private normalizeProduct(p: any): any {
+    if (!p) return p;
+    return {
+      ...p,
+      id: p.id || p.Id,
+      name: p.name || p.Name,
+      description: p.description || p.Description,
+      price: p.price || p.Price,
+      newPrice: p.newPrice || p.NewPrice,
+      oldPrice: p.oldPrice || p.OldPrice,
+      categoryId: p.categoryId || p.CategoryId,
+      categoryName: p.categoryName || p.CategoryName,
+      supplierId: p.supplierId || p.SupplierId,
+      shownQuantity: p.shownQuantity || (p.shownQuantity === 0 ? 0 : (p.ShownQuantity || 0)),
+      quantityInStock: p.quantityInStock || p.QuantityInStock,
+      productPhotos: p.productPhotos || p.ProductPhotos || p.productphotos || [],
+      haveSale: p.haveSale ?? p.HaveSale ?? false,
+      isFasting: p.isFasting ?? p.IsFasting ?? false,
+      popularity: p.popularity || p.Popularity || 0,
+      reviewCount: p.reviewCount || p.ReviewCount || 0
+    };
   }
 }

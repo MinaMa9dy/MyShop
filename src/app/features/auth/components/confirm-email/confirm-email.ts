@@ -3,90 +3,94 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmEmailDto } from '../../../../core/models/auth.model';
+import { LanguageService } from '../../../../core/services/language.service';
 
 @Component({
   selector: 'app-confirm-email',
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="auth-page min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4">
-      <div class="auth-card card max-w-md w-full text-center">
-        @if (loading()) {
-          <div class="py-12">
-            <div class="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p class="text-gray-600 font-medium">Confirming your email...</p>
-          </div>
-        } @else if (success()) {
-          <div class="py-12">
-            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+    <main class="min-h-screen flex items-center justify-center bg-surface px-6 py-20 overflow-hidden relative" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
+      <!-- Dynamic Background Elements -->
+      <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -mr-40 -mt-40 animate-pulse"></div>
+      <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-tertiary/5 rounded-full blur-[100px] -ml-40 -mb-40 animate-pulse" style="animation-delay: 2s"></div>
+
+      <div class="max-w-xl w-full relative z-10 animate-fade-in">
+        <div class="bg-surface-container-lowest p-10 md:p-14 rounded-[48px] shadow-2xl border border-outline-variant/10 backdrop-blur-xl relative overflow-hidden text-center">
+          
+          @if (loading()) {
+            <div class="py-20 space-y-8">
+               <div class="w-24 h-24 border-8 border-primary/20 border-t-primary rounded-full animate-spin mx-auto shadow-inner"></div>
+               <div>
+                  <h3 class="font-headline text-2xl font-black text-on-surface mb-2 uppercase tracking-tighter">Synchronizing Vector</h3>
+                  <p class="font-body text-on-surface-variant opacity-60">Verifying communication channel parameters...</p>
+               </div>
             </div>
-            <h1 class="text-2xl font-bold text-gray-800 mb-2">Email Confirmed!</h1>
-            <p class="text-gray-600 mb-8">Your email has been successfully confirmed. You can now log in to your account.</p>
-            <a [routerLink]="['/ar/auth/login']" class="btn btn-primary px-8 py-3">
-              Go to Login
-            </a>
-          </div>
-        } @else {
-          <div class="py-12">
-            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+          } @else if (success()) {
+            <div class="py-12 space-y-10 animate-scale-in">
+               <div class="w-32 h-32 bg-success/10 text-success rounded-[40px] flex items-center justify-center mx-auto shadow-2xl border border-success/20 group relative overflow-hidden">
+                  <span class="material-symbols-outlined text-6xl relative z-10 transition-transform group-hover:scale-110">mark_email_read</span>
+                  <div class="absolute inset-0 bg-gradient-to-br from-success/20 to-transparent"></div>
+               </div>
+               <div>
+                  <h1 class="font-headline text-4xl font-black text-on-surface mb-3 tracking-tight">Channel Verified</h1>
+                  <p class="font-body text-on-surface-variant opacity-70">Communication protocol established. Your entity is now fully operational.</p>
+               </div>
+               <a [routerLink]="['/' + currentLang + '/auth/login']" 
+                  class="inline-block py-5 px-16 bg-on-surface text-surface rounded-[32px] font-headline font-bold text-lg shadow-2xl hover:scale-[1.05] transition-all group">
+                  <span class="flex items-center gap-3">
+                     Initialize Access
+                     <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">login</span>
+                  </span>
+               </a>
             </div>
-            <h1 class="text-2xl font-bold text-gray-800 mb-2">Confirmation Failed</h1>
-            <p class="text-gray-600 mb-8">{{ error() || 'The confirmation link is invalid or has expired.' }}</p>
-            <div class="flex flex-col gap-4">
-              <a [routerLink]="['/ar/auth/resend-email-confirmation']" class="btn btn-primary py-3">
-                Resend Confirmation Link
-              </a>
-              <a [routerLink]="['/ar/auth/login']" class="btn btn-outline py-3">
-                Back to Login
-              </a>
+          } @else {
+            <div class="py-12 space-y-10 animate-scale-in">
+               <div class="w-32 h-32 bg-error/10 text-error rounded-[40px] flex items-center justify-center mx-auto shadow-2xl border border-error/20 relative overflow-hidden">
+                  <span class="material-symbols-outlined text-6xl relative z-10">error</span>
+                  <div class="absolute inset-0 bg-gradient-to-br from-error/20 to-transparent"></div>
+               </div>
+               <div>
+                  <h1 class="font-headline text-4xl font-black text-on-surface mb-3 tracking-tight">Protocol Mismatch</h1>
+                  <p class="font-body text-on-surface-variant opacity-70">{{ error() || 'The verification sequence is invalid or has expired.' }}</p>
+               </div>
+               <div class="flex flex-col gap-5 max-w-sm mx-auto">
+                  <a [routerLink]="['/' + currentLang + '/auth/resend-email-confirmation']" 
+                     class="w-full py-5 bg-primary text-on-primary rounded-[32px] font-headline font-bold uppercase tracking-widest text-xs shadow-xl transition-all hover:scale-[1.02]">
+                     Retry Verification Protocol
+                  </a>
+                  <a [routerLink]="['/' + currentLang + '/auth/login']" 
+                     class="w-full py-5 bg-surface-container rounded-[32px] font-headline font-bold uppercase tracking-widest text-[10px] text-outline transition-all hover:bg-surface-container-high">
+                     Back to Gateway
+                  </a>
+               </div>
             </div>
-          </div>
-        }
+          }
+          
+        </div>
       </div>
-    </div>
+    </main>
   `,
-  styles: [`
-    .auth-page {
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    }
-  `]
+  styles: []
 })
 export class ConfirmEmailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
+  private languageService = inject(LanguageService);
   
   loading = signal(true);
   success = signal(false);
   error = signal<string | null>(null);
+  get currentLang(): string { return this.languageService.currentLanguage(); }
   
   ngOnInit(): void {
     const userId = this.route.snapshot.queryParams['userId'];
     const token = this.route.snapshot.queryParams['token'];
+    if (!userId || !token) { this.loading.set(false); this.error.set('Invalid confirmation link.'); return; }
     
-    if (!userId || !token) {
-      this.loading.set(false);
-      this.error.set('Invalid confirmation link.');
-      return;
-    }
-    
-    const confirmDto: ConfirmEmailDto = { userId, token };
-    
-    this.authService.confirmEmail(confirmDto).subscribe({
-      next: () => {
-        this.success.set(true);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error('Email confirmation failed:', err);
-        this.error.set(err.error?.message || 'Email confirmation failed. The link might be expired.');
-        this.loading.set(false);
-      }
+    this.authService.confirmEmail({ userId, token }).subscribe({
+      next: () => { this.success.set(true); this.loading.set(false); },
+      error: (err) => { this.error.set(err.error?.message || 'Link synchronization timeout.'); this.loading.set(false); }
     });
   }
 }
