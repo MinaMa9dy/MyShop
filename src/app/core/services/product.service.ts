@@ -17,10 +17,10 @@ export class ProductService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/Products`;
   
-  // Create a new product (AddProduct endpoint)
+  // Create a new product (POST to api/Products)
   addProduct(product: AddProductDto): Observable<any> {
     const formData = this.toFormData(product);
-    return this.http.post(`${this.apiUrl}/AddProduct`, formData);
+    return this.http.post(this.apiUrl, formData);
   }
   
   getAll(pageNumber: number = 1, pageSize: number = 10): Observable<any> {
@@ -77,6 +77,16 @@ export class ProductService {
     return this.http.put<Product>(`${this.apiUrl}/${product.id}`, formData);
   }
 
+  uploadPhoto(productId: string, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    // The backend DTO expects ProductId
+    formData.append('ProductId', productId);
+    formData.append('IsMain', 'false');
+    
+    return this.http.post(`${environment.apiUrl}/Photo`, formData);
+  }
+  
   private toFormData(obj: any): FormData {
     const formData = new FormData();
     for (const key in obj) {

@@ -5,6 +5,8 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { CategoryService } from '../../../core/services/category.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { Category } from '../../../core/models/category.model';
+import { TokenService } from '../../../core/services/token.service';
+import { computed } from '@angular/core';
 
 @Component({
   selector: 'app-category-list',
@@ -13,7 +15,19 @@ import { Category } from '../../../core/models/category.model';
   template: `
     <div class="categories-page py-8">
       <div class="container mx-auto px-4">
-        <h1 class="page-header">Categories</h1>
+        <div class="flex justify-between items-center mb-8">
+          <h1 class="text-3xl font-bold text-gray-800">{{ 'nav.categories' | translate }}</h1>
+          @if (isAdmin()) {
+            <button 
+              [routerLink]="['/' + currentLang + '/admin/categories/add']"
+              class="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-600/20 transform hover:-translate-y-0.5 active:translate-y-0 text-sm md:text-base">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              <span class="font-bold">{{ 'admin.addCategory.button' | translate }}</span>
+            </button>
+          }
+        </div>
         
         @if (loading()) {
           <div class="flex justify-center py-12">
@@ -56,9 +70,12 @@ import { Category } from '../../../core/models/category.model';
 export class CategoryListComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private languageService = inject(LanguageService);
+  private tokenService = inject(TokenService);
   
   categories = signal<any[]>([]);
   loading = signal(false);
+  
+  isAdmin = computed(() => this.tokenService.hasRole('Admin'));
   
   get currentLang(): string {
     return this.languageService.currentLanguage();

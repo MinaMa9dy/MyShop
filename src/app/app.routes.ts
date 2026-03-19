@@ -105,6 +105,36 @@ export const routes: Routes = [
         title: 'MyShop - Add Product'
       },
       {
+        path: 'admin/categories/add',
+        loadComponent: () => import('./features/admin/add-category/add-category.component').then(m => m.AddCategoryComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - Add Category'
+      },
+      {
+        path: 'admin/coupons',
+        loadComponent: () => import('./features/admin/coupons/coupon-list/coupon-list.component').then(m => m.CouponListComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - Manage Coupons'
+      },
+      {
+        path: 'admin/coupons/add',
+        loadComponent: () => import('./features/admin/coupons/coupon-form/coupon-form.component').then(m => m.CouponFormComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - Add Coupon'
+      },
+      {
+        path: 'admin/coupons/edit/:id',
+        loadComponent: () => import('./features/admin/coupons/coupon-form/coupon-form.component').then(m => m.CouponFormComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - Edit Coupon'
+      },
+      {
+        path: 'admin/coupons/assign/:id',
+        loadComponent: () => import('./features/admin/coupons/coupon-assign/coupon-assign.component').then(m => m.CouponAssignComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - Assign Coupon'
+      },
+      {
         path: 'wishes',
         loadComponent: () => import('./features/wish/wish-list/wish-list.component').then(m => m.WishListComponent),
         canActivate: [authGuard],
@@ -211,6 +241,36 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/add-product/add-product.component').then(m => m.AddProductComponent),
         canActivate: [authGuard],
         title: 'MyShop - إضافة منتج'
+      },
+      {
+        path: 'admin/categories/add',
+        loadComponent: () => import('./features/admin/add-category/add-category.component').then(m => m.AddCategoryComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - إضافة فئة'
+      },
+      {
+        path: 'admin/coupons',
+        loadComponent: () => import('./features/admin/coupons/coupon-list/coupon-list.component').then(m => m.CouponListComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - إدارة الكوبونات'
+      },
+      {
+        path: 'admin/coupons/add',
+        loadComponent: () => import('./features/admin/coupons/coupon-form/coupon-form.component').then(m => m.CouponFormComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - إضافة كوبون'
+      },
+      {
+        path: 'admin/coupons/edit/:id',
+        loadComponent: () => import('./features/admin/coupons/coupon-form/coupon-form.component').then(m => m.CouponFormComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - تعديل الكوبون'
+      },
+      {
+        path: 'admin/coupons/assign/:id',
+        loadComponent: () => import('./features/admin/coupons/coupon-assign/coupon-assign.component').then(m => m.CouponAssignComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - تعيين الكوبون'
       },
       {
         path: 'wishes',

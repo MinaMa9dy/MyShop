@@ -35,8 +35,8 @@ export class CategoryService {
     return this.http.get<Category[]>(`${this.apiUrl}/tree`);
   }
   
-  create(category: AddCategoryDto): Observable<Category> {
-    return this.http.post<Category>(this.apiUrl, category);
+  create(category: AddCategoryDto): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/AddCategory`, category);
   }
   
   update(category: UpdateCategoryDto): Observable<Category> {

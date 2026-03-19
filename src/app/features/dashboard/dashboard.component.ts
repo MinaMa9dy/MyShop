@@ -125,6 +125,12 @@ import { environment } from '../../../environments/environment';
                   <div class="border-t border-gray-100 pt-6">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">{{ 'dashboard.quickActions' | translate }}</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      @if (canAddProduct()) {
+                        <a [routerLink]="['/' + currentLang() + '/admin/products/add']" class="profile-action-btn p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all text-center group border border-green-200 shadow-sm">
+                          <span class="text-3xl block mb-2 group-hover:scale-110 transition-transform">➕</span>
+                          <span class="font-medium text-green-700 group-hover:text-green-800">{{ 'admin.addProduct.addProduct' | translate }}</span>
+                        </a>
+                      }
                       <a [routerLink]="'/' + currentLang() + '/products'" class="profile-action-btn p-4 bg-gray-50 rounded-xl hover:bg-indigo-50 transition-all text-center group">
                         <span class="text-3xl block mb-2 group-hover:scale-110 transition-transform">🛍️</span>
                         <span class="font-medium text-gray-700 group-hover:text-indigo-600">{{ 'dashboard.browseProducts' | translate }}</span>
@@ -137,10 +143,16 @@ import { environment } from '../../../environments/environment';
                         <span class="text-3xl block mb-2 group-hover:scale-110 transition-transform">📂</span>
                         <span class="font-medium text-gray-700 group-hover:text-indigo-600">{{ 'nav.categories' | translate }}</span>
                       </a>
-                      <a [routerLink]="'/' + currentLang() + '/orders'" class="profile-action-btn p-4 bg-gray-50 rounded-xl hover:bg-indigo-50 transition-all text-center group">
-                        <span class="text-3xl block mb-2 group-hover:scale-110 transition-transform">📋</span>
-                        <span class="font-medium text-gray-700 group-hover:text-indigo-600">{{ 'orders.title' | translate }}</span>
-                      </a>
+                      @if (isAdmin()) {
+                        <a [routerLink]="['/' + currentLang() + '/admin/categories/add']" class="profile-action-btn p-4 bg-purple-50 rounded-xl hover:bg-purple-100 transition-all text-center group border border-purple-200 shadow-sm">
+                          <span class="text-3xl block mb-2 group-hover:scale-110 transition-transform">📁➕</span>
+                          <span class="font-medium text-purple-700 group-hover:text-purple-800">{{ 'admin.addCategory.button' | translate }}</span>
+                        </a>
+                        <a [routerLink]="['/' + currentLang() + '/admin/coupons']" class="profile-action-btn p-4 bg-yellow-50 rounded-xl hover:bg-yellow-100 transition-all text-center group border border-yellow-200 shadow-sm">
+                          <span class="text-3xl block mb-2 group-hover:scale-110 transition-transform">🎫</span>
+                          <span class="font-medium text-yellow-700 group-hover:text-yellow-800">{{ 'admin.coupons.title' | translate }}</span>
+                        </a>
+                      }
                     </div>
                   </div>
                 </div>
@@ -251,6 +263,12 @@ export class DashboardComponent implements OnInit {
     }
     return this.tokenService.getName() || 'User';
   });
+  
+  canAddProduct = computed(() => {
+    return this.authService.isLoggedIn() && (this.tokenService.isSeller() || this.tokenService.hasRole('Admin'));
+  });
+
+  isAdmin = computed(() => this.tokenService.hasRole('Admin'));
   
   // Get member since date
   memberSince = computed(() => {

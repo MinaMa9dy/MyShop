@@ -143,39 +143,40 @@ export class TokenService {
     return null;
   }
 
-  // Get role from JWT token claims
-  getRole(): string | null {
+  // Get all roles from JWT token claims
+  getRoles(): string[] {
     const token = this.getAccessToken();
-    if (!token) return null;
+    if (!token) return [];
     
     const payload = this.decodeToken(token);
-    if (!payload) return null;
+    if (!payload) return [];
     
-    // Try common claim names for role
-    if (payload.role) return payload.role;
-    if (payload.roles) return Array.isArray(payload.roles) ? payload.roles[0] : payload.roles;
-    if (payload.roleclaimtype) return payload.roleclaimtype;
+    let roles: any = null;
     
-    // Check for namespaced role claim
-    for (const key of Object.keys(payload)) {
-      if (key.toLowerCase().includes('role')) {
-        return payload[key];
+    // Check for standard role claims
+    if (payload.role) roles = payload.role;
+    else if (payload.roles) roles = payload.roles;
+    else {
+      // Check for namespaced role claim (common in ASP.NET Core)
+      for (const key of Object.keys(payload)) {
+        if (key.toLowerCase().includes('role')) {
+          roles = payload[key];
+          break;
+        }
       }
     }
     
-    return null;
+    if (!roles) return [];
+    if (Array.isArray(roles)) return roles;
+    return [roles];
   }
 
   // Check if user has a specific role
   hasRole(role: string): boolean {
-    const userRole = this.getRole();
-    if (!userRole) return false;
+    const roles = this.getRoles();
+    if (!roles || roles.length === 0) return false;
     
-    if (Array.isArray(userRole)) {
-      return userRole.includes(role);
-    }
-    
-    return userRole.toLowerCase() === role.toLowerCase();
+    return roles.some(r => r.toLowerCase() === role.toLowerCase());
   }
 
   // Check if user is a Seller

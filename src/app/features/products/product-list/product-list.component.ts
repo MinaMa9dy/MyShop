@@ -42,6 +42,10 @@ export class ProductListComponent implements OnInit {
   // Track which product is being processed
   processingId = signal<string | null>(null);
 
+  get canAddProduct(): boolean {
+    return this.authService.isLoggedIn() && (this.tokenService.isSeller() || this.tokenService.hasRole('Admin'));
+  }
+
   get currentLang(): string {
     return this.languageService.currentLanguage();
   }

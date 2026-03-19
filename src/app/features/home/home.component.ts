@@ -75,13 +75,25 @@ import { TokenService } from '../../core/services/token.service';
       <section class="featured-products py-16">
         <div class="max-w-7xl mx-auto px-4">
           <!-- Centered Header -->
-          <div class="text-center mb-10">
-            <h2 class="text-3xl font-bold mb-3 text-gray-800">
-              {{ 'home.featuredProducts' | translate }}
-            </h2>
-            <a [routerLink]="'/' + currentLang + '/products'" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-1 transition-colors">
-              {{ 'home.viewAll' | translate }}
-            </a>
+          <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+            <div class="text-center md:text-left">
+              <h2 class="text-3xl font-bold mb-3 text-gray-800">
+                {{ 'home.featuredProducts' | translate }}
+              </h2>
+              <a [routerLink]="'/' + currentLang + '/products'" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-1 transition-colors">
+                {{ 'home.viewAll' | translate }}
+              </a>
+            </div>
+            @if (canAddProduct()) {
+              <button 
+                [routerLink]="['/' + currentLang + '/admin/products/add']"
+                class="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all shadow-lg hover:shadow-green-600/20 transform hover:-translate-y-0.5 active:translate-y-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span class="font-semibold">{{ 'admin.addProduct.addProduct' | translate }}</span>
+              </button>
+            }
           </div>
           
           @if (featuredProducts().length > 0) {
@@ -211,6 +223,10 @@ export class HomeComponent implements OnInit {
   
   // Check if user is logged in
   isLoggedIn = computed(() => !!this.tokenService.getUserId());
+  
+  canAddProduct = computed(() => {
+    return this.authService.isLoggedIn() && (this.tokenService.isSeller() || this.tokenService.hasRole('Admin'));
+  });
   
   get currentLang(): string {
     return this.languageService.currentLanguage();
