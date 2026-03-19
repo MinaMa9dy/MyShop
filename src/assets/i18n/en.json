@@ -97,6 +97,7 @@
     "loginToReview": "Please login to write a review",
     "beFirstToReview": "Be the first to review this product",
     "customerIntelligence": "Customer Intelligence",
+    "customerReviews": "Customer Reviews",
     "reviewDesc": "Review the experiences of our architectural circle and provide your own feedback.",
     "logNewIntelligence": "Log New Intelligence",
     "satisfactionScore": "SATISFACTION SCORE",
@@ -394,6 +395,8 @@
     "empty": "Your wishlist is empty",
     "emptyDesc": "Start adding items you love to your wishlist",
     "remove": "Remove",
-    "browseProducts": "Browse Products"
+    "browseProducts": "Browse Products",
+    "view": "View",
+    "acquire": "Acquire Item"
   }
 }

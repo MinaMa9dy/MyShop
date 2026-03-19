@@ -75,10 +75,11 @@ import { environment } from '../../../../environments/environment';
                     </button>
 
                     <!-- Indicators -->
-                    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-10">
                       @for (photo of allPhotos(); track photo.id; let i = $index) {
-                        <div class="w-2 h-2 rounded-full transition-all duration-300" 
-                             [class]="currentPhotoIndex() === i ? 'bg-primary w-6' : 'bg-outline-variant/30'"></div>
+                        <button (click)="scrollToPhoto(i)"
+                                class="w-2 h-2 rounded-full transition-all duration-300 hover:scale-125 focus:outline-none" 
+                                [class]="currentPhotoIndex() === i ? 'bg-primary w-6' : 'bg-outline-variant/30'"></button>
                       }
                     </div>
                   }
@@ -409,7 +410,9 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     if (this.carouselElement) {
       const element = this.carouselElement.nativeElement;
       const width = element.offsetWidth;
-      element.scrollTo({ left: width * index, behavior: 'smooth' });
+      // Handle RTL scroll direction (negative offset in most modern browsers)
+      const scrollPos = this.currentLang === 'ar' ? -width * index : width * index;
+      element.scrollTo({ left: scrollPos, behavior: 'smooth' });
       this.currentPhotoIndex.set(index);
     }
   }
@@ -426,7 +429,8 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
 
   onScroll(event: Event): void {
     const element = event.target as HTMLElement;
-    const index = Math.round(element.scrollLeft / element.offsetWidth);
+    // Use Math.abs for RTL support (where scrollLeft can be negative)
+    const index = Math.round(Math.abs(element.scrollLeft) / element.offsetWidth);
     if (this.currentPhotoIndex() !== index) {
       this.currentPhotoIndex.set(index);
     }

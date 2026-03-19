@@ -52,7 +52,7 @@ import { Wish } from '../../../core/models/wish.model';
              <button (click)="continueShopping()" class="px-10 py-5 bg-primary text-on-primary rounded-2xl font-headline font-bold shadow-[0_15px_30px_rgba(var(--primary-rgb),0.3)] hover:scale-105 active:scale-95 transition-all">Start Curation</button>
           </div>
         } @else {
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          <div class="grid grid-cols-2 lg:grid-cols-4 md:grid-cols-3 gap-6 md:gap-8 hover-glow">
             @for (wish of wishes(); track wish.productId) {
               <div class="group relative bg-surface-container-lowest rounded-3xl overflow-hidden border border-outline-variant/10 hover:border-primary/30 transition-all duration-500 hover:shadow-2xl flex flex-col h-full">
                 
@@ -63,6 +63,15 @@ import { Wish } from '../../../core/models/wish.model';
                   } @else {
                     <div class="w-full h-full flex items-center justify-center text-outline-variant opacity-20">
                       <span class="material-symbols-outlined text-7xl">inventory_2</span>
+                    </div>
+                  }
+
+                  <!-- Sale Badge -->
+                  @if (wish.product?.haveSale || ((wish.product?.oldPrice ?? 0) > (wish.product?.newPrice ?? 0))) {
+                    <div class="absolute top-6 left-6 z-10">
+                      <span class="bg-error text-on-error text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg animate-pulse-soft">
+                        {{ 'product.onSale' | translate }}
+                      </span>
                     </div>
                   }
 
@@ -77,15 +86,15 @@ import { Wish } from '../../../core/models/wish.model';
                     }
                   </button>
 
-                  <div class="absolute inset-x-0 bottom-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-gradient-to-t from-black/60 to-transparent">
+                  <div class="absolute inset-x-0 bottom-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-gradient-to-t from-black/60 to-transparent flex justify-center">
                     <button (click)="addToCart(wish, $event)"
                             [disabled]="addingId() === wish.productId"
                             class="w-full py-4 glass-tray rounded-2xl text-white font-headline font-bold flex items-center justify-center gap-3 hover:bg-primary transition-colors">
                        @if (addingId() === wish.productId) {
                          <span class="w-4 h-4 border-2 border-white/60 border-t-white rounded-full animate-spin"></span>
                        } @else {
-                         <span>Acquire Item</span>
-                         <span class="material-symbols-outlined">shopping_cart</span>
+                         <span class="text-xs">{{ 'WISH.acquire' | translate }}</span>
+                         <span class="material-symbols-outlined text-sm">shopping_cart</span>
                        }
                     </button>
                   </div>
@@ -101,19 +110,19 @@ import { Wish } from '../../../core/models/wish.model';
                    </div>
 
                    <div class="pt-6 border-t border-outline-variant/10 flex items-center justify-between">
-                      <div class="flex flex-col">
-                        <span class="font-headline font-black text-xl text-on-surface tracking-tighter">
-                           {{ wish.product?.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
+                      <div class="flex items-baseline gap-3">
+                        <span class="font-headline font-black text-2xl text-on-surface tracking-tighter">
+                           {{ (wish.product?.newPrice ?? 0) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
                         </span>
-                        @if (wish.product?.haveSale && wish.product?.oldPrice) {
-                          <span class="text-[10px] font-body text-outline line-through opacity-50">
+                        @if (wish.product?.haveSale && wish.product?.oldPrice && (wish.product?.oldPrice ?? 0) > (wish.product?.newPrice ?? 0)) {
+                          <span class="text-sm font-body text-outline-variant line-through opacity-60">
                              {{ wish.product?.oldPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
                           </span>
                         }
                       </div>
 
                       <button (click)="goToProduct(wish.productId!)" class="text-primary group/btn flex items-center gap-1 font-black uppercase text-[10px] tracking-widest">
-                         <span>View</span>
+                         <span>{{ 'WISH.view' | translate }}</span>
                          <span class="material-symbols-outlined text-sm transform group-hover/btn:translate-x-1 transition-transform">arrow_forward</span>
                       </button>
                    </div>

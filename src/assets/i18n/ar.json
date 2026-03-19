@@ -97,6 +97,7 @@
     "loginToReview": "الرجاء تسجيل الدخول لكتابة تقييم",
     "beFirstToReview": "كن أول من يقيم هذا المنتج",
     "customerIntelligence": "ذكاء العملاء",
+    "customerReviews": "تقييمات العملاء",
     "reviewDesc": "راجع تجارب دائرتنا المعمارية وقدم تعليقاتك الخاصة.",
     "logNewIntelligence": "تسجيل ذكاء جديد",
     "satisfactionScore": "درجة الرضا",
@@ -394,6 +395,8 @@
     "empty": "قائمة الأمنيات فارغة",
     "emptyDesc": "ابدأ بإضافة العناصر التي تحبها إلى قائمة الأمنيات",
     "remove": "إزالة",
-    "browseProducts": "تصفح المنتجات"
+    "browseProducts": "تصفح المنتجات",
+    "view": "عرض",
+    "acquire": "اقتناء"
   }
 }
