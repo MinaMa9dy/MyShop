@@ -43,6 +43,11 @@ export const routes: Routes = [
             title: 'MyShop - Reset Password'
           },
           {
+            path: 'forgot-password',
+            loadComponent: () => import('./features/auth/components/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
+            title: 'MyShop - Forgot Password'
+          },
+          {
             path: 'resend-email-confirmation',
             loadComponent: () => import('./features/auth/components/resend-email-confirmation/resend-email-confirmation.component').then(m => m.ResendEmailConfirmationComponent),
             title: 'MyShop - Resend Confirmation'
@@ -179,6 +184,11 @@ export const routes: Routes = [
             path: 'reset-password',
             loadComponent: () => import('./features/auth/components/reset-password/reset-password').then(m => m.ResetPasswordComponent),
             title: 'MyShop - إعادة تعيين كلمة المرور'
+          },
+          {
+            path: 'forgot-password',
+            loadComponent: () => import('./features/auth/components/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
+            title: 'MyShop - هل نسيت كلمة المرور؟'
           },
           {
             path: 'resend-email-confirmation',

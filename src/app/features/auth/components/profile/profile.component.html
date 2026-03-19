@@ -17,15 +17,35 @@
       
       <div class="px-6 pb-6">
         <!-- Profile Photo -->
-        <div class="relative -mt-16 mb-4">
-          <div class="w-32 h-32 rounded-full border-4 border-white bg-gray-200 overflow-hidden flex items-center justify-center">
-            <img *ngIf="getPhotoUrl()" 
-                 [src]="getPhotoUrl()" 
-                 alt="Profile Photo" 
-                 class="w-full h-full object-cover">
-            <span *ngIf="!getPhotoUrl()" class="text-4xl text-gray-400">
-              {{ profile.firstName.charAt(0) }}{{ profile.lastName.charAt(0) }}
-            </span>
+        <div class="relative -mt-16 mb-4 flex">
+          <div class="relative group">
+            <div class="w-32 h-32 rounded-full border-4 border-white bg-gray-200 overflow-hidden flex items-center justify-center relative">
+              <img *ngIf="getPhotoUrl()" 
+                   [src]="getPhotoUrl()" 
+                   alt="Profile Photo" 
+                   class="w-full h-full object-cover">
+              <span *ngIf="!getPhotoUrl()" class="text-4xl text-gray-400">
+                {{ profile.firstName.charAt(0) }}{{ profile.lastName.charAt(0) }}
+              </span>
+              
+              <!-- Upload overlay -->
+              <div *ngIf="isOwnProfile" 
+                   class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                   (click)="fileInput.click()">
+                <svg *ngIf="!uploadingPhoto" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <div *ngIf="uploadingPhoto" class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            </div>
+            
+            <!-- Hidden file input -->
+            <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden">
+          </div>
+          
+          <div *ngIf="uploadError" class="ml-4 rtl:mr-4 rtl:ml-0 self-end text-sm text-red-600 mb-2">
+            {{ uploadError }}
           </div>
         </div>
         

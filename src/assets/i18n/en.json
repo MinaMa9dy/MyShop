@@ -61,7 +61,12 @@
     "resendConfirmationButton": "Resend Confirmation Link",
     "resendConfirmationLink": "Resend confirmation email?",
     "backToLogin": "Back to Login",
-    "remembered": "Remembered?"
+    "remembered": "Remembered?",
+    "forgotPassword": "Forgot Password?",
+    "forgotPasswordDesc": "Enter your email address to receive a password reset link.",
+    "sendResetLink": "Send Reset Link",
+    "sending": "Sending...",
+    "resetLinkSent": "Password reset link has been sent to your email. Please check your inbox."
   },
   "product": {
     "addToCart": "Add to Cart",
@@ -234,7 +239,9 @@
       "name": "Category Name",
       "namePlaceholder": "Enter category name",
       "description": "Description",
-      "descriptionPlaceholder": "Enter category description"
+      "descriptionPlaceholder": "Enter category description",
+      "superCategory": "Super Category",
+      "selectSuperCategory": "Select a super category (Optional)"
     },
     "coupons": {
       "title": "Manage Coupons",

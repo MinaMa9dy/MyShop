@@ -61,7 +61,12 @@
     "resendConfirmationButton": "إعادة إرسال رابط التأكيد",
     "resendConfirmationLink": "إعادة إرسال بريد التأكيد؟",
     "backToLogin": "العودة إلى تسجيل الدخول",
-    "remembered": "هل تذكرت؟"
+    "remembered": "هل تذكرت؟",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "forgotPasswordDesc": "أدخل بريدك الإلكتروني لتلقي رابط إعادة تعيين كلمة المرور.",
+    "sendResetLink": "إرسال رابط إعادة التعيين",
+    "sending": "جاري الإرسال...",
+    "resetLinkSent": "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني. يرجى التحقق من صندوق الوارد الخاص بك."
   },
   "product": {
     "addToCart": "إضافة للسلة",
@@ -234,7 +239,9 @@
       "name": "اسم الفئة",
       "namePlaceholder": "أدخل اسم الفئة",
       "description": "الوصف",
-      "descriptionPlaceholder": "أدخل وصف الفئة"
+      "descriptionPlaceholder": "أدخل وصف الفئة",
+      "superCategory": "الفئة الأعلى",
+      "selectSuperCategory": "اختر فئة أعلى (اختياري)"
     },
     "coupons": {
       "title": "إدارة الكوبونات",

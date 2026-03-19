@@ -20,17 +20,24 @@ export class ProfileComponent implements OnInit {
   loading = true;
   error: string | null = null;
   
+  isOwnProfile = false;
+  uploadingPhoto = false;
+  uploadError: string | null = null;
+  
   ngOnInit(): void {
     // First check for UserId in query params (for guests viewing other profiles)
     this.route.queryParams.subscribe(params => {
       const userIdFromParams = params['UserId'];
+      const currentUserId = this.authService.getUserId();
+      
       if (userIdFromParams) {
+        this.isOwnProfile = userIdFromParams === currentUserId;
         this.loadProfile(userIdFromParams);
       } else {
         // Fall back to logged-in user's ID
-        const userId = this.authService.getUserId();
-        if (userId) {
-          this.loadProfile(userId);
+        if (currentUserId) {
+          this.isOwnProfile = true;
+          this.loadProfile(currentUserId);
         } else {
           this.loading = false;
           this.error = 'You are not logged in. Please login to view your profile.';
@@ -56,14 +63,35 @@ export class ProfileComponent implements OnInit {
     });
   }
   
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.uploadingPhoto = true;
+      this.uploadError = null;
+      
+      this.authService.changeUserPhoto(file).subscribe({
+        next: () => {
+          this.uploadingPhoto = false;
+          const currentUserId = this.authService.getUserId();
+          if (currentUserId) {
+            this.loadProfile(currentUserId);
+          }
+        },
+        error: (err) => {
+          console.error('Upload failed', err);
+          this.uploadingPhoto = false;
+          this.uploadError = err.error?.message || err.error?.error || 'Failed to upload photo';
+        }
+      });
+    }
+  }
+  
   getPhotoUrl(): string {
     if (this.profile?.userPhoto?.relativePath) {
       // Extract just the filename from the relative path
-      // Handle both forward slash and backslash
       const normalizedPath = this.profile.userPhoto.relativePath.replace(/\\/g, '/');
       const parts = normalizedPath.split('/');
       let fileName = parts[parts.length - 1];
-      // Return the API URL with just the filename
       return `${environment.apiUrl}/Photo/UserPhoto/${fileName}`;
     }
     return '';
@@ -92,3 +120,4 @@ export class ProfileComponent implements OnInit {
     return '';
   }
 }
+

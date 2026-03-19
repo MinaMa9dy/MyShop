@@ -1,11 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CategoryService } from '../../../core/services/category.service';
 import { LanguageService } from '../../../core/services/language.service';
-import { AddCategoryDto } from '../../../core/models/category.model';
+import { AddCategoryDto, Category } from '../../../core/models/category.model';
 
 @Component({
   selector: 'app-add-category',
@@ -73,6 +73,21 @@ import { AddCategoryDto } from '../../../core/models/category.model';
               }
             </div>
 
+            <!-- Super Category -->
+            <div class="form-group">
+              <label for="superCategoryId" class="block text-sm font-semibold text-gray-700 mb-2">{{ 'admin.addCategory.superCategory' | translate }}</label>
+              <select 
+                id="superCategoryId" 
+                formControlName="superCategoryId"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none appearance-none bg-white"
+              >
+                <option value="">{{ 'admin.addCategory.selectSuperCategory' | translate }}</option>
+                @for (cat of categories(); track cat.id) {
+                  <option [value]="cat.id">{{ cat.name }}</option>
+                }
+              </select>
+            </div>
+
             <!-- Description -->
             <div class="form-group">
               <label for="description" class="block text-sm font-semibold text-gray-700 mb-2">{{ 'admin.addCategory.description' | translate }}</label>
@@ -111,7 +126,7 @@ import { AddCategoryDto } from '../../../core/models/category.model';
     </div>
   `
 })
-export class AddCategoryComponent {
+export class AddCategoryComponent implements OnInit {
   private fb = inject(FormBuilder);
   private categoryService = inject(CategoryService);
   private languageService = inject(LanguageService);
@@ -119,15 +134,32 @@ export class AddCategoryComponent {
 
   categoryForm: FormGroup = this.fb.group({
     name: ['', [Validators.required]],
-    description: ['']
+    description: [''],
+    superCategoryId: ['']
   });
 
+  categories = signal<Category[]>([]);
   submitting = signal(false);
   success = signal<string | null>(null);
   error = signal<string | null>(null);
 
   get currentLang(): string {
     return this.languageService.currentLanguage();
+  }
+
+  ngOnInit(): void {
+    this.loadCategories();
+  }
+
+  loadCategories(): void {
+    this.categoryService.getAll().subscribe({
+      next: (cats) => {
+        this.categories.set(cats);
+      },
+      error: (err) => {
+        console.error('Error loading categories:', err);
+      }
+    });
   }
 
   onSubmit(): void {
@@ -142,7 +174,8 @@ export class AddCategoryComponent {
 
     const categoryData: AddCategoryDto = {
       name: this.categoryForm.value.name,
-      description: this.categoryForm.value.description
+      description: this.categoryForm.value.description,
+      superCategoryId: this.categoryForm.value.superCategoryId || undefined
     };
 
     this.categoryService.create(categoryData).subscribe({

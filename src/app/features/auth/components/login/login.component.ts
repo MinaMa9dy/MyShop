@@ -63,7 +63,12 @@ declare var google: any;
           </div>
           
           <div class="form-group">
-            <label for="password">{{ 'auth.password' | translate }}</label>
+            <div class="flex justify-between items-center mb-1">
+              <label for="password" class="mb-0">{{ 'auth.password' | translate }}</label>
+              <a [routerLink]="'/' + currentLang + '/auth/forgot-password'" class="text-sm text-blue-600 hover:text-blue-500 font-medium">
+                {{ 'auth.forgotPassword' | translate }}
+              </a>
+            </div>
             <input 
               type="password" 
               id="password" 

@@ -2,7 +2,7 @@ export interface Category {
   id: string;
   name: string;
   description?: string;
-  parentId?: string;
+  superCategoryId?: string;
   parentName?: string;
   imageUrl?: string;
   isActive: boolean;
@@ -16,7 +16,7 @@ export interface Category {
 export interface AddCategoryDto {
   name: string;
   description?: string;
-  parentId?: string;
+  superCategoryId?: string;
   imageUrl?: string;
   isActive?: boolean;
   displayOrder?: number;
@@ -26,7 +26,7 @@ export interface UpdateCategoryDto {
   id: string;
   name: string;
   description?: string;
-  parentId?: string;
+  superCategoryId?: string;
   imageUrl?: string;
   isActive?: boolean;
   displayOrder?: number;
