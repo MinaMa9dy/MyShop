@@ -122,7 +122,7 @@ declare var google: any;
             </div>
 
             <!-- Google Login Container -->
-            <div id="google-btn" class="w-full shadow-sm hover:shadow-md transition-shadow rounded-xl overflow-hidden"></div>
+            <div id="google-btn" class="w-full flex justify-center py-2 transition-all"></div>
 
             <p class="text-on-surface-variant font-body text-sm mt-4 text-center">
               {{ 'auth.noAccount' | translate }}
@@ -177,7 +177,11 @@ export class LoginComponent implements AfterViewInit {
 
       google.accounts.id.renderButton(
         document.getElementById('google-btn'),
-        { theme: 'outline', size: 'large', width: '100%' }
+        { 
+          theme: 'outline', 
+          size: 'large', 
+          shape: 'pill'
+        }
       );
     }
   }
