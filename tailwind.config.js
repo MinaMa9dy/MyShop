@@ -57,6 +57,25 @@ module.exports = {
         "2xl": "1.5rem",
         "full": "9999px"
       },
+      keyframes: {
+        'slide-in-right': {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+        'slide-in-left': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        }
+      },
+      animation: {
+        'slide-in-right': 'slide-in-right 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+        'slide-in-left': 'slide-in-left 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+        'fade-in': 'fade-in 0.3s ease-out',
+      }
     },
   },
   plugins: [

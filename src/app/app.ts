@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy, Renderer2, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, Renderer2, computed, effect } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, Event, NavigationEnd } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from './core/services/auth.service';
@@ -62,6 +62,13 @@ export class App implements OnInit, OnDestroy {
   
   // Mobile menu state
   mobileMenuOpen = signal(false);
+
+  constructor() {
+    effect(() => {
+      const isLocked = this.mobileMenuOpen() || this.cartService.isOpen();
+      this.toggleBodyScroll(isLocked);
+    });
+  }
   
   ngOnInit(): void {
     // Load cart from local storage first (for quick display)
@@ -127,21 +134,16 @@ export class App implements OnInit, OnDestroy {
   }
   
   toggleMobileMenu(): void {
-    this.mobileMenuOpen.update(value => {
-      const newValue = !value;
-      this.toggleBodyScroll(!newValue);
-      return newValue;
-    });
+    this.mobileMenuOpen.update(v => !v);
   }
   
   closeMobileMenu(): void {
     this.mobileMenuOpen.set(false);
-    this.toggleBodyScroll(true);
   }
   
-  private toggleBodyScroll(enable: boolean): void {
+  private toggleBodyScroll(lock: boolean): void {
     if (typeof document !== 'undefined') {
-      if (this.mobileMenuOpen()) {
+      if (lock) {
         this.renderer.addClass(document.body, 'overflow-hidden');
       } else {
         this.renderer.removeClass(document.body, 'overflow-hidden');
