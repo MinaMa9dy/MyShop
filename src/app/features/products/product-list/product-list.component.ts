@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, effect, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -18,7 +18,14 @@ import { TokenService } from '../../../core/services/token.service';
   imports: [CommonModule, RouterLink, FormsModule, TranslatePipe],
   templateUrl: './product-list.component.html'
 })
-export class ProductListComponent implements OnInit {
+export class ProductListComponent implements OnInit, OnDestroy {
+  constructor() {
+    effect(() => {
+      const lock = this.isMobileFiltersOpen();
+      this.toggleBodyScroll(lock);
+    });
+  }
+
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private route = inject(ActivatedRoute);
@@ -41,6 +48,7 @@ export class ProductListComponent implements OnInit {
   wishlistIds = signal<Set<string>>(new Set());
   // Track which product is being processed
   processingId = signal<string | null>(null);
+  isMobileFiltersOpen = signal(false);
 
   get canAddProduct(): boolean {
     return this.authService.isLoggedIn() && (this.tokenService.isSeller() || this.tokenService.hasRole('Admin'));
@@ -266,5 +274,14 @@ export class ProductListComponent implements OnInit {
       name: c.name || c.Name,
       description: c.description || c.Description
     };
+  }
+
+  ngOnDestroy(): void {
+    this.toggleBodyScroll(false);
+  }
+
+  private toggleBodyScroll(lock: boolean): void {
+    if (lock) document.body.classList.add('overflow-hidden');
+    else document.body.classList.remove('overflow-hidden');
   }
 }

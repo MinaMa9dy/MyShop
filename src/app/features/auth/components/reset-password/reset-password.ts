@@ -5,11 +5,12 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ResetPasswordDto } from '../../../../core/models/auth.model';
 import { LanguageService } from '../../../../core/services/language.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule],
   template: `
     <main class="min-h-screen flex items-center justify-center bg-surface px-6 py-20 overflow-hidden relative" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
       <!-- Dynamic Background Elements -->
@@ -23,8 +24,8 @@ import { LanguageService } from '../../../../core/services/language.service';
               <span class="material-symbols-outlined text-4xl text-primary transition-transform group-hover:scale-110">security</span>
               <div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent"></div>
            </div>
-           <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-3">Protocol Reset</h1>
-           <p class="font-body text-on-surface-variant opacity-70 max-w-sm mx-auto">Define a new security sequence for your entity profile.</p>
+           <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-3">{{ 'auth.protocolReset' | translate }}</h1>
+           <p class="font-body text-on-surface-variant opacity-70 max-w-sm mx-auto">{{ 'auth.resetSubtitle' | translate }}</p>
         </div>
 
         <div class="bg-surface-container-lowest p-10 md:p-14 rounded-[48px] shadow-2xl border border-outline-variant/10 backdrop-blur-xl relative overflow-hidden text-start">
@@ -34,12 +35,12 @@ import { LanguageService } from '../../../../core/services/language.service';
                 <span class="material-symbols-outlined text-5xl">verified</span>
               </div>
               <div>
-                <h3 class="font-headline text-2xl font-black text-on-surface mb-2">Sequence Verified</h3>
-                <p class="font-body text-on-surface-variant opacity-60">Your credentials have been successfully updated in the main vault.</p>
+                <h3 class="font-headline text-2xl font-black text-on-surface mb-2">{{ 'auth.sequenceVerified' | translate }}</h3>
+                <p class="font-body text-on-surface-variant opacity-60">{{ 'auth.resetSuccessDesc' | translate }}</p>
               </div>
               <a [routerLink]="['/' + currentLang + '/auth/login']" 
                  class="inline-block py-5 px-12 bg-on-surface text-surface rounded-[32px] font-headline font-bold text-lg shadow-xl hover:scale-[1.05] transition-all">
-                Access Profile
+                {{ 'auth.accessProfile' | translate }}
               </a>
             </div>
           } @else {
@@ -53,24 +54,24 @@ import { LanguageService } from '../../../../core/services/language.service';
 
               <div class="space-y-8">
                 <div class="space-y-3">
-                  <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2 block">New Cipher Sequence</label>
+                  <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2 block">{{ 'auth.newPassword' | translate }}</label>
                   <div class="relative group">
                     <span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1-2 text-outline-variant group-focus-within:text-primary transition-colors">key</span>
                     <input type="password" formControlName="password"
                            class="w-full bg-surface-container-low px-16 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all"
                            [class.border-error/20]="resetForm.get('password')?.invalid && resetForm.get('password')?.touched"
-                           placeholder="Enter robust password">
+                           [placeholder]="'auth.passwordPlaceholder' | translate">
                   </div>
                 </div>
 
                 <div class="space-y-3">
-                  <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2 block">Confirm Cipher Sequence</label>
+                  <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2 block">{{ 'auth.confirmPassword' | translate }}</label>
                   <div class="relative group">
                     <span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1-2 text-outline-variant group-focus-within:text-primary transition-colors">lock</span>
                     <input type="password" formControlName="confirmPassword"
                            class="w-full bg-surface-container-low px-16 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all"
                            [class.border-error/20]="resetForm.get('confirmPassword')?.invalid && resetForm.get('confirmPassword')?.touched"
-                           placeholder="Verify password">
+                           [placeholder]="'auth.confirmPasswordPlaceholder' | translate">
                   </div>
                 </div>
               </div>
@@ -80,16 +81,16 @@ import { LanguageService } from '../../../../core/services/language.service';
                         class="w-full py-6 bg-primary text-on-primary rounded-[32px] font-headline font-bold text-lg shadow-[0_20px_40px_rgba(var(--primary-rgb),0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 group">
                   @if (loading()) {
                     <span class="w-6 h-6 border-4 border-on-primary/30 border-t-white rounded-full animate-spin"></span>
-                    <span class="font-black uppercase tracking-widest text-xs">Authenticating Change...</span>
+                    <span class="font-black uppercase tracking-widest text-xs">{{ 'auth.authenticating' | translate }}</span>
                   } @else {
-                    <span>Authorize Reset</span>
+                    <span>{{ 'auth.authorizeReset' | translate }}</span>
                     <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">encrypted</span>
                   }
                 </button>
 
                 <div class="text-center">
                    <a [routerLink]="['/' + currentLang + '/auth/login']" class="text-[10px] font-black uppercase tracking-widest text-outline hover:text-primary transition-colors">
-                      Back to Secure Gate
+                      {{ 'auth.backToSecureGate' | translate }}
                    </a>
                 </div>
               </div>

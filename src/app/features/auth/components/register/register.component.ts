@@ -20,9 +20,9 @@ import { TranslatePipe } from '@ngx-translate/core';
         </div>
         
         <div class="relative z-10 text-on-secondary animate-fade-in text-center">
-            <h1 class="font-headline text-6xl font-black tracking-tighter mb-4">Precision</h1>
+            <h1 class="font-headline text-6xl font-black tracking-tighter mb-4">{{ 'auth.registerBrandingTitle' | translate }}</h1>
             <p class="font-body text-xl opacity-80 max-w-sm mx-auto leading-relaxed text-center">
-              Join the elite circle of curated aesthetics and architectural lifestyle.
+              {{ 'auth.registerBrandingSubtitle' | translate }}
             </p>
             <div class="mt-12 flex justify-center">
               <span class="material-symbols-outlined text-8xl opacity-20 animate-float">person_add</span>
@@ -42,7 +42,7 @@ import { TranslatePipe } from '@ngx-translate/core';
             <h2 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">
               {{ 'auth.createAccount' | translate }}
             </h2>
-            <p class="text-on-surface-variant font-body">Start your journey with curated precision</p>
+            <p class="text-on-surface-variant font-body">{{ 'auth.createAccountSubtitle' | translate }}</p>
           </div>
 
           @if (successMessage()) {

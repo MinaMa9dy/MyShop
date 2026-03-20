@@ -4,11 +4,12 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmEmailDto } from '../../../../core/models/auth.model';
 import { LanguageService } from '../../../../core/services/language.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-confirm-email',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslateModule],
   template: `
     <main class="min-h-screen flex items-center justify-center bg-surface px-6 py-20 overflow-hidden relative" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
       <!-- Dynamic Background Elements -->
@@ -22,8 +23,8 @@ import { LanguageService } from '../../../../core/services/language.service';
             <div class="py-20 space-y-8">
                <div class="w-24 h-24 border-8 border-primary/20 border-t-primary rounded-full animate-spin mx-auto shadow-inner"></div>
                <div>
-                  <h3 class="font-headline text-2xl font-black text-on-surface mb-2 uppercase tracking-tighter">Synchronizing Vector</h3>
-                  <p class="font-body text-on-surface-variant opacity-60">Verifying communication channel parameters...</p>
+                  <h3 class="font-headline text-2xl font-black text-on-surface mb-2 uppercase tracking-tighter">{{ 'auth.syncVector' | translate }}</h3>
+                  <p class="font-body text-on-surface-variant opacity-60">{{ 'auth.verifyParams' | translate }}</p>
                </div>
             </div>
           } @else if (success()) {
@@ -33,13 +34,13 @@ import { LanguageService } from '../../../../core/services/language.service';
                   <div class="absolute inset-0 bg-gradient-to-br from-success/20 to-transparent"></div>
                </div>
                <div>
-                  <h1 class="font-headline text-4xl font-black text-on-surface mb-3 tracking-tight">Channel Verified</h1>
-                  <p class="font-body text-on-surface-variant opacity-70">Communication protocol established. Your entity is now fully operational.</p>
+                  <h1 class="font-headline text-4xl font-black text-on-surface mb-3 tracking-tight">{{ 'auth.channelVerified' | translate }}</h1>
+                  <p class="font-body text-on-surface-variant opacity-70">{{ 'auth.protocolEstablished' | translate }}</p>
                </div>
                <a [routerLink]="['/' + currentLang + '/auth/login']" 
                   class="inline-block py-5 px-16 bg-on-surface text-surface rounded-[32px] font-headline font-bold text-lg shadow-2xl hover:scale-[1.05] transition-all group">
                   <span class="flex items-center gap-3">
-                     Initialize Access
+                     {{ 'auth.initAccess' | translate }}
                      <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">login</span>
                   </span>
                </a>
@@ -51,17 +52,17 @@ import { LanguageService } from '../../../../core/services/language.service';
                   <div class="absolute inset-0 bg-gradient-to-br from-error/20 to-transparent"></div>
                </div>
                <div>
-                  <h1 class="font-headline text-4xl font-black text-on-surface mb-3 tracking-tight">Protocol Mismatch</h1>
-                  <p class="font-body text-on-surface-variant opacity-70">{{ error() || 'The verification sequence is invalid or has expired.' }}</p>
+                  <h1 class="font-headline text-4xl font-black text-on-surface mb-3 tracking-tight">{{ 'auth.protocolMismatch' | translate }}</h1>
+                  <p class="font-body text-on-surface-variant opacity-70">{{ error() || ('auth.verifyExpired' | translate) }}</p>
                </div>
                <div class="flex flex-col gap-5 max-w-sm mx-auto">
                   <a [routerLink]="['/' + currentLang + '/auth/resend-email-confirmation']" 
                      class="w-full py-5 bg-primary text-on-primary rounded-[32px] font-headline font-bold uppercase tracking-widest text-xs shadow-xl transition-all hover:scale-[1.02]">
-                     Retry Verification Protocol
+                     {{ 'auth.retryProtocol' | translate }}
                   </a>
                   <a [routerLink]="['/' + currentLang + '/auth/login']" 
                      class="w-full py-5 bg-surface-container rounded-[32px] font-headline font-bold uppercase tracking-widest text-[10px] text-outline transition-all hover:bg-surface-container-high">
-                     Back to Gateway
+                     {{ 'auth.backToLogin' | translate }}
                   </a>
                </div>
             </div>

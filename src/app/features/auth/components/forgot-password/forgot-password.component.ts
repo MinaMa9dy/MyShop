@@ -24,7 +24,7 @@ import { ForgotPasswordDto } from '../../../../core/models/auth.model';
               <span class="material-symbols-outlined text-4xl text-primary transition-transform group-hover:scale-110">lock_reset</span>
               <div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent"></div>
            </div>
-           <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-3">Protocol Recovery</h1>
+           <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-3">{{ 'auth.protocolRecovery' | translate }}</h1>
            <p class="font-body text-on-surface-variant opacity-70 max-w-sm mx-auto">{{ 'auth.forgotPasswordDesc' | translate }}</p>
         </div>
 
@@ -56,7 +56,7 @@ import { ForgotPasswordDto } from '../../../../core/models/auth.model';
                          placeholder="you@identity.protocol">
                 </div>
                 @if (forgotPasswordForm.get('email')?.invalid && forgotPasswordForm.get('email')?.touched) {
-                  <p class="text-[10px] font-black text-error uppercase px-2 text-start">Invalid Communication Parameter</p>
+                  <p class="text-[10px] font-black text-error uppercase px-2 text-start">{{ 'auth.invalidEmail' | translate }}</p>
                 }
               </div>
             </div>
@@ -68,7 +68,7 @@ import { ForgotPasswordDto } from '../../../../core/models/auth.model';
                   <span class="w-6 h-6 border-4 border-on-primary/30 border-t-white rounded-full animate-spin"></span>
                   <span class="font-black uppercase tracking-widest text-xs">{{ 'auth.sending' | translate }}</span>
                 } @else {
-                  <span>Initiate Reset</span>
+                   <span>{{ 'auth.initiateReset' | translate }}</span>
                   <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">send</span>
                 }
               </button>

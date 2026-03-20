@@ -45,7 +45,7 @@ declare var google: any;
             <h2 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">
               {{ 'auth.welcomeBack' | translate }}
             </h2>
-            <p class="text-on-surface-variant font-body">Sign in to your curated collection</p>
+            <p class="text-on-surface-variant font-body">{{ 'auth.welcomeBackSubtitle' | translate }}</p>
           </div>
 
           @if (error()) {
