@@ -90,7 +90,7 @@ export interface ProductFilter {
   categoryId?: string;
   minPrice?: number;
   maxPrice?: number;
-  isOnSale?: boolean;
+  haveSale?: boolean;
   isFasting?: boolean;
   searchTerm?: string;
   page?: number;

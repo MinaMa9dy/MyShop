@@ -24,7 +24,7 @@ import { ForgotPasswordDto } from '../../../../core/models/auth.model';
               <span class="material-symbols-outlined text-4xl text-primary transition-transform group-hover:scale-110">lock_reset</span>
               <div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent"></div>
            </div>
-           <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-3">{{ 'auth.protocolRecovery' | translate }}</h1>
+           <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-3">{{ 'auth.passwordRecovery' | translate }}</h1>
            <p class="font-body text-on-surface-variant opacity-70 max-w-sm mx-auto">{{ 'auth.forgotPasswordDesc' | translate }}</p>
         </div>
 
@@ -53,7 +53,7 @@ import { ForgotPasswordDto } from '../../../../core/models/auth.model';
                   <input formControlName="email" type="email" autocomplete="email" required
                          class="w-full bg-surface-container-low px-16 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all"
                          [class.border-error/20]="forgotPasswordForm.get('email')?.invalid && forgotPasswordForm.get('email')?.touched"
-                         placeholder="you@identity.protocol">
+                         placeholder="you@example.com">
                 </div>
                 @if (forgotPasswordForm.get('email')?.invalid && forgotPasswordForm.get('email')?.touched) {
                   <p class="text-[10px] font-black text-error uppercase px-2 text-start">{{ 'auth.invalidEmail' | translate }}</p>

@@ -20,10 +20,7 @@ import { TokenService } from '../../../core/services/token.service';
               <h1 class="font-headline text-5xl md:text-6xl font-black tracking-tighter text-on-surface mb-6">
                 {{ 'nav.categories' | translate }}
               </h1>
-              <p class="font-body text-lg text-on-surface-variant leading-relaxed opacity-80">
-                Explore our curated collections of architectural precision and lifestyle essentials. 
-                Each category is selected with the highest standards of quality and design.
-              </p>
+
             </div>
             
             @if (isAdmin()) {

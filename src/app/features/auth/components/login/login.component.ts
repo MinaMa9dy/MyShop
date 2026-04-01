@@ -41,7 +41,7 @@ declare var google: any;
       <!-- Right Form Side -->
       <div class="w-full md:w-1/2 flex items-center justify-center p-8 md:p-16 bg-surface-container-lowest">
         <div class="w-full max-w-md animate-slide-up">
-          <div class="text-start mb-10">
+          <div class="text-center md:text-start mb-10">
             <h2 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">
               {{ 'auth.welcomeBack' | translate }}
             </h2>
@@ -117,7 +117,7 @@ declare var google: any;
           <div class="mt-10 flex flex-col items-center gap-6">
             <div class="flex items-center gap-4 w-full text-outline-variant">
               <hr class="flex-grow border-outline-variant/30">
-              <span class="text-[10px] uppercase font-black tracking-widest">Global Protocol</span>
+              <span class="text-[10px] uppercase font-black tracking-widest">Global Access</span>
               <hr class="flex-grow border-outline-variant/30">
             </div>
 

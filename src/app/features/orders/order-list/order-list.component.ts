@@ -34,7 +34,7 @@ import { PhotoService } from '../../../core/services/photo.service';
           <div class="text-center py-32 bg-error/5 rounded-[40px] border-2 border-dashed border-error/20 animate-fade-in">
              <span class="material-symbols-outlined text-6xl text-error mb-4">report</span>
              <p class="font-headline text-xl font-bold text-on-surface mb-6">{{ error() }}</p>
-              <button (click)="loadOrders()" class="px-8 py-4 bg-primary text-on-primary rounded-2xl font-headline font-bold">{{ 'orders.retryProtocol' | translate }}</button>
+              <button (click)="loadOrders()" class="px-8 py-4 bg-primary text-on-primary rounded-2xl font-headline font-bold">{{ 'orders.retryAction' | translate }}</button>
           </div>
         } @else if (orders().length === 0) {
           <div class="text-center py-40 bg-surface-container-low rounded-[48px] border-2 border-dashed border-outline-variant/30 animate-fade-in">
@@ -139,7 +139,7 @@ import { PhotoService } from '../../../core/services/photo.service';
 
                 <!-- Footer Action -->
                 <div class="px-10 py-6 bg-surface-container border-t border-outline-variant/5 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                   <p class="text-[8px] font-black uppercase tracking-widest text-outline">Protocol Phase: Execution Completed</p>
+                   <p class="text-[8px] font-black uppercase tracking-widest text-outline">Order Status: Completed</p>
                    <button class="text-primary font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:translate-x-1 transition-transform">
                       <span>Request Detail Log</span>
                       <span class="material-symbols-outlined text-sm">arrow_forward</span>

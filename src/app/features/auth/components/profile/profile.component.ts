@@ -43,7 +43,7 @@ import { TranslateModule } from '@ngx-translate/core';
           <div class="bg-surface-container-lowest p-16 rounded-[40px] shadow-2xl text-center border-2 border-dashed border-error/20">
              <span class="material-symbols-outlined text-6xl text-error mb-4">security_update_warning</span>
              <p class="font-headline text-xl font-bold text-on-surface mb-6">{{ error() }}</p>
-              <button (click)="ngOnInit()" class="px-8 py-4 bg-primary text-on-primary rounded-2xl font-headline font-bold">{{ 'dashboard.retryProtocol' | translate }}</button>
+              <button (click)="ngOnInit()" class="px-8 py-4 bg-primary text-on-primary rounded-2xl font-headline font-bold">Retry</button>
           </div>
         } @else if (profile()) {
           <div class="bg-surface-container-lowest rounded-[48px] shadow-2xl border border-outline-variant/10 overflow-hidden animate-slide-up">
@@ -124,7 +124,7 @@ import { TranslateModule } from '@ngx-translate/core';
                  </div>
 
                  <div class="p-8 bg-surface-container rounded-[32px] border border-outline-variant/10 space-y-2 group hover:bg-surface-container-low transition-colors duration-500 text-start">
-                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-outline group-hover:text-primary transition-colors">{{ 'profile.originProtocol' | translate }}</p>
+                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-outline group-hover:text-primary transition-colors">Joined</p>
                     <p class="font-headline text-2xl font-black text-on-surface">{{ 'profile.precisionSeries' | translate }}</p>
                     <div class="h-1 w-8 bg-outline-variant/30 rounded-full group-hover:w-16 transition-all"></div>
                  </div>
@@ -169,7 +169,7 @@ export class ProfileComponent implements OnInit {
         this.loadProfile(currentUserId);
       } else {
         this.loading.set(false);
-        this.error.set('Authentication Protocol Failure: Identity not detected.');
+        this.error.set('Authentication Failure: Identity not detected.');
       }
     });
   }
@@ -194,7 +194,7 @@ export class ProfileComponent implements OnInit {
         },
         error: (err) => {
           this.uploadingPhoto.set(false);
-          this.uploadError.set(err.error?.message || 'Upload protocol error.');
+          this.uploadError.set(err.error?.message || 'Upload error.');
         }
       });
     }

@@ -96,7 +96,7 @@ import { environment } from '../../../../environments/environment';
                 </button>
 
                 @if (isOnSale()) {
-                   <div class="absolute top-8 left-8 flex flex-col gap-3">
+                   <div class="absolute top-8 left-8 flex flex-col items-start gap-3">
                       <span class="bg-error text-on-error px-4 py-2 rounded-2xl font-headline font-black text-xs uppercase tracking-widest shadow-xl">{{ salePercentage() }}% OFF</span>
                    </div>
                 }
@@ -117,9 +117,9 @@ import { environment } from '../../../../environments/environment';
             </div>
 
             <!-- Content Section (5 cols) -->
-            <div class="lg:col-span-5 space-y-10 animate-slide-up" style="animation-delay: 100ms">
+            <div class="lg:col-span-5 space-y-10 animate-slide-up text-center lg:text-start" style="animation-delay: 100ms">
               <div class="space-y-4">
-                <div class="flex items-center gap-3">
+                <div class="flex items-center justify-center lg:justify-start gap-3">
                    <span class="text-[10px] font-black uppercase tracking-[0.3em] text-primary px-3 py-1 bg-primary/10 rounded-full">{{ product()?.category }}</span>
                    <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
                    <span class="text-[10px] font-black uppercase tracking-[0.3em] text-outline">{{ totalReviewCount() }} {{ 'product.reviews' | translate }}</span>
@@ -134,7 +134,7 @@ import { environment } from '../../../../environments/environment';
 
               <div class="p-8 bg-surface-container rounded-[32px] border border-outline-variant/10 space-y-8">
                 <!-- Price Display -->
-                <div class="flex items-baseline gap-4">
+                <div class="flex items-baseline justify-center lg:justify-start gap-4">
                    <span class="font-headline text-4xl font-black text-on-surface tracking-tighter">
                      {{ product()?.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
                    </span>
@@ -146,7 +146,7 @@ import { environment } from '../../../../environments/environment';
                 </div>
 
                 <!-- Stock Status Tag -->
-                <div class="flex items-center gap-4">
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4">
                    <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/50 border border-outline-variant/20 shadow-sm">
                       <div class="w-2 h-2 rounded-full" [class.bg-success]="product()?.shownQuantity > 0" [class.bg-error]="product()?.shownQuantity <= 0"></div>
                       <span class="text-[10px] font-black uppercase tracking-widest" [class.text-success]="product()?.shownQuantity > 0" [class.text-error]="product()?.shownQuantity <= 0">
@@ -184,37 +184,21 @@ import { environment } from '../../../../environments/environment';
                 }
 
                 @if (canEditProduct()) {
-                   <div class="grid grid-cols-2 gap-4 pt-4">
-                      <button (click)="editProduct()" class="py-4 bg-tertiary/10 text-tertiary rounded-2xl font-headline font-bold text-sm tracking-tight hover:bg-tertiary hover:text-on-tertiary transition-all">{{ 'dashboard.editProtocol' | translate }}</button>
+                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                      <button (click)="editProduct()" class="py-4 bg-tertiary/10 text-tertiary rounded-2xl font-headline font-bold text-sm tracking-tight hover:bg-tertiary hover:text-on-tertiary transition-all">{{ 'dashboard.editProfile' | translate }}</button>
                       <button (click)="deleteProduct()" class="py-4 bg-error/10 text-error rounded-2xl font-headline font-bold text-sm tracking-tight hover:bg-error hover:text-on-error transition-all">{{ 'dashboard.decommission' | translate }}</button>
                    </div>
                 }
               </div>
 
-              <!-- Product Features / USPS -->
-              <div class="grid grid-cols-2 gap-6 pt-10 border-t border-outline-variant/10">
-                 <div class="flex items-start gap-3">
-                   <div class="p-2 bg-surface-container rounded-lg"><span class="material-symbols-outlined text-primary">verified</span></div>
-                   <div>
-                     <p class="text-[10px] font-black uppercase tracking-widest text-on-surface">{{ 'product.authenticated' | translate }}</p>
-                     <p class="text-xs text-outline leading-tight">{{ 'product.originalDesign' | translate }}</p>
-                   </div>
-                 </div>
-                 <div class="flex items-start gap-3">
-                   <div class="p-2 bg-surface-container rounded-lg"><span class="material-symbols-outlined text-primary">local_shipping</span></div>
-                   <div>
-                     <p class="text-[10px] font-black uppercase tracking-widest text-on-surface">{{ 'product.accelerated' | translate }}</p>
-                     <p class="text-xs text-outline leading-tight">{{ 'product.priorityExpress' | translate }}</p>
-                   </div>
-                 </div>
-              </div>
+
             </div>
           </div>
 
           <!-- Reviews Section -->
           <section class="mt-40 animate-slide-up">
-            <div class="flex flex-col md:flex-row justify-between items-end gap-12 mb-16">
-               <div class="max-w-xl text-start">
+            <div class="flex flex-col md:flex-row justify-between items-center md:items-end gap-12 mb-16 text-center md:text-start">
+               <div class="max-w-xl mx-auto md:mx-0">
                   <p class="font-label text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-2">{{ 'product.customerIntelligence' | translate }}</p>
                   <h2 class="font-headline text-4xl font-black text-on-surface tracking-tighter mb-4">{{ 'product.customerReviews' | translate }}</h2>
                   <p class="font-body text-sm text-on-surface-variant max-w-lg opacity-70">{{ 'product.reviewDesc' | translate }}</p>
@@ -237,12 +221,12 @@ import { environment } from '../../../../environments/environment';
                <!-- Review Submission (4 cols) -->
                <div class="lg:col-span-4 lg:sticky lg:top-24 h-fit">
                   @if (isLoggedIn()) {
-                    <div class="bg-surface-container-low p-8 rounded-[40px] border border-outline-variant/20 shadow-xl space-y-8">
-                       <h3 class="font-headline font-black text-xl tracking-tight text-on-surface">{{ 'product.logNewIntelligence' | translate }}</h3>
+                    <div class="bg-surface-container-low p-8 rounded-[40px] border border-outline-variant/20 shadow-xl space-y-8 text-center md:text-start">
+                       <h3 class="font-headline font-black text-xl tracking-tight text-on-surface text-center md:text-start">{{ 'product.logNewIntelligence' | translate }}</h3>
                        
                        <div class="space-y-4">
-                          <label class="text-[10px] font-black uppercase tracking-widest text-outline block">{{ 'product.satisfactionScore' | translate }}</label>
-                          <div class="flex gap-2">
+                          <label class="text-[10px] font-black uppercase tracking-widest text-outline block text-center md:text-start">{{ 'product.satisfactionScore' | translate }}</label>
+                          <div class="flex justify-center md:justify-start gap-2">
                             @for (star of [1, 2, 3, 4, 5]; track star) {
                               <button (click)="setRating(star)" class="group focus:outline-none transition-transform hover:scale-125">
                                 <span class="material-symbols-outlined text-3xl transition-colors" [class]="star <= newReviewStars ? 'text-primary fill-current' : 'text-outline-variant'">star</span>
@@ -252,7 +236,7 @@ import { environment } from '../../../../environments/environment';
                        </div>
 
                        <div class="space-y-4">
-                          <label class="text-[10px] font-black uppercase tracking-widest text-outline block">{{ 'product.intelligenceContent' | translate }}</label>
+                          <label class="text-[10px] font-black uppercase tracking-widest text-outline block text-center md:text-start">{{ 'product.intelligenceContent' | translate }}</label>
                           <textarea [(ngModel)]="newReviewContent" rows="5" 
                                     class="w-full bg-surface border-2 border-transparent focus:border-primary/20 p-5 rounded-2xl outline-none font-body text-sm text-on-surface transition-all resize-none"
                                     [placeholder]="'product.quantifyExperience' | translate"></textarea>

@@ -89,7 +89,7 @@ import { AddCategoryDto, Category } from '../../../core/models/category.model';
               </button>
               <a [routerLink]="['/' + currentLang + '/categories']"
                  class="flex-1 py-6 bg-surface-container rounded-[32px] font-headline font-bold text-xs uppercase tracking-widest text-outline hover:bg-surface-container-high transition-all text-center flex items-center justify-center">
-                 Cancel Protocol
+                 Cancel
               </a>
             </div>
           </form>
@@ -143,7 +143,7 @@ export class AddCategoryComponent implements OnInit {
         this.categoryForm.reset();
         setTimeout(() => this.router.navigate(['/', this.currentLang, 'categories']), 1000);
       },
-      error: (err) => { this.submitting.set(false); this.error.set(err.error?.message || 'Creation protocol failed.'); }
+      error: (err) => { this.submitting.set(false); this.error.set(err.error?.message || 'Creation failed.'); }
     });
   }
 }

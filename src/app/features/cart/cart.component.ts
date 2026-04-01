@@ -33,7 +33,6 @@ import { FormsModule } from '@angular/forms';
            </div>
            <div>
               <h2 class="font-headline font-black text-xl text-on-surface tracking-tight">{{ 'CART.SHOPPING_CART' | translate }}</h2>
-              <p class="text-[10px] font-black uppercase tracking-widest text-outline">Protocol: active_inventory</p>
            </div>
         </div>
         <button (click)="closeCart()" class="w-10 h-10 rounded-full hover:bg-surface-container transition-colors flex items-center justify-center text-outline group">
@@ -58,15 +57,16 @@ import { FormsModule } from '@angular/forms';
               <div class="relative w-24 h-24 rounded-2xl bg-surface-container overflow-hidden flex-shrink-0 cursor-pointer" (click)="goToProductDetail(item)">
                 <img [src]="item.productImage || placeholder" [alt]="item.productName" class="w-full h-full object-cover transition-transform group-hover:scale-110">
                 @if (isItemDiscounted(item.productId)) {
-                  <div class="absolute top-1 left-1 bg-error text-on-error text-[8px] font-black uppercase px-2 py-1 rounded-lg shadow-lg">Save</div>
+                  <div class="absolute top-1 left-1 bg-error/90 backdrop-blur-md text-on-error text-[8px] font-black uppercase px-2 py-1 rounded-lg shadow-lg border border-white/20">Save</div>
                 }
               </div>
 
               <!-- Item Details -->
-              <div class="flex-grow space-y-3">
-                <div class="flex justify-between items-start gap-4">
-                  <h3 class="font-headline font-bold text-sm text-on-surface line-clamp-2 hover:text-primary transition-colors cursor-pointer" (click)="goToProductDetail(item)">{{ item.productName }}</h3>
-                  <button (click)="removeFromCart(item)" class="text-outline-variant hover:text-error transition-colors">
+              <div class="flex-grow space-y-3 min-w-0">
+                <div class="flex justify-between items-start gap-3">
+                  <h3 class="font-headline font-bold text-sm text-on-surface line-clamp-2 hover:text-primary transition-colors cursor-pointer flex-grow" (click)="goToProductDetail(item)">{{ item.productName }}</h3>
+                  <button (click)="removeFromCart(item)" 
+                          class="w-8 h-8 rounded-full border border-outline-variant/10 text-outline-variant hover:text-error hover:bg-error/5 transition-all flex items-center justify-center flex-shrink-0">
                     <span class="material-symbols-outlined text-lg">delete</span>
                   </button>
                 </div>
@@ -117,20 +117,20 @@ import { FormsModule } from '@angular/forms';
         <footer class="p-8 space-y-8 bg-surface-container-low border-t border-outline-variant/30 shadow-[0_-20px_40px_rgba(0,0,0,0.02)]">
           <div class="space-y-4">
             <div class="flex justify-between text-[10px] font-black uppercase tracking-widest text-outline">
-               <span>Acquisition Subtotal</span>
+               <span>{{ 'orderConfirm.alphaValuation' | translate }}</span>
                <span [class.line-through]="appliedCoupon()">{{ originalTotalPrice() | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
             </div>
             
             @if (appliedCoupon()) {
               <div class="flex justify-between text-[10px] font-black uppercase tracking-widest text-error">
-                 <span>Protocol Discount ({{ appliedCoupon()?.coupon?.couponCode }})</span>
+                 <span>Discount ({{ appliedCoupon()?.coupon?.couponCode }})</span>
                  <span>-{{ discountAmount() | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
               </div>
             }
 
             <div class="flex justify-between items-end pt-4 border-t border-outline-variant/10">
                <div>
-                 <p class="text-[10px] font-black uppercase tracking-[0.2em] text-outline mb-1">Total Valuation</p>
+                 <p class="text-[10px] font-black uppercase tracking-[0.2em] text-outline mb-1">{{ 'orderConfirm.finalValuation' | translate }}</p>
                  <p class="font-headline text-3xl font-black text-on-surface tracking-tighter">{{ totalPrice() | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
                </div>
                <button (click)="proceedToCheckout()" 

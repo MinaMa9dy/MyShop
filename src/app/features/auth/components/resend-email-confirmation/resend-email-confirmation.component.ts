@@ -39,7 +39,7 @@ import { TranslatePipe } from '@ngx-translate/core';
                </div>
                <div class="pt-6">
                   <button (click)="success.set(false)" class="text-[10px] font-black uppercase tracking-widest text-outline hover:text-primary transition-colors">
-                     Re-initiate Protocol
+                     Resend Email
                   </button>
                </div>
             </div>
@@ -63,7 +63,7 @@ import { TranslatePipe } from '@ngx-translate/core';
                     <input type="email" formControlName="email" required
                            class="w-full bg-surface-container-low px-16 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all"
                            [class.border-error/20]="resendForm.get('email')?.invalid && resendForm.get('email')?.touched"
-                           placeholder="you@identity.protocol">
+                           placeholder="you@example.com">
                   </div>
                   @if (resendForm.get('email')?.invalid && resendForm.get('email')?.touched) {
                     <p class="text-[10px] font-black text-error uppercase px-2">Invalid Identification Parameter</p>
@@ -78,7 +78,7 @@ import { TranslatePipe } from '@ngx-translate/core';
                     <span class="w-6 h-6 border-4 border-on-primary/30 border-t-white rounded-full animate-spin"></span>
                     <span class="font-black uppercase tracking-widest text-xs">Transmitting...</span>
                   } @else {
-                    <span>Dispatch Protocol</span>
+                    <span>Send Email</span>
                     <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">send_and_archive</span>
                   }
                 </button>
@@ -119,7 +119,7 @@ export class ResendEmailConfirmationComponent {
       email: email, clientURI: `${window.location.origin}/${this.currentLang}/auth/confirm-email`
     }).subscribe({
       next: () => { this.loading.set(false); this.success.set(true); },
-      error: (err) => { this.loading.set(false); this.error.set(err.error?.message || 'Dispatch protocol failure.'); }
+      error: (err) => { this.loading.set(false); this.error.set(err.error?.message || 'Submission failed.'); }
     });
   }
 }

@@ -49,7 +49,7 @@ import { Coupon, DiscountType } from '../../../../core/models/coupon.model';
                </div>
                <h3 class="font-headline text-2xl font-black text-on-surface mb-2">{{ 'admin.coupons.noCoupons' | translate }}</h3>
                <p class="font-body text-on-surface-variant opacity-60 mb-10">No active incentives discovered in the sequence.</p>
-               <button [routerLink]="['/' + currentLang + '/admin/coupons/add']" class="px-8 py-4 bg-outline text-surface rounded-2xl font-headline font-bold">Generate Protocol</button>
+               <button [routerLink]="['/' + currentLang + '/admin/coupons/add']" class="px-8 py-4 bg-outline text-surface rounded-2xl font-headline font-bold">New Coupon</button>
             </div>
           } @else {
             <div class="overflow-x-auto">
@@ -156,7 +156,7 @@ export class CouponListComponent implements OnInit {
   }
 
   deleteCoupon(id: string) {
-    if (confirm('Decommission this protocol?')) {
+    if (confirm('Delete this coupon?')) {
       this.deletingId.set(id);
       this.couponService.delete(id).subscribe({
         next: () => {

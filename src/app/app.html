@@ -3,7 +3,7 @@
   <app-toast></app-toast>
   
   <!-- Premium Navigation Shell -->
-  <nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-xl border-b border-outline-variant/10 shadow-2xl shadow-black/[0.02]">
+  <nav class="fixed top-0 w-full z-50 bg-white/95 border-b border-outline-variant/20 shadow-sm">
     <div class="flex justify-between items-center px-6 py-4 w-full max-w-7xl mx-auto rtl:flex-row-reverse">
       <!-- Brand Logo -->
       <a [routerLink]="'/' + currentLanguage() + '/'" class="text-2xl font-black tracking-tighter text-primary dark:text-inverse-primary font-headline">
@@ -23,7 +23,7 @@
            class="text-on-surface-variant hover:text-primary transition-all duration-300 py-1 font-medium nav-link-underline">
           {{ 'nav.products' | translate }}
         </a>
-        <a href="#" class="text-on-surface-variant hover:text-primary transition-all duration-300 py-1 font-medium nav-link-underline">
+        <a [routerLink]="'/' + currentLanguage() + '/'" fragment="deals" class="text-on-surface-variant hover:text-primary transition-all duration-300 py-1 font-medium nav-link-underline">
           {{ 'nav.deals' | translate }}
         </a>
       </div>
@@ -48,9 +48,9 @@
         <!-- Profile/Account -->
         <button [routerLink]="isLoggedIn() ? '/' + currentLanguage() + '/dashboard' : '/' + currentLanguage() + '/auth/login'"
                 class="p-2 rounded-full hover:bg-primary/5 transition-all duration-300 scale-105 active:scale-95 text-primary">
-          @if (isLoggedIn() && getUserPhotoUrl()) {
+          @if (isLoggedIn() && userPhotoUrl()) {
             <div class="w-7 h-7 rounded-full overflow-hidden border-2 border-primary/20 p-0.5">
-              <img [src]="getUserPhotoUrl()" alt="Profile" class="w-full h-full object-cover rounded-full">
+              <img [src]="userPhotoUrl()" alt="Profile" class="w-full h-full object-cover rounded-full" loading="lazy">
             </div>
           } @else {
             <span class="material-symbols-outlined font-black">account_circle</span>
@@ -155,39 +155,27 @@
         <ul class="flex flex-col gap-3 font-label text-xs uppercase tracking-widest">
           <li><a [routerLink]="'/' + currentLanguage() + '/products'" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'nav.products' | translate }}</a></li>
           <li><a [routerLink]="'/' + currentLanguage() + '/categories'" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'nav.categories' | translate }}</a></li>
-          <li><a href="#" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'nav.deals' | translate }}</a></li>
+          <li><a [routerLink]="'/' + currentLanguage() + '/'" fragment="deals" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'nav.deals' | translate }}</a></li>
         </ul>
       </div>
 
       <!-- Legal & Privacy -->
       <div class="space-y-6">
-        <h4 class="font-headline font-bold text-sm uppercase tracking-tight">Legal</h4>
+        <h4 class="font-headline font-bold text-sm uppercase tracking-tight">{{ 'footer.legal' | translate }}</h4>
         <ul class="flex flex-col gap-3 font-label text-xs uppercase tracking-widest">
-          <li><a href="#" class="text-on-surface-variant hover:text-primary transition-colors">Privacy Policy</a></li>
-          <li><a href="#" class="text-on-surface-variant hover:text-primary transition-colors">Terms of Service</a></li>
-          <li><a href="#" class="text-on-surface-variant hover:text-primary transition-colors">Help Center</a></li>
+          <li><a [routerLink]="'/' + currentLanguage() + '/'" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'footer.privacyPolicy' | translate }}</a></li>
+          <li><a [routerLink]="'/' + currentLanguage() + '/'" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'footer.termsOfService' | translate }}</a></li>
+          <li><a [routerLink]="'/' + currentLanguage() + '/'" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'footer.helpCenter' | translate }}</a></li>
         </ul>
       </div>
 
-      <!-- Audience Engagement -->
-      <div class="space-y-6">
-        <h4 class="font-headline font-bold text-sm uppercase tracking-tight">Newsletter</h4>
-        <div class="relative group">
-          <input type="email" 
-                 placeholder="Email address" 
-                 class="w-full bg-surface-container-lowest border-none rounded-xl px-4 py-4 text-sm focus:ring-2 focus:ring-primary/40 outline-none transition-all shadow-sm">
-          <button class="absolute inset-y-1 right-1 px-4 bg-primary text-on-primary rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center">
-            <span class="material-symbols-outlined text-sm">send</span>
-          </button>
-        </div>
-        <p class="text-[10px] text-on-surface-variant uppercase tracking-tighter opacity-70">Subscribe for early access to curated drops.</p>
-      </div>
+
     </div>
 
     <!-- Final Footnote -->
     <div class="max-w-7xl mx-auto mt-16 pt-8 border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-6">
       <p class="font-label text-xs uppercase tracking-widest text-on-surface-variant">
-        © 2026 MyShop Precision. {{ 'footer.allRightsReserved' | translate }}
+        © 2026 MyShop. {{ 'footer.allRightsReserved' | translate }}
       </p>
       <div class="flex gap-6 grayscale opacity-60">
         <span class="material-symbols-outlined text-xl">credit_card</span>

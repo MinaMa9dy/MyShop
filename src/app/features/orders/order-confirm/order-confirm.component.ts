@@ -26,23 +26,7 @@ import { AddOrderDto, CityOption, CITIES } from '../../../core/models/order.mode
                <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-2">{{ 'orderConfirm.finalizeAcquisition' | translate }}</h1>
                <p class="font-body text-on-surface-variant opacity-70">{{ 'orderConfirm.confirmOrder' | translate }}</p>
             </div>
-            <!-- Progress Stepper -->
-            <div class="flex items-center gap-4">
-               <div class="flex items-center gap-2">
-                  <div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-black">1</div>
-                  <span class="text-[10px] font-black uppercase tracking-widest text-on-surface">{{ 'orderConfirm.curation' | translate }}</span>
-               </div>
-               <div class="w-8 h-px bg-outline-variant/30"></div>
-               <div class="flex items-center gap-2 text-primary">
-                  <div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-black shadow-[0_0_20px_rgba(var(--primary-rgb),0.5)]">2</div>
-                  <span class="text-[10px] font-black uppercase tracking-widest">{{ 'orderConfirm.protocol' | translate }}</span>
-               </div>
-               <div class="w-8 h-px bg-outline-variant/30"></div>
-               <div class="flex items-center gap-2 opacity-30">
-                  <div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-xs font-black">3</div>
-                  <span class="text-[10px] font-black uppercase tracking-widest text-on-surface">{{ 'orderConfirm.execution' | translate }}</span>
-               </div>
-            </div>
+
           </div>
         </div>
       </section>
@@ -52,12 +36,12 @@ import { AddOrderDto, CityOption, CITIES } from '../../../core/models/order.mode
           
           <!-- Shipping Form (7 cols) -->
           <div class="lg:col-span-7 space-y-10 animate-slide-up">
-            <div class="p-10 bg-surface-container-lowest rounded-[48px] shadow-2xl border border-outline-variant/10">
+            <div class="p-6 md:p-10 bg-surface-container-lowest rounded-[48px] shadow-2xl border border-outline-variant/10">
                <div class="flex items-center gap-4 mb-10">
                   <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
                     <span class="material-symbols-outlined">local_shipping</span>
                   </div>
-                  <h2 class="font-headline text-2xl font-black tracking-tight text-on-surface">{{ 'orderConfirm.destinationProtocols' | translate }}</h2>
+                  <h2 class="font-headline text-2xl font-black tracking-tight text-on-surface">{{ 'orderConfirm.destinationDetails' | translate }}</h2>
                </div>
 
                <form (ngSubmit)="placeOrder()" class="space-y-8">
@@ -125,11 +109,8 @@ import { AddOrderDto, CityOption, CITIES } from '../../../core/models/order.mode
 
           <!-- Summary Sidebar (5 cols) -->
           <div class="lg:col-span-5 space-y-10 animate-slide-up" style="animation-delay: 100ms">
-            <div class="p-10 bg-surface-container rounded-[48px] border border-outline-variant/10 sticky top-24">
-               <div class="flex items-center gap-4 mb-4">
-                  <div class="w-10 h-10 rounded-xl bg-on-surface/5 flex items-center justify-center text-on-surface flex-shrink-0 overflow-hidden">
-                    <span class="material-symbols-outlined text-xl">receipt_short</span>
-                  </div>
+            <div class="p-6 md:p-10 bg-surface-container rounded-[48px] border border-outline-variant/10 sticky top-24">
+               <div class="mb-4">
                   <h3 class="font-headline font-black text-on-surface">{{ 'orderConfirm.inventoryValuation' | translate }}</h3>
                </div>
 
@@ -159,7 +140,7 @@ import { AddOrderDto, CityOption, CITIES } from '../../../core/models/order.mode
                <div class="mb-10 p-6 bg-primary/5 rounded-[32px] border border-primary/10">
                   <p class="text-[10px] font-black uppercase tracking-widest text-primary mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">confirmation_number</span>
-                    {{ 'orderConfirm.protocolOverride' | translate }}
+                    {{ 'orderConfirm.promoCode' | translate }}
                   </p>
                   
                   @if (appliedCoupon()) {
@@ -173,12 +154,12 @@ import { AddOrderDto, CityOption, CITIES } from '../../../core/models/order.mode
                        </button>
                     </div>
                   } @else {
-                    <div class="flex gap-3">
+                    <div class="flex flex-col sm:flex-row gap-4">
                        <input type="text" [(ngModel)]="couponInput" 
-                              class="flex-grow bg-white px-4 py-3 rounded-xl border border-transparent focus:border-primary/10 outline-none font-body text-xs text-on-surface uppercase tracking-widest"
+                              class="flex-grow w-full bg-white px-6 py-4 rounded-2xl border border-outline-variant/20 focus:border-primary/30 shadow-inner outline-none font-body text-sm text-on-surface uppercase tracking-widest transition-all"
                               [placeholder]="'orderConfirm.codePlaceholder' | translate">
                        <button (click)="applyCoupon()" [disabled]="isApplyingCoupon || !couponInput.trim()"
-                               class="px-6 bg-primary text-on-primary rounded-xl font-headline font-bold text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all">
+                               class="px-8 py-4 bg-primary text-on-primary rounded-2xl font-headline font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:scale-105 active:scale-95 transition-all text-center">
                           {{ 'CART.APPLY' | translate }}
                        </button>
                     </div>
@@ -196,7 +177,7 @@ import { AddOrderDto, CityOption, CITIES } from '../../../core/models/order.mode
                    </div>
                    @if (discountAmount() > 0) {
                       <div class="flex justify-between text-[10px] font-black uppercase tracking-widest text-error">
-                         <span>{{ 'orderConfirm.protocolReduction' | translate }}</span>
+                         <span>{{ 'orderConfirm.discount' | translate }}</span>
                          <span>-{{ discountAmount() | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
                       </div>
                    }
@@ -279,7 +260,7 @@ export class OrderConfirmComponent implements OnInit {
         this.cartService.clearCoupon();
         this.router.navigate(['/' + this.currentLang + '/orders']);
       },
-      error: (err) => { this.submitting.set(false); this.error.set(extractErrorMessage(err) || 'Execution protocol failed.'); }
+      error: (err) => { this.submitting.set(false); this.error.set(extractErrorMessage(err) || 'Execution failed.'); }
     });
   }
 
@@ -290,7 +271,7 @@ export class OrderConfirmComponent implements OnInit {
       next: (data: any) => {
         const responseData = this.normalizeCouponData(data);
         if (responseData?.coupon) { this.cartService.setCoupon(responseData); this.couponInput = ''; }
-        else { this.couponError = 'Invalid protocol response.'; }
+        else { this.couponError = 'Invalid response.'; }
         this.isApplyingCoupon = false;
       },
       error: (err) => { this.couponError = extractErrorMessage(err) || 'Validation failed.'; this.isApplyingCoupon = false; }

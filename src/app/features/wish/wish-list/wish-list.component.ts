@@ -39,7 +39,7 @@ import { Wish } from '../../../core/models/wish.model';
           <div class="text-center py-40 bg-error/5 rounded-3xl border-2 border-dashed border-error/20">
              <span class="material-symbols-outlined text-6xl text-error mb-4">error</span>
              <p class="font-headline text-xl font-black text-on-surface mb-6">{{ error() }}</p>
-             <button (click)="loadWishes()" class="px-8 py-4 bg-primary text-on-primary rounded-2xl font-headline font-bold">Retry Protocol</button>
+             <button (click)="loadWishes()" class="px-8 py-4 bg-primary text-on-primary rounded-2xl font-headline font-bold">Retry</button>
           </div>
         } @else if (wishes().length === 0) {
           <div class="text-center py-40 bg-surface-container-lowest rounded-3xl border-2 border-dashed border-outline-variant/30 animate-fade-in">
@@ -49,7 +49,7 @@ import { Wish } from '../../../core/models/wish.model';
              </div>
              <h2 class="font-headline text-2xl font-black text-on-surface mb-3">{{ 'WISH.empty' | translate }}</h2>
              <p class="font-body text-on-surface-variant opacity-60 mb-10 max-w-sm mx-auto leading-relaxed">{{ 'WISH.emptyDesc' | translate }}</p>
-             <button (click)="continueShopping()" class="px-10 py-5 bg-primary text-on-primary rounded-2xl font-headline font-bold shadow-[0_15px_30px_rgba(var(--primary-rgb),0.3)] hover:scale-105 active:scale-95 transition-all">Start Curation</button>
+             <button (click)="continueShopping()" class="px-10 py-5 bg-primary text-on-primary rounded-2xl font-headline font-bold shadow-[0_15px_30px_rgba(var(--primary-rgb),0.3)] hover:scale-105 active:scale-95 transition-all">{{ 'WISH.browseProducts' | translate }}</button>
           </div>
         } @else {
           <div class="grid grid-cols-2 lg:grid-cols-4 md:grid-cols-3 gap-6 md:gap-8 hover-glow">
@@ -68,7 +68,7 @@ import { Wish } from '../../../core/models/wish.model';
 
                   <!-- Sale Badge -->
                   @if (wish.product?.haveSale || ((wish.product?.oldPrice ?? 0) > (wish.product?.newPrice ?? 0))) {
-                    <div class="absolute top-6 left-6 z-10">
+                    <div class="absolute top-6 left-6 z-10 flex flex-col items-start gap-2">
                       <span class="bg-error text-on-error text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg animate-pulse-soft">
                         {{ 'product.onSale' | translate }}
                       </span>
@@ -159,7 +159,7 @@ export class WishListComponent implements OnInit {
 
   loadWishes(): void {
     const userId = this.tokenService.getUserId();
-    if (!userId) { this.error.set('Authentication Protocol Failure'); this.loading.set(false); return; }
+    if (!userId) { this.error.set('Authentication Failure'); this.loading.set(false); return; }
 
     this.wishService.getWishes(userId).subscribe({
       next: (wishes) => { this.wishes.set(wishes); this.loading.set(false); },

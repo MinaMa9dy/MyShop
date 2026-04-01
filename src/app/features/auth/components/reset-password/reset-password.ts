@@ -24,7 +24,7 @@ import { TranslateModule } from '@ngx-translate/core';
               <span class="material-symbols-outlined text-4xl text-primary transition-transform group-hover:scale-110">security</span>
               <div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent"></div>
            </div>
-           <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-3">{{ 'auth.protocolReset' | translate }}</h1>
+           <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-3">{{ 'auth.passwordReset' | translate }}</h1>
            <p class="font-body text-on-surface-variant opacity-70 max-w-sm mx-auto">{{ 'auth.resetSubtitle' | translate }}</p>
         </div>
 
@@ -124,7 +124,7 @@ export class ResetPasswordComponent implements OnInit {
   ngOnInit(): void {
     this.userId = this.route.snapshot.queryParams['userId'];
     this.token = this.route.snapshot.queryParams['token'];
-    if (!this.userId || !this.token) this.error.set('Invalid restoration protocol link.');
+    if (!this.userId || !this.token) this.error.set('Invalid restoration link.');
   }
   
   onSubmit(): void {
@@ -137,7 +137,7 @@ export class ResetPasswordComponent implements OnInit {
     
     this.authService.resetPassword(resetDto).subscribe({
       next: () => { this.success.set(true); this.loading.set(false); },
-      error: (err) => { this.error.set(err.error?.message || 'Authorization failed. Protocol link potentially expired.'); this.loading.set(false); }
+      error: (err) => { this.error.set(err.error?.message || 'Authorization failed. Link potentially expired.'); this.loading.set(false); }
     });
   }
 }

@@ -1,8 +1,9 @@
-import { Component, inject, OnInit, signal, computed, effect, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, effect, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { ProductService } from '../../../core/services/product.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { LanguageService } from '../../../core/services/language.service';
@@ -16,7 +17,8 @@ import { TokenService } from '../../../core/services/token.service';
   selector: 'app-product-list',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, TranslatePipe],
-  templateUrl: './product-list.component.html'
+  templateUrl: './product-list.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductListComponent implements OnInit, OnDestroy {
   constructor() {
@@ -50,6 +52,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
   processingId = signal<string | null>(null);
   isMobileFiltersOpen = signal(false);
 
+  // Debounce search/filter changes to avoid hammering the API
+  private filterChange$ = new Subject<void>();
+  private destroy$ = new Subject<void>();
+
   get canAddProduct(): boolean {
     return this.authService.isLoggedIn() && (this.tokenService.isSeller() || this.tokenService.hasRole('Admin'));
   }
@@ -67,6 +73,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
   isFastingOnly = false;
 
   ngOnInit(): void {
+    // Debounce filter changes: wait 300ms after the last change before fetching
+    this.filterChange$.pipe(
+      debounceTime(300),
+      takeUntil(this.destroy$)
+    ).subscribe(() => this.loadProducts());
+
     this.loadCategories();
     this.loadWishlist();
 
@@ -85,28 +97,26 @@ export class ProductListComponent implements OnInit, OnDestroy {
       categoryId: this.selectedCategory || undefined,
       minPrice: this.minPrice || undefined,
       maxPrice: this.maxPrice || undefined,
-      isOnSale: this.onSaleOnly || undefined,
+      haveSale: this.onSaleOnly || undefined,
       isFasting: this.isFastingOnly || undefined,
       page: this.currentPage(),
       pageSize: this.pageSize
     }).subscribe({
       next: (response: any) => {
-        console.log('Product Response Debug:', response);
         let prods: any[] = [];
         if (Array.isArray(response)) {
           prods = response;
         } else if (response && typeof response === 'object') {
-          // Check for common data wrappers
           prods = response.getProducts || response.GetProducts ||
-                  response.items || response.Items || 
-                  response.data || response.Data || 
+                  response.items || response.Items ||
+                  response.data || response.Data ||
                   response.products || response.Products || [];
         }
         this.products.set(prods.map(p => this.normalizeProduct(p)));
 
         let totalPages = 1;
         if (response) {
-          totalPages = response.totalPages || response.TotalPages || 
+          totalPages = response.totalPages || response.TotalPages ||
                        (response.totalCount || response.TotalCount ? Math.ceil((response.totalCount || response.TotalCount) / this.pageSize) : 1);
         }
         this.totalPages.set(Math.max(1, totalPages));
@@ -179,7 +189,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   onFilterChange(): void {
     this.currentPage.set(1);
-    this.loadProducts();
+    this.filterChange$.next(); // debounced — actual fetch happens after 300ms idle
   }
 
   clearFilters(): void {
@@ -277,6 +287,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
     this.toggleBodyScroll(false);
   }
 

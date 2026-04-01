@@ -24,7 +24,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
            <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-2">
              {{ 'admin.coupons.assignTitle' | translate }}
            </h1>
-           <p class="font-body text-on-surface-variant opacity-70">Associate specific inventory entities with this incentive protocol.</p>
+           <p class="font-body text-on-surface-variant opacity-70">Associate specific products with this coupon.</p>
         </div>
       </header>
 
@@ -41,7 +41,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
               <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 p-8 bg-tertiary/5 rounded-[32px] border border-tertiary/10">
                 <div>
                    <h3 class="font-headline font-black text-xl text-on-surface">Entity Selection</h3>
-                   <p class="text-xs font-black uppercase tracking-widest text-outline opacity-60">Authorize specific products for protocol eligibility.</p>
+                   <p class="text-xs font-black uppercase tracking-widest text-outline opacity-60">Select products eligible for this coupon.</p>
                 </div>
                 <div class="px-6 py-3 bg-tertiary text-on-tertiary rounded-2xl font-headline font-black text-xs uppercase tracking-widest shadow-lg shadow-tertiary/20">
                   {{ selectedCount() }} Bound Entities
@@ -124,7 +124,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
                 </button>
                 <a [routerLink]="['/' + currentLang + '/admin/coupons']"
                    class="flex-1 py-6 bg-surface-container rounded-[32px] font-headline font-bold text-xs uppercase tracking-widest text-outline hover:bg-surface-container-high transition-all text-center flex items-center justify-center">
-                   Terminate Protocol
+                   Cancel
                 </a>
               </footer>
             </div>
@@ -232,7 +232,7 @@ export class CouponAssignComponent implements OnInit, OnDestroy {
 
     forkJoin(requests).subscribe({
       next: () => {
-        this.submitting.set(false); this.success.set('Protocol associations verified.');
+        this.submitting.set(false); this.success.set('Associations saved.');
         setTimeout(() => this.router.navigate(['/', this.currentLang, 'admin', 'coupons']), 1000);
       },
       error: () => { this.submitting.set(false); this.error.set('Authorization update failure.'); }

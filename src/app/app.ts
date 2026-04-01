@@ -48,8 +48,8 @@ export class App implements OnInit, OnDestroy {
     return '👤';
   });
   
-  // Get user photo URL
-  getUserPhotoUrl(): string {
+  // Get user photo URL — computed so it only recalculates when userProfile changes
+  userPhotoUrl = computed(() => {
     const profile = this.userProfile();
     if (profile?.userPhoto?.relativePath) {
       const normalizedPath = profile.userPhoto.relativePath.replace(/\\/g, '/');
@@ -58,7 +58,7 @@ export class App implements OnInit, OnDestroy {
       return `${environment.apiUrl}/Photo/UserPhoto/${fileName}`;
     }
     return '';
-  }
+  });
   
   // Mobile menu state
   mobileMenuOpen = signal(false);
@@ -83,7 +83,6 @@ export class App implements OnInit, OnDestroy {
     
     // Subscribe to login success event for cart sync
     this.loginSubscription = this.authService.loginSuccess.subscribe(() => {
-      console.log('Login success detected, fetching cart from backend');
       this.fetchUserCart();
       this.loadUserProfile();
     });
@@ -103,17 +102,9 @@ export class App implements OnInit, OnDestroy {
   
   private fetchUserCart(): void {
     this.cartService.getCartItems().subscribe({
-        next: () => {
-          console.log('Cart loaded from backend');
-        },
+        next: () => { /* cart loaded */ },
         error: (error: any) => {
-          // Handle 401 gracefully - user is not authenticated
-          // Don't redirect, just keep the local cart data
-          if (error.status === 401) {
-            console.log('App - User is not authenticated, keeping local cart data');
-            // Cart service already handles this silently
-            return;
-          }
+          if (error.status === 401) return; // User not authenticated — keep local cart
           console.error('Error loading cart:', error);
         }
       });

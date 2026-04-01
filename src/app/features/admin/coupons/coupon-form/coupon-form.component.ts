@@ -131,7 +131,7 @@ import { CreateCouponDto, UpdateCouponDto, DiscountType } from '../../../../core
                 </button>
                 <a [routerLink]="['/' + currentLang + '/admin/coupons']"
                    class="flex-1 py-6 bg-surface-container rounded-[32px] font-headline font-bold text-xs uppercase tracking-widest text-outline hover:bg-surface-container-high transition-all text-center flex items-center justify-center">
-                   Cancel Protocol
+                   Cancel
                 </a>
               </footer>
             </form>
@@ -200,7 +200,7 @@ export class CouponFormComponent implements OnInit {
     const api = this.isEditMode() && this.couponCode() ? this.couponService.update(this.couponCode()!, submissionData) : this.couponService.create(submissionData);
     api.subscribe({
       next: () => this.router.navigate(['/', this.currentLang, 'admin', 'coupons']),
-      error: (err) => { this.submitting.set(false); this.error.set(err.error?.message || 'Submission protocol failed.'); }
+      error: (err) => { this.submitting.set(false); this.error.set(err.error?.message || 'Submission failed.'); }
     });
   }
 }

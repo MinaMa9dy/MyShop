@@ -35,7 +35,7 @@ import { TranslateModule } from '@ngx-translate/core';
                </div>
                <div>
                   <h1 class="font-headline text-4xl font-black text-on-surface mb-3 tracking-tight">{{ 'auth.channelVerified' | translate }}</h1>
-                  <p class="font-body text-on-surface-variant opacity-70">{{ 'auth.protocolEstablished' | translate }}</p>
+                  <p class="font-body text-on-surface-variant opacity-70">{{ 'auth.accountEstablished' | translate }}</p>
                </div>
                <a [routerLink]="['/' + currentLang + '/auth/login']" 
                   class="inline-block py-5 px-16 bg-on-surface text-surface rounded-[32px] font-headline font-bold text-lg shadow-2xl hover:scale-[1.05] transition-all group">
@@ -52,13 +52,13 @@ import { TranslateModule } from '@ngx-translate/core';
                   <div class="absolute inset-0 bg-gradient-to-br from-error/20 to-transparent"></div>
                </div>
                <div>
-                  <h1 class="font-headline text-4xl font-black text-on-surface mb-3 tracking-tight">{{ 'auth.protocolMismatch' | translate }}</h1>
+                  <h1 class="font-headline text-4xl font-black text-on-surface mb-3 tracking-tight">{{ 'auth.linkMismatch' | translate }}</h1>
                   <p class="font-body text-on-surface-variant opacity-70">{{ error() || ('auth.verifyExpired' | translate) }}</p>
                </div>
                <div class="flex flex-col gap-5 max-w-sm mx-auto">
                   <a [routerLink]="['/' + currentLang + '/auth/resend-email-confirmation']" 
                      class="w-full py-5 bg-primary text-on-primary rounded-[32px] font-headline font-bold uppercase tracking-widest text-xs shadow-xl transition-all hover:scale-[1.02]">
-                     {{ 'auth.retryProtocol' | translate }}
+                     Try Again
                   </a>
                   <a [routerLink]="['/' + currentLang + '/auth/login']" 
                      class="w-full py-5 bg-surface-container rounded-[32px] font-headline font-bold uppercase tracking-widest text-[10px] text-outline transition-all hover:bg-surface-container-high">

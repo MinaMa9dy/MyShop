@@ -25,22 +25,22 @@ import { TokenService } from '../../core/services/token.service';
                style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCrToAN7K9bxCYHNmah4SPbCguXNVlpK-DeQWeEBnHb8hhrK_YwTkoUXoEOh-RgjYVbFZj2ZzFPFjqLgEqS81zBG3mBRaFpNCTpPthaRKkjbY6cN5ywiH6wrgPH-fov4huJ80NbYSMgUyawNMMrAIHqttsqobdz8M4Yk_ERm3md8eXwLlW4PLs3aIXrOye6hD6Mc0OtdU9LpkjMLI7eeChndSjrvjUUdPvpHGIlYDvLm3UBFRbdvqH0krtaLiZxlv72URSOjaoPfUbP'); background-size: cover; background-position: center;">
           </div>
           
-          <div class="relative z-10 max-w-2xl animate-fade-in text-start">
+          <div class="relative z-10 max-w-2xl animate-fade-in text-center md:text-start mx-auto md:mx-0 flex flex-col items-center md:items-start">
             <h1 class="font-headline text-5xl md:text-7xl font-extrabold tracking-tighter leading-none mb-6">
               {{ 'home.welcome' | translate }}
             </h1>
             <p class="font-body text-lg md:text-xl opacity-90 mb-10 max-w-lg leading-relaxed">
               {{ 'home.subtitle' | translate }}
             </p>
-            <div class="flex flex-wrap gap-4">
+            <div class="flex flex-col sm:flex-row flex-wrap gap-4 justify-center md:justify-start w-full sm:w-auto">
               <a [routerLink]="'/' + currentLang + '/products'" 
-                 class="bg-surface-container-lowest text-primary font-headline font-bold px-10 py-4 rounded-full hover:scale-105 active:scale-95 transition-transform duration-300 shadow-xl flex items-center gap-3">
+                 class="bg-surface-container-lowest text-primary font-headline font-bold px-10 py-4 rounded-full hover:scale-105 active:scale-95 transition-transform duration-300 shadow-xl flex items-center justify-center gap-3">
                 {{ 'home.shopNow' | translate }}
                 <span class="material-symbols-outlined">arrow_forward</span>
               </a>
               @if (!isLoggedIn()) {
                 <a [routerLink]="'/' + currentLang + '/auth/register'" 
-                   class="bg-white/10 backdrop-blur-md border border-white/20 text-white font-headline font-bold px-10 py-4 rounded-full hover:bg-white/20 transition-all duration-300">
+                   class="bg-white/10 backdrop-blur-md border border-white/20 text-white font-headline font-bold px-10 py-4 rounded-full hover:bg-white/20 transition-all duration-300 flex items-center justify-center">
                   {{ 'home.createAccount' | translate }}
                 </a>
               }
@@ -51,12 +51,14 @@ import { TokenService } from '../../core/services/token.service';
 
       <!-- Bento-Style Categories -->
       <section class="categories px-6 py-12 max-w-7xl mx-auto">
-        <div class="flex justify-between items-end mb-10">
-          <div>
-            <h2 class="font-headline text-3xl font-extrabold tracking-tight text-on-surface">
+        <div class="flex flex-col md:flex-row justify-between items-center md:items-end mb-12 gap-6 text-center md:text-start">
+          <div class="space-y-2">
+            <h2 class="font-headline text-4xl md:text-5xl font-black tracking-tighter text-on-surface">
               {{ 'home.categories' | translate }}
             </h2>
-            <p class="text-on-surface-variant font-body text-xs uppercase tracking-widest animate-fade-in-up" style="animation-delay: 100ms">{{ 'home.browseByDept' | translate }}</p>
+            <p class="text-on-surface-variant font-body text-xs md:text-sm font-black uppercase tracking-[0.3em] opacity-50 animate-fade-in-up" style="animation-delay: 100ms">
+              {{ 'home.browseByDept' | translate }}
+            </p>
           </div>
           <a [routerLink]="['/' + currentLang + '/categories']" 
              class="text-primary font-semibold flex items-center gap-1 hover:gap-2 transition-all group">
@@ -88,22 +90,22 @@ import { TokenService } from '../../core/services/token.service';
       </section>
 
       <!-- Premium Featured Products Grid -->
-      <section class="featured-products px-6 py-12 max-w-7xl mx-auto mb-20 text-start">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+      <section class="featured-products px-6 py-12 max-w-7xl mx-auto mb-20 text-center md:text-start">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6 text-center md:text-start">
           <h2 class="font-headline text-3xl font-extrabold tracking-tight text-on-surface">
             {{ 'home.featuredProducts' | translate }}
           </h2>
           
-          <div class="flex gap-4">
+          <div class="flex flex-wrap justify-center md:justify-start gap-4">
             @if (canAddProduct()) {
               <button 
                 [routerLink]="['/' + currentLang + '/admin/products/add']"
-                class="flex items-center gap-2 px-6 py-3 bg-secondary text-on-secondary rounded-xl hover:bg-secondary-dim transition-all shadow-lg hover:shadow-secondary/20 transform hover:-translate-y-0.5">
+                class="flex items-center justify-center gap-2 px-6 py-3 bg-secondary text-on-secondary rounded-xl hover:bg-secondary-dim transition-all shadow-lg hover:shadow-secondary/20 transform hover:-translate-y-0.5">
                 <span class="material-symbols-outlined">add_circle</span>
                 <span class="font-semibold">{{ 'admin.addProduct.addProduct' | translate }}</span>
               </button>
             }
-            <a [routerLink]="'/' + currentLang + '/products'" class="flex items-center gap-2 px-6 py-3 bg-surface-container border border-outline-variant text-on-surface rounded-xl hover:bg-surface-container-high transition-all">
+            <a [routerLink]="'/' + currentLang + '/products'" class="flex items-center justify-center gap-2 px-6 py-3 bg-surface-container border border-outline-variant text-on-surface rounded-xl hover:bg-surface-container-high transition-all">
                {{ 'home.viewAll' | translate }}
             </a>
           </div>
@@ -123,14 +125,14 @@ import { TokenService } from '../../core/services/token.service';
                   </a>
                   
                   <!-- Quality Badges -->
-                  <div class="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none">
+                  <div class="absolute top-2 left-2 md:top-4 md:left-4 flex flex-col items-start gap-1.5 pointer-events-none z-10">
                     @if (product.haveSale) {
-                      <span class="bg-error text-on-error text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">
+                      <span class="bg-error/90 backdrop-blur-md text-on-error text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg md:rounded-xl shadow-lg ring-1 ring-white/20">
                         {{ 'product.sale' | translate }}
                       </span>
                     }
                     @if (product.isFasting) {
-                      <span class="bg-primary text-on-primary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">
+                      <span class="bg-primary/90 backdrop-blur-md text-on-primary text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg md:rounded-xl shadow-lg ring-1 ring-white/20">
                         {{ 'product.fasting' | translate }}
                       </span>
                     }
@@ -170,15 +172,10 @@ import { TokenService } from '../../core/services/token.service';
                         {{ product.name }}
                       </h3>
                     </a>
-                    <div class="hidden md:flex items-center gap-1 text-tertiary">
-                      <span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
-                      <span class="text-xs font-black">4.9</span>
-                    </div>
+
                   </div>
                   
-                  <p class="text-on-surface-variant text-[10px] md:text-xs mb-2 md:mb-6 line-clamp-1 md:line-clamp-2 leading-relaxed flex-grow">
-                    {{ 'product.premiumNote' | translate }}
-                  </p>
+
 
                   <div class="flex items-center justify-between mt-auto">
                     <div class="flex flex-col">

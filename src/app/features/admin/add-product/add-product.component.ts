@@ -129,7 +129,7 @@ import { TranslateService } from '@ngx-translate/core';
               <section class="space-y-8">
                 <div class="flex items-center gap-4 border-b border-outline-variant/10 pb-4">
                   <span class="material-symbols-outlined text-primary">collections</span>
-                  <h3 class="font-headline font-black text-xl text-on-surface">{{ 'admin.addProduct.visualProtocols' | translate }}</h3>
+                  <h3 class="font-headline font-black text-xl text-on-surface">{{ 'admin.addProduct.visualMedia' | translate }}</h3>
                 </div>
 
                 <!-- Existing Photos (Edit Mode) -->
@@ -184,7 +184,7 @@ import { TranslateService } from '@ngx-translate/core';
                 </div>
               </section>
 
-              <!-- Final Protocol Control -->
+              <!-- Final Control -->
               <footer class="pt-16 border-t border-outline-variant/10 space-y-10">
                  @if (error()) {
                    <div class="p-6 bg-error/10 text-error rounded-3xl border border-error/20 flex items-start gap-4">
@@ -211,7 +211,7 @@ import { TranslateService } from '@ngx-translate/core';
                     </button>
                      <a [routerLink]="'/' + currentLang + '/products'"
                         class="flex-1 py-6 bg-surface-container rounded-[32px] font-headline font-bold text-sm uppercase tracking-widest text-outline hover:bg-surface-container-high transition-all text-center flex items-center justify-center">
-                        {{ 'admin.addProduct.terminateProtocol' | translate }}
+                        {{ 'admin.addProduct.cancel' | translate }}
                      </a>
                  </div>
               </footer>
@@ -273,7 +273,7 @@ export class AddProductComponent implements OnInit {
       next: (product: any) => {
         const userId = this.tokenService.getUserId();
         if ((product.supplierId !== userId && product.SupplierId !== userId) && !this.tokenService.hasRole('Admin')) {
-           this.error.set(this.translate.instant('admin.addProduct.authProtocolFailure')); return;
+           this.error.set(this.translate.instant('admin.addProduct.authFailure')); return;
         }
         this.originalProduct.set(product);
         this.productForm.patchValue({
@@ -331,7 +331,7 @@ export class AddProductComponent implements OnInit {
         this.submitting.set(false); this.success.set(this.translate.instant('admin.addProduct.entityIntegrated'));
         this.selectedFiles.set([]); this.productForm.reset();
       },
-      error: (err) => { this.submitting.set(false); this.error.set(err.error?.message || this.translate.instant('admin.addProduct.integrationProtocolError')); }
+      error: (err) => { this.submitting.set(false); this.error.set(err.error?.message || this.translate.instant('admin.addProduct.integrationError')); }
     });
   }
 

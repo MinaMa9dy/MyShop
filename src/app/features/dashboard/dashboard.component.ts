@@ -71,7 +71,7 @@ import { environment } from '../../../environments/environment';
       <section class="max-w-7xl mx-auto px-6 -mt-16 relative z-30">
         <!-- Quantified Metrics Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-           <div class="bg-surface-container-lowest p-10 rounded-[48px] shadow-2xl border border-outline-variant/10 group hover:border-primary/30 transition-all">
+           <div class="bg-surface-container-lowest p-6 md:p-10 rounded-[48px] shadow-2xl border border-outline-variant/10 group hover:border-primary/30 transition-all">
               <div class="flex justify-between items-start mb-8">
                   <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                      <span class="material-symbols-outlined text-3xl">inventory_2</span>
@@ -79,10 +79,10 @@ import { environment } from '../../../environments/environment';
                   <span class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.historicalLog' | translate }}</span>
                </div>
                <p class="font-headline text-5xl font-black text-on-surface mb-2">{{ stats().totalOrders }}</p>
-               <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.totalOrders' | translate }} Protocol</p>
+               <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.totalOrders' | translate }}</p>
            </div>
 
-           <div class="bg-surface-container-lowest p-10 rounded-[48px] shadow-2xl border border-outline-variant/10 group hover:border-tertiary/30 transition-all">
+           <div class="bg-surface-container-lowest p-6 md:p-10 rounded-[48px] shadow-2xl border border-outline-variant/10 group hover:border-tertiary/30 transition-all">
               <div class="flex justify-between items-start mb-8">
                   <div class="w-14 h-14 bg-tertiary/10 rounded-2xl flex items-center justify-center text-tertiary group-hover:scale-110 transition-transform">
                      <span class="material-symbols-outlined text-3xl">shopping_cart</span>
@@ -93,7 +93,7 @@ import { environment } from '../../../environments/environment';
                <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.itemsInBuffer' | translate }}</p>
            </div>
 
-           <div class="bg-surface-container-lowest p-10 rounded-[48px] shadow-2xl border border-outline-variant/10 group hover:border-error/30 transition-all sm:col-span-2 lg:col-span-1">
+           <div class="bg-surface-container-lowest p-6 md:p-10 rounded-[48px] shadow-2xl border border-outline-variant/10 group hover:border-error/30 transition-all sm:col-span-2 lg:col-span-1">
               <div class="flex justify-between items-start mb-8">
                   <div class="w-14 h-14 bg-error/10 rounded-2xl flex items-center justify-center text-error group-hover:scale-110 transition-transform">
                      <span class="material-symbols-outlined text-3xl">favorite</span>
@@ -118,12 +118,12 @@ import { environment } from '../../../environments/environment';
                     </button>
                  </nav>
 
-                 <div class="p-10 md:p-16">
+                 <div class="p-6 md:p-10 md:p-16">
                      <!-- Overview Tab Content -->
                      <div *ngIf="activeTab() === 'overview'" class="space-y-12 animate-fade-in text-start">
                         <div>
                            <h3 class="font-headline font-black text-2xl text-on-surface mb-8 tracking-tighter">{{ 'dashboard.strategicExecution' | translate }}</h3>
-                          <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
+                          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                              <a *ngIf="canAddProduct()" [routerLink]="['/' + currentLang() + '/admin/products/add']" 
                                 class="p-8 rounded-[32px] bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-all text-center group">
                                 <span class="material-symbols-outlined text-4xl text-primary mb-4 group-hover:scale-125 transition-transform">add_box</span>
@@ -186,7 +186,7 @@ import { environment } from '../../../environments/environment';
 
            <!-- Sidebar / Auxiliary Info -->
            <aside class="space-y-8">
-               <div class="bg-surface-container-lowest p-10 rounded-[48px] shadow-2xl border border-outline-variant/10 text-start">
+               <div class="bg-surface-container-lowest p-6 md:p-10 rounded-[48px] shadow-2xl border border-outline-variant/10 text-start">
                   <h4 class="font-headline font-black text-lg text-on-surface mb-8 tracking-tight">{{ 'dashboard.securityStatus' | translate }}</h4>
                   <div class="space-y-6">
                      <div class="flex items-center gap-4">
@@ -198,21 +198,13 @@ import { environment } from '../../../environments/environment';
                            <p class="text-[8px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.verifiedChannel' | translate }}</p>
                         </div>
                      </div>
-                     <div class="flex items-center gap-4 opacity-50">
-                        <div class="w-10 h-10 rounded-xl bg-surface-container-high text-outline-variant flex items-center justify-center">
-                           <span class="material-symbols-outlined text-xl">2fa</span>
-                        </div>
-                        <div>
-                           <p class="text-[10px] font-black uppercase tracking-widest text-on-surface">{{ 'dashboard.multiFactor' | translate }}</p>
-                           <p class="text-[8px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.disabledSector' | translate }}</p>
-                        </div>
-                     </div>
+
                   </div>
                </div>
 
-               <div class="bg-gradient-to-br from-primary to-primary-container p-10 rounded-[48px] shadow-2xl text-on-primary relative overflow-hidden group">
+               <div class="bg-gradient-to-br from-primary to-primary-container p-6 md:p-10 rounded-[48px] shadow-2xl text-on-primary relative overflow-hidden group">
                   <div class="relative z-10 text-start">
-                     <p class="text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">{{ 'dashboard.protocolLoyalty' | translate }}</p>
+                     <p class="text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">{{ 'dashboard.accountLoyalty' | translate }}</p>
                      <h4 class="font-headline font-black text-3xl mb-4 tracking-tighter">{{ 'dashboard.eliteSequence' | translate }}</h4>
                      <p class="font-body text-xs opacity-80 leading-relaxed mb-8">{{ 'dashboard.accessRestricted' | translate }}</p>
                      <button class="w-full py-4 bg-white text-primary rounded-2xl font-headline font-black text-[10px] uppercase tracking-widest group-hover:bg-primary-container group-hover:text-white transition-all">{{ 'dashboard.reviewBenefits' | translate }}</button>

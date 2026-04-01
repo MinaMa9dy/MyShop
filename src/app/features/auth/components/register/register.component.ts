@@ -38,7 +38,7 @@ import { TranslatePipe } from '@ngx-translate/core';
       <!-- Right Form Side -->
       <div class="w-full md:w-1/2 flex items-center justify-center p-8 md:p-16 bg-surface-container-lowest overflow-y-auto">
         <div class="w-full max-w-lg animate-slide-up py-10">
-          <div class="text-start mb-10">
+          <div class="text-center md:text-start mb-10">
             <h2 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">
               {{ 'auth.createAccount' | translate }}
             </h2>
