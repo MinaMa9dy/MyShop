@@ -19,17 +19,17 @@ import { environment } from '../../../environments/environment';
   template: `
     <main class="min-h-screen bg-surface pb-24" [dir]="currentLang() === 'ar' ? 'rtl' : 'ltr'">
       <!-- Strategic Hero Section -->
-      <header class="h-[40vh] min-h-[400px] relative overflow-hidden bg-on-surface flex items-end pb-24">
-         <div class="absolute inset-0 z-0">
-            <div class="absolute inset-0 bg-gradient-to-t from-on-surface via-on-surface/40 to-transparent z-10"></div>
+      <header class="min-h-[500px] md:h-[40vh] md:min-h-[400px] relative overflow-hidden bg-on-surface flex items-center md:items-end pb-24 pt-32 md:pt-0">
+         <div class="absolute inset-0 z-0 text-center">
+            <div class="absolute inset-0 bg-gradient-to-t from-on-surface via-on-surface/60 to-transparent z-10"></div>
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--primary)_0%,_transparent_50%)] opacity-30 z-0 animate-pulse"></div>
             @if (getPhotoUrl()) {
-              <img [src]="getPhotoUrl()" class="w-full h-full object-cover opacity-60 blur-sm scale-110">
+              <img [src]="getPhotoUrl()" class="w-full h-full object-cover opacity-60 blur-md scale-110">
             }
          </div>
 
-         <div class="max-w-7xl mx-auto px-6 w-full relative z-20 flex flex-col md:flex-row items-end justify-between gap-10">
-            <div class="flex items-end gap-8 text-start">
+         <div class="max-w-7xl mx-auto px-6 w-full relative z-20 flex flex-col md:flex-row items-center md:items-end justify-between gap-12 text-center md:text-start">
+            <div class="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8">
                <!-- High-End Avatar -->
                <div class="relative group">
                   <div class="w-32 h-32 md:w-40 md:h-40 bg-surface rounded-[40px] p-2 shadow-2xl relative z-10 overflow-hidden transform group-hover:scale-105 transition-transform duration-500">
@@ -50,20 +50,20 @@ import { environment } from '../../../environments/environment';
                   <input type="file" id="dash-photo" class="hidden" accept="image/*" (change)="onPhotoSelected($event)">
                </div>
 
-               <div class="pb-2">
-                  <div class="flex items-center gap-3 mb-4">
+               <div class="flex flex-col items-center md:items-start pb-2">
+                  <div class="flex items-center justify-center md:justify-start gap-2 mb-4 flex-wrap">
                      @for (role of user()?.roles || []; track role) {
                         <span class="px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-white border border-white/20">{{ role }}</span>
                      }
                   </div>
-                  <h1 class="font-headline text-5xl md:text-7xl font-black tracking-tighter text-white mb-2">{{ userFullName() }}</h1>
+                  <h1 class="font-headline text-5xl md:text-7xl font-black tracking-tighter text-white mb-2 leading-none">{{ userFullName() }}</h1>
                   <p class="font-body text-white/60 tracking-widest uppercase text-xs">{{ userEmail() }}</p>
                </div>
             </div>
 
             <!-- Dashboard Control Panel -->
-             <div class="flex gap-4 mb-2">
-                <button (click)="logout()" class="px-8 py-4 bg-error text-on-error rounded-2xl font-headline font-bold uppercase tracking-widest text-[10px] shadow-2xl hover:bg-error-container hover:text-on-error-container transition-all">{{ 'dashboard.deauthenticate' | translate }}</button>
+             <div class="flex justify-center md:justify-start gap-4 mb-2 w-full md:w-auto">
+                <button (click)="logout()" class="px-10 py-4 bg-error text-on-error rounded-full font-headline font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl hover:scale-105 active:scale-95 transition-all">{{ 'dashboard.deauthenticate' | translate }}</button>
              </div>
          </div>
       </header>

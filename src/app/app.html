@@ -3,10 +3,10 @@
   <app-toast></app-toast>
   
   <!-- Premium Navigation Shell -->
-  <nav class="fixed top-0 w-full z-50 bg-white/95 border-b border-outline-variant/20 shadow-sm">
-    <div class="flex justify-between items-center px-6 py-4 w-full max-w-7xl mx-auto rtl:flex-row-reverse">
+  <nav class="fixed top-0 w-full z-50 bg-white/95 border-b border-outline-variant/10 backdrop-blur-md">
+    <div class="flex justify-between items-center px-4 md:px-6 py-3 md:py-4 w-full max-w-7xl mx-auto !flex-row">
       <!-- Brand Logo -->
-      <a [routerLink]="'/' + currentLanguage() + '/'" class="text-2xl font-black tracking-tighter text-primary dark:text-inverse-primary font-headline">
+      <a [routerLink]="'/' + currentLanguage() + '/'" class="text-xl md:text-2xl font-black tracking-tighter text-primary font-headline ltr:mr-auto rtl:ml-auto">
         MyShop
       </a>
 
@@ -28,14 +28,8 @@
         </a>
       </div>
 
-      <!-- Actions -->
-      <div class="flex items-center space-x-2 md:space-x-4 rtl:space-x-reverse">
-        <!-- Language Switcher -->
-        <button (click)="toggleLanguage()" 
-                class="p-2 rounded-full hover:bg-primary/5 transition-all duration-300 scale-105 active:scale-95 text-primary">
-          <span class="material-symbols-outlined font-black">language</span>
-        </button>
-
+      <!-- Actions (Standardized Order) -->
+      <div class="flex items-center space-x-1 sm:space-x-2 md:space-x-4 !flex-row">
         <!-- Cart Tray -->
         <button (click)="toggleCart()" 
                 class="p-2 rounded-full hover:bg-surface-container-low transition-all duration-300 scale-105 active:scale-95 text-primary relative">
@@ -57,13 +51,12 @@
           }
         </button>
 
-        <!-- Mobile Toggle -->
+        <!-- Mobile Toggle (Simplified) -->
         <button (click)="toggleMobileMenu()" 
-                [class.active]="mobileMenuOpen()"
-                class="md:hidden p-3 text-primary rounded-xl hover:bg-surface-container-high transition-all flex flex-col items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-primary/20">
-          <span class="block w-6 h-0.5 bg-current transition-all duration-300 transform" [class.translate-y-2]="mobileMenuOpen()" [class.rotate-45]="mobileMenuOpen()"></span>
-          <span class="block w-6 h-0.5 bg-current transition-all duration-300" [class.opacity-0]="mobileMenuOpen()"></span>
-          <span class="block w-6 h-0.5 bg-current transition-all duration-300 transform" [class.-translate-y-2]="mobileMenuOpen()" [class.-rotate-45]="mobileMenuOpen()"></span>
+                class="md:hidden p-2 text-primary focus:outline-none transition-transform active:scale-90">
+          <span class="material-symbols-outlined text-[28px] font-black">
+            {{ mobileMenuOpen() ? 'close' : 'menu' }}
+          </span>
         </button>
       </div>
     </div>
