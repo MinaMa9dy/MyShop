@@ -22,6 +22,58 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-  <app-root></app-root>
+  <app-root>
+    <!-- Premium Initial Loader (Prevents FOUC/Flicker) -->
+    <style>
+      .initial-loader {
+        position: fixed;
+        inset: 0;
+        background: #ffffff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.4s ease-out;
+      }
+      .loader-logo {
+        font-family: 'Inter', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #0066cc; /* Using your primary blue */
+        letter-spacing: -0.05em;
+        margin-bottom: 24px;
+        animation: pulse-soft 2s infinite ease-in-out;
+      }
+      .loader-bar {
+        width: 120px;
+        height: 3px;
+        background: rgba(0, 102, 204, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+      }
+      .loader-bar::after {
+        content: '';
+        position: absolute;
+        width: 40%;
+        height: 100%;
+        background: #0066cc;
+        animation: slide-loader 1.5s infinite ease-in-out;
+      }
+      @keyframes pulse-soft {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(0.98); }
+      }
+      @keyframes slide-loader {
+        0% { left: -40%; }
+        100% { left: 100%; }
+      }
+    </style>
+    <div class="initial-loader" id="app-loader">
+      <div class="loader-logo">MyShop</div>
+      <div class="loader-bar"></div>
+    </div>
+  </app-root>
 </body>
 </html>
