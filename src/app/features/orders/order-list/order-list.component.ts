@@ -107,7 +107,7 @@ import { PhotoService } from '../../../core/services/photo.service';
                       <!-- Logistics & Valuation -->
                       <div class="space-y-10">
                          <div class="space-y-6">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-outline">Logistics Coordinates</p>
+                            <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'orderConfirm.shippingInfo' | translate }}</p>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                <div class="space-y-2">
                                   <span class="material-symbols-outlined text-outline-variant text-sm">location_on</span>
@@ -130,7 +130,7 @@ import { PhotoService } from '../../../core/services/photo.service';
                                   <p class="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2">Final Valuation</p>
                                   <p class="font-headline text-4xl font-black text-on-surface tracking-tighter">{{ calculateOrderTotal(order) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
                                </div>
-                               <span class="text-[10px] font-black uppercase tracking-widest text-outline opacity-40">Valuation Verified</span>
+
                             </div>
                          </div>
                       </div>
@@ -138,12 +138,8 @@ import { PhotoService } from '../../../core/services/photo.service';
                 </div>
 
                 <!-- Footer Action -->
-                <div class="px-10 py-6 bg-surface-container border-t border-outline-variant/5 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                   <p class="text-[8px] font-black uppercase tracking-widest text-outline">Order Status: Completed</p>
-                   <button class="text-primary font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:translate-x-1 transition-transform">
-                      <span>Request Detail Log</span>
-                      <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                   </button>
+                <!-- Order Status Footer -->
+                <div class="px-10 py-6 bg-surface-container border-t border-outline-variant/5">
                 </div>
 
               </div>
@@ -186,19 +182,24 @@ export class OrderListComponent implements OnInit {
     return (order.orderItems || []).reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
   }
   
-  getStatusText(status: string): string {
-    const map: { [key: string]: string } = { 'Delivered': 'orders.delivered', 'Shipped': 'orders.shipped', 'Processing': 'orders.processing', 'Cancelled': 'orders.cancelled' };
-    return map[status] || 'orders.processing';
+  getStatusText(status: any): string {
+    const s = status.toString();
+    const map: { [key: string]: string } = { 
+      '0': 'orders.processing', 'Processing': 'orders.processing',
+      '1': 'orders.shipped', 'Shipped': 'orders.shipped',
+      '2': 'orders.delivered', 'Delivered': 'orders.delivered',
+      '3': 'orders.cancelled', 'Cancelled': 'orders.cancelled', 'Canceled': 'orders.cancelled'
+    };
+    return map[s] || 'orders.processing';
   }
 
-  getStatusClasses(status: string): string {
-    const map: { [key: string]: string } = {
-       'Delivered': 'bg-success/10 text-success border border-success/20',
-       'Shipped': 'bg-primary/10 text-primary border border-primary/20',
-       'Processing': 'bg-tertiary/10 text-tertiary border border-tertiary/20',
-       'Cancelled': 'bg-error/10 text-error border border-error/20'
-    };
-    return map[status] || 'bg-surface-container-high text-outline border border-outline-variant/30';
+  getStatusClasses(status: any): string {
+    const s = status.toString();
+    if (s === '0' || s === 'Processing') return 'bg-tertiary/10 text-tertiary border border-tertiary/20';
+    if (s === '1' || s === 'Shipped') return 'bg-primary/10 text-primary border border-primary/20';
+    if (s === '2' || s === 'Delivered') return 'bg-success/10 text-success border border-success/20';
+    if (s === '3' || s === 'Cancelled' || s === 'Canceled') return 'bg-error/10 text-error border border-error/20';
+    return 'bg-surface-container-high text-outline border border-outline-variant/30';
   }
   
   getPhotoPath(item: any): string | null {

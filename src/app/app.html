@@ -4,9 +4,9 @@
   
   <!-- Premium Navigation Shell -->
   <nav class="fixed top-0 w-full z-50 bg-white/95 border-b border-outline-variant/10 backdrop-blur-md">
-    <div class="flex justify-between items-center px-4 md:px-6 py-3 md:py-4 w-full max-w-7xl mx-auto !flex-row">
+    <div class="flex justify-between items-center px-4 md:px-6 py-3 md:py-4 w-full max-w-7xl mx-auto flex-row rtl:md:flex-row-reverse">
       <!-- Brand Logo -->
-      <a [routerLink]="'/' + currentLanguage() + '/'" class="text-xl md:text-2xl font-black tracking-tighter text-primary font-headline ltr:mr-auto rtl:ml-auto">
+      <a [routerLink]="'/' + currentLanguage() + '/'" class="text-xl md:text-2xl font-black tracking-tighter text-primary font-headline">
         MyShop
       </a>
 
@@ -28,8 +28,14 @@
         </a>
       </div>
 
-      <!-- Actions (Standardized Order) -->
-      <div class="flex items-center space-x-1 sm:space-x-2 md:space-x-4 !flex-row">
+      <!-- Actions (Standardized Order for Mobile, Standard RTL for Desktop) -->
+      <div class="flex items-center space-x-1 sm:space-x-2 md:space-x-4 flex-row rtl:md:flex-row-reverse">
+        <!-- Language Switcher (Desktop Only) -->
+        <button (click)="toggleLanguage()" 
+                class="hidden md:flex p-2 rounded-full hover:bg-primary/5 transition-all duration-300 scale-105 active:scale-95 text-primary">
+          <span class="material-symbols-outlined font-black">language</span>
+        </button>
+
         <!-- Cart Tray -->
         <button (click)="toggleCart()" 
                 class="p-2 rounded-full hover:bg-surface-container-low transition-all duration-300 scale-105 active:scale-95 text-primary relative">
