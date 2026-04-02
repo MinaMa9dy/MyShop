@@ -140,12 +140,14 @@ import { TokenService } from '../../core/services/token.service';
 
                   <!-- Quick Action Button (Wishlist) -->
                   <button 
-                    class="absolute top-2 right-2 md:top-4 md:right-4 z-20 p-2 md:p-2.5 bg-white/80 backdrop-blur-md rounded-full shadow-xl hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-110 active:scale-90"
-                    [class.text-primary]="wishlistIds().has(product.id)"
-                    [class.text-on-surface-variant]="!wishlistIds().has(product.id)"
+                    class="absolute top-2 right-2 md:top-4 md:right-4 z-20 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-90 border border-outline-variant/10"
+                    [class.bg-red-600]="wishlistIds().has(product.id)"
+                    [class.bg-white]="!wishlistIds().has(product.id)"
                     (click)="toggleWishlist(product, $event)">
-                    <span class="material-symbols-outlined text-lg md:text-xl flex items-center justify-center leading-none" 
-                          [style.font-variation-settings]="wishlistIds().has(product.id) ? '\\'FILL\\' 1' : '\\'FILL\\' 0'">
+                    <span class="material-symbols-outlined text-lg md:text-xl leading-none transition-colors duration-300"
+                          [class.text-white]="wishlistIds().has(product.id)"
+                          [class.text-on-surface-variant]="!wishlistIds().has(product.id)"
+                          [style.font-variation-settings]="' &quot;FILL&quot; 0 '">
                       favorite
                     </span>
                   </button>
