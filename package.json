@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "mobile": "ng serve --host 0.0.0.0",
     "copy": "copy-folder dist/browser docs",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",

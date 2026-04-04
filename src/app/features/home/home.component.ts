@@ -71,7 +71,8 @@ import { TokenService } from '../../core/services/token.service';
           @for (category of categories(); track category.id) {
             <a [routerLink]="['/' + currentLang + '/products']" 
                [queryParams]="{categoryId: category.id}"
-               class="group cursor-pointer aspect-square rounded-2xl bg-surface-container-low flex flex-col items-center justify-center p-6 hover:bg-white hover:shadow-2xl transition-all duration-500 relative overflow-hidden text-center">
+               class="group cursor-pointer aspect-square rounded-2xl bg-surface-container-low flex flex-col items-center justify-center p-6 hover:bg-white hover:shadow-2xl transition-[transform,background-color,shadow] duration-500 relative overflow-hidden text-center"
+               style="will-change: transform; transform: translateZ(0); backface-visibility: hidden;">
               
               <div class="w-20 h-20 rounded-full bg-primary/5 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-500">
                 <span class="material-symbols-outlined text-4xl text-primary">{{ getCategoryIcon(category.name) }}</span>
@@ -113,26 +114,31 @@ import { TokenService } from '../../core/services/token.service';
 
         @if (featuredProducts().length > 0) {
           <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
-            @for (product of featuredProducts(); track product.id) {
-              <div class="group animate-fade-in-up relative bg-surface-container-lowest rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-transparent hover:border-outline-variant/30 flex flex-col">
+            @for (product of featuredProducts(); track product.id; let i = $index) {
+              <div class="group animate-fade-in-up relative bg-surface-container-lowest rounded-2xl overflow-hidden transition-[transform,shadow,border-color] duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-transparent hover:border-outline-variant/30 flex flex-col"
+                   style="will-change: transform, opacity; transform: translateZ(0); backface-visibility: hidden; contain: layout;">
                 
                 <!-- Product Media Area -->
                 <div class="relative aspect-[4/5] overflow-hidden bg-surface-container-low">
                   <a [routerLink]="['/' + currentLang + '/products', product.id]">
                     <img [src]="photoService.getMainPhotoUrl(product.productPhotos || product.productphotos) || placeholder" 
                          [alt]="product.name"
-                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                         loading="lazy"
+                         decoding="async"
+                         [attr.fetchpriority]="i < 4 ? 'high' : 'auto'"
+                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                         style="will-change: transform;">
                   </a>
                   
                   <!-- Quality Badges -->
                   <div class="absolute top-2 left-2 md:top-4 md:left-4 flex flex-col items-start gap-1.5 pointer-events-none z-10">
                     @if (product.haveSale) {
-                      <span class="bg-error/90 backdrop-blur-md text-on-error text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg md:rounded-xl shadow-lg ring-1 ring-white/20">
+                      <span class="bg-error/90 md:backdrop-blur-md text-on-error text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg md:rounded-xl shadow-lg ring-1 ring-white/20">
                         {{ 'product.sale' | translate }}
                       </span>
                     }
                     @if (product.isFasting) {
-                      <span class="bg-primary/90 backdrop-blur-md text-on-primary text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg md:rounded-xl shadow-lg ring-1 ring-white/20">
+                      <span class="bg-primary/90 md:backdrop-blur-md text-on-primary text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg md:rounded-xl shadow-lg ring-1 ring-white/20">
                         {{ 'product.fasting' | translate }}
                       </span>
                     }
@@ -140,7 +146,7 @@ import { TokenService } from '../../core/services/token.service';
 
                   <!-- Quick Action Button (Wishlist) -->
                   <button 
-                    class="absolute top-2 right-2 md:top-4 md:right-4 z-20 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-90 border border-outline-variant/10"
+                    class="absolute top-2 right-2 md:top-4 md:right-4 z-20 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-2xl transition-[transform,background-color] duration-300 transform hover:scale-110 active:scale-90 border border-outline-variant/10"
                     [class.bg-red-600]="wishlistIds().has(product.id)"
                     [class.bg-white]="!wishlistIds().has(product.id)"
                     (click)="toggleWishlist(product, $event)">
@@ -153,7 +159,7 @@ import { TokenService } from '../../core/services/token.service';
                   </button>
 
                   <!-- Glassmorphism Add to Cart Tray -->
-                  <div class="absolute inset-x-4 bottom-4 glass-tray p-4 rounded-xl translate-y-20 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-between shadow-2xl overflow-hidden">
+                  <div class="absolute inset-x-4 bottom-4 glass-tray p-4 rounded-xl translate-y-20 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-[transform,opacity] duration-500 flex items-center justify-between shadow-2xl overflow-hidden md:flex hidden">
                     <span class="font-headline font-bold text-sm text-on-surface">{{ 'product.quickAdd' | translate }}</span>
                     <button 
                       class="bg-primary text-on-primary p-2 rounded-full hover:scale-110 active:scale-95 transition-all shadow-lg"
