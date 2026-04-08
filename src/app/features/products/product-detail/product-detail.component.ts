@@ -238,7 +238,7 @@ import { environment } from '../../../../environments/environment';
                        <div class="space-y-4">
                           <label class="text-[10px] font-black uppercase tracking-widest text-outline block text-center md:text-start">{{ 'product.intelligenceContent' | translate }}</label>
                           <textarea [(ngModel)]="newReviewContent" rows="5" 
-                                    class="w-full bg-surface border-2 border-transparent focus:border-primary/20 p-5 rounded-2xl outline-none font-body text-sm text-on-surface transition-all resize-none"
+                                    class="w-full bg-surface border-2 border-transparent focus:border-primary/20 p-5 rounded-2xl outline-none font-body text-sm text-on-surface transition-all resize-y min-h-[140px]"
                                     [placeholder]="'product.quantifyExperience' | translate"></textarea>
                        </div>
 
@@ -304,7 +304,7 @@ import { environment } from '../../../../environments/environment';
                          </div>
                          <div class="mt-8 relative">
                            <span class="material-symbols-outlined absolute -left-2 -top-4 opacity-5 text-4xl transform -scale-x-100">format_quote</span>
-                           <p class="font-body text-on-surface-variant leading-relaxed text-lg pl-6">
+                           <p class="font-body text-on-surface-variant leading-relaxed text-lg pl-6 break-words whitespace-pre-wrap">
                               {{ review.content }}
                            </p>
                          </div>
