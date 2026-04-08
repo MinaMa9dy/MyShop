@@ -505,6 +505,12 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   decreaseQuantity(): void { if (this.quantity > 1) this.quantity--; }
   
   addToCart(): void {
+    const userId = this.tokenService.getUserId();
+    if (!userId) {
+      this.router.navigate(['/' + this.currentLang + '/auth/login']);
+      return;
+    }
+
     const currentProduct = this.product();
     if (currentProduct) {
       this.cartService.addToCart(currentProduct.id, this.quantity, currentProduct).subscribe();

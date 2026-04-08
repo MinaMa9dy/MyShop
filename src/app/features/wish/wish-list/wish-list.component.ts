@@ -178,10 +178,18 @@ export class WishListComponent implements OnInit {
 
   addToCart(wish: Wish, event: Event): void {
     event.stopPropagation();
+    
+    // Auth Check
+    const userId = this.tokenService.getUserId();
+    if (!userId) {
+      this.router.navigate(['/' + this.currentLang + '/auth/login']);
+      return;
+    }
+
     const productId = wish.productId;
     if (!productId) return;
     this.addingId.set(productId);
-    this.cartService.addToCart(productId, 1).subscribe({
+    this.cartService.addToCart(productId, 1, wish.product).subscribe({
       next: () => this.addingId.set(null),
       error: () => this.addingId.set(null)
     });

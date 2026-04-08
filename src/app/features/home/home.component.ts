@@ -382,6 +382,13 @@ export class HomeComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
     
+    // Auth Check
+    const userId = this.tokenService.getUserId();
+    if (!userId) {
+      this.router.navigate(['/' + this.currentLang + '/auth/login']);
+      return;
+    }
+
     if (product.shownQuantity <= 0) {
       return;
     }

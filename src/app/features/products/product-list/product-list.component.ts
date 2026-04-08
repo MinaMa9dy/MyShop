@@ -225,6 +225,14 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   addToCart(product: any, event: Event): void {
     event.preventDefault(); event.stopPropagation();
+
+    // Auth Check
+    const userId = this.tokenService.getUserId();
+    if (!userId) {
+      this.router.navigate(['/' + this.currentLang + '/auth/login']);
+      return;
+    }
+
     if (product.shownQuantity <= 0) return;
     this.cartService.addToCart(product.id, 1, product).subscribe({
       next: () => console.log('Added to cart'),
