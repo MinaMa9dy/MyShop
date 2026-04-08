@@ -22,7 +22,7 @@ import { TokenService } from '../../core/services/token.service';
         <div class="relative rounded-2xl md:rounded-3xl overflow-hidden min-h-[400px] md:min-h-[550px] flex items-center p-8 md:p-16 bg-gradient-to-br from-primary to-primary-container text-on-primary">
           <!-- Topographic Decorative Background -->
           <div class="absolute inset-0 opacity-20 pointer-events-none" 
-               style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCrToAN7K9bxCYHNmah4SPbCguXNVlpK-DeQWeEBnHb8hhrK_YwTkoUXoEOh-RgjYVbFZj2ZzFPFjqLgEqS81zBG3mBRaFpNCTpPthaRKkjbY6cN5ywiH6wrgPH-fov4huJ80NbYSMgUyawNMMrAIHqttsqobdz8M4Yk_ERm3md8eXwLlW4PLs3aIXrOye6hD6Mc0OtdU9LpkjMLI7eeChndSjrvjUUdPvpHGIlYDvLm3UBFRbdvqH0krtaLiZxlv72URSOjaoPfUbP'); background-size: cover; background-position: center;">
+               style="background-image: url('assets/images/hero-bg.webp'); background-size: cover; background-position: center;">
           </div>
           
           <div class="relative z-10 max-w-2xl animate-fade-in text-center md:text-start mx-auto md:mx-0 flex flex-col items-center md:items-start">
