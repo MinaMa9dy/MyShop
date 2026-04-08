@@ -106,49 +106,73 @@ export class CartService {
   }
 
   // Add item to cart - uses POST api/Cart
-  addToCart(productId: string, quantity: number = 1): Observable<any> {
+  addToCart(productId: string, quantity: number = 1, productData?: any): Observable<any> {
     const customerId = this.getCurrentUserId();
+    const previousItems = [...this._items()];
     
+    // Perform optimistic update
+    const existingItem = this.findItem(productId);
+    if (existingItem) {
+      this._items.update(items =>
+        items.map(i =>
+          i.productId === productId
+            ? { ...i, quantity: i.quantity + quantity }
+            : i
+        )
+      );
+    } else if (productData) {
+      this._items.update(items => [...items, {
+        productId: productId,
+        customerId: customerId,
+        quantity: quantity,
+        productName: productData.name || productData.productName || '',
+        productPrice: productData.newPrice || productData.price || productData.productPrice || 0,
+        productImage: productData.productImage || (productData.productPhotos ? getProductMainPhoto(productData) : '')
+      }]);
+    } else {
+      this._items.update(items => [...items, {
+        productId: productId,
+        customerId: customerId,
+        quantity: quantity,
+        productName: '...',
+        productPrice: 0
+      }]);
+    }
+    
+    this.saveToStorage();
+    this.open();
+
     const dto = {
       productId: productId,
       customerId: customerId,
       quantity: quantity
     };
 
-    console.log('Adding to cart - POST api/Cart:', dto);
-
     return this.http.post<any>(this.apiUrl, dto).pipe(
       tap((response: any) => {
-        console.log('Add to cart response:', response);
-        
         const item = response || response?.data;
-        
         if (item) {
-          // Always increase quantity locally if item exists
-          const existingItem = this.findItem(productId);
-          if (existingItem) {
-            this._items.update(items =>
-              items.map(i =>
-                i.productId === productId
-                  ? { ...i, quantity: i.quantity + quantity }
-                  : i
-              )
-            );
-          } else {
-            // Add new item
-            this._items.update(items => [...items, {
-              productId: item.productId || productId,
-              customerId: item.customerId || customerId,
-              quantity: item.quantity || quantity,
-              productName: item.product?.name || item.productName || '',
-              productPrice: item.product?.newPrice || item.product?.price || item.productPrice || 0,
-              productImage: getProductMainPhoto(item.product) || item.productImage || ''
-            }]);
-          }
+          this._items.update(items =>
+            items.map(i =>
+              i.productId === productId
+                ? {
+                    ...i,
+                    productName: item.product?.name || item.productName || i.productName,
+                    productPrice: item.product?.newPrice || item.product?.price || item.productPrice || i.productPrice,
+                    productImage: getProductMainPhoto(item.product) || item.productImage || i.productImage,
+                    quantity: item.quantity || i.quantity
+                  }
+                : i
+            )
+          );
+          this.saveToStorage();
         }
-        
-        this.open();
+      }),
+      catchError(error => {
+        console.error('Optimistic Add to Cart failed, rolling back:', error);
+        this._items.set(previousItems);
         this.saveToStorage();
+        return throwError(() => error);
       })
     );
   }
@@ -156,31 +180,39 @@ export class CartService {
   // Remove item from cart - uses DELETE api/Cart (body instead of query params)
   removeFromCart(productId: string, quantityToRemove: number = 0): Observable<any> {
     const customerId = this.getCurrentUserId();
+    const previousItems = [...this._items()];
     
+    // Perform optimistic update
+    const existingItem = this.findItem(productId);
+    if (existingItem) {
+      if (quantityToRemove === 0 || existingItem.quantity <= quantityToRemove) {
+        this._items.update(items => items.filter(item => item.productId !== productId));
+      } else {
+        this._items.update(items =>
+          items.map(item =>
+            item.productId === productId
+              ? { ...item, quantity: item.quantity - quantityToRemove }
+              : item
+          )
+        );
+      }
+      this.saveToStorage();
+    }
+
     const dto = {
       productId: productId,
       customerId: customerId,
       quantity: quantityToRemove
     };
 
-    console.log('Removing from cart - DELETE api/Cart:', dto);
-    
     return this.http.delete<any>(this.apiUrl, { body: dto }).pipe(
       tap((response: any) => {
-        console.log('Remove cart response:', response);
-        
-        // Check if the backend operation was successful
         const isSuccess = response?.isSuccess || response?.data !== undefined;
-        
         if (isSuccess && response?.data) {
           const updatedItem = response.data;
-          
-          // If quantity returned is 0 or null, remove the item completely
           if (!updatedItem.quantity || updatedItem.quantity === 0) {
             this._items.update(items => items.filter(item => item.productId !== productId));
-            console.log('Item completely removed from cart');
           } else {
-            // Update the quantity based on backend response
             this._items.update(items =>
               items.map(item =>
                 item.productId === productId
@@ -188,12 +220,15 @@ export class CartService {
                   : item
               )
             );
-            console.log('Item quantity updated to:', updatedItem.quantity);
           }
           this.saveToStorage();
-        } else if (!isSuccess) {
-          console.error('Failed to remove item from cart:', response?.error || response);
         }
+      }),
+      catchError(error => {
+        console.error('Optimistic Remove from Cart failed, rolling back:', error);
+        this._items.set(previousItems);
+        this.saveToStorage();
+        return throwError(() => error);
       })
     );
   }

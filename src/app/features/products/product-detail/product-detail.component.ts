@@ -458,10 +458,27 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     if (!userId) { this.router.navigate(['/' + this.currentLang + '/auth/login']); return; }
     if (!productId) return;
     
-    if (this.isWishlisted()) {
-      this.wishService.removeWish(userId, productId).subscribe({ next: () => this.isWishlisted.set(false) });
+    // --- OPTIMISTIC UPDATE START ---
+    const wasWishlisted = this.isWishlisted();
+    this.isWishlisted.set(!wasWishlisted);
+    // --- OPTIMISTIC UPDATE END ---
+
+    if (wasWishlisted) {
+      this.wishService.removeWish(userId, productId).subscribe({
+        next: () => console.log('Optimistic UI (Detail): Successfully removed'),
+        error: (err) => {
+          console.error('Optimistic UI (Detail): Error removing, rolling back', err);
+          this.isWishlisted.set(true);
+        }
+      });
     } else {
-      this.wishService.addWish({ userId, productId }).subscribe({ next: () => this.isWishlisted.set(true) });
+      this.wishService.addWish({ userId, productId }).subscribe({
+        next: () => console.log('Optimistic UI (Detail): Successfully added'),
+        error: (err) => {
+          console.error('Optimistic UI (Detail): Error adding, rolling back', err);
+          this.isWishlisted.set(false);
+        }
+      });
     }
   }
   
@@ -488,7 +505,10 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   decreaseQuantity(): void { if (this.quantity > 1) this.quantity--; }
   
   addToCart(): void {
-    this.cartService.addToCart(this.product()?.id, this.quantity).subscribe();
+    const currentProduct = this.product();
+    if (currentProduct) {
+      this.cartService.addToCart(currentProduct.id, this.quantity, currentProduct).subscribe();
+    }
   }
   
   isLoggedIn(): boolean { return this.authService.isLoggedIn(); }

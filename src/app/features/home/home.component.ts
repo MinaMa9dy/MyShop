@@ -158,18 +158,7 @@ import { TokenService } from '../../core/services/token.service';
                     </span>
                   </button>
 
-                  <!-- Glassmorphism Add to Cart Tray -->
-                  <div class="absolute inset-x-4 bottom-4 glass-tray p-4 rounded-xl translate-y-20 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-[transform,opacity] duration-500 flex items-center justify-between shadow-2xl overflow-hidden md:flex hidden">
-                    <span class="font-headline font-bold text-sm text-on-surface">{{ 'product.quickAdd' | translate }}</span>
-                    <button 
-                      class="bg-primary text-on-primary p-2 rounded-full hover:scale-110 active:scale-95 transition-all shadow-lg"
-                      [disabled]="product.shownQuantity <= 0"
-                      (click)="addToCart(product, $event)">
-                      <span class="material-symbols-outlined text-sm">add</span>
-                    </button>
-                    <!-- Glass effect overlay for the tray -->
-                    <div class="absolute inset-0 bg-white/10 -z-10"></div>
-                  </div>
+
                 </div>
 
                 <!-- Product Content Info -->
@@ -185,7 +174,7 @@ import { TokenService } from '../../core/services/token.service';
                   
 
 
-                  <div class="flex items-center justify-between mt-auto">
+                  <div class="flex items-center justify-between mt-auto pt-4 border-t border-outline-variant/10">
                     <div class="flex flex-col">
                       <span class="text-sm md:text-2xl font-black text-primary font-headline">{{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
                       @if (product.oldPrice > product.newPrice) {
@@ -193,11 +182,18 @@ import { TokenService } from '../../core/services/token.service';
                       }
                     </div>
                     
-                    @if (product.shownQuantity <= 0) {
-                      <span class="px-3 py-1 bg-surface-container-high text-on-surface-variant text-[10px] font-bold rounded-full">
-                        {{ 'product.outOfStock' | translate }}
-                      </span>
-                    }
+                    <div class="flex items-center gap-2">
+                       @if (product.shownQuantity > 0) {
+                         <button (click)="addToCart(product, $event)"
+                                 class="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-primary text-on-primary flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all">
+                           <span class="material-symbols-outlined text-xl md:text-2xl">add_shopping_cart</span>
+                         </button>
+                       } @else {
+                         <span class="px-3 py-1 bg-surface-container-high text-on-surface-variant text-[10px] font-bold rounded-full">
+                           {{ 'product.outOfStock' | translate }}
+                         </span>
+                       }
+                    </div>
                   </div>
                 </div>
               </div>
@@ -339,41 +335,44 @@ export class HomeComponent implements OnInit {
     const productId = product.id;
     const isCurrentlyInWishlist = this.wishlistIds().has(productId);
     
-    // Set processing state
-    this.processingId.set(productId);
+    // --- OPTIMISTIC UPDATE START ---
+    const previousIds = new Set(this.wishlistIds());
+    const newIds = new Set(this.wishlistIds());
     
     if (isCurrentlyInWishlist) {
-      // Remove from wishlist - wait for API response
+      newIds.delete(productId);
+    } else {
+      newIds.add(productId);
+    }
+    
+    // Update UI immediately
+    this.wishlistIds.set(newIds);
+    // --- OPTIMISTIC UPDATE END ---
+
+    if (isCurrentlyInWishlist) {
+      // Remove from wishlist in background
       this.wishService.removeWish(userId, productId).subscribe({
         next: () => {
-          // Update UI after successful API response
-          const currentIds = this.wishlistIds();
-          const newIds = new Set<string>();
-          currentIds.forEach(id => newIds.add(id));
-          newIds.delete(productId);
-          this.wishlistIds.set(newIds);
-          this.processingId.set(null);
+          // Success: No further action needed as UI is already updated
+          console.log('Successfully removed from wishlist');
         },
         error: (error) => {
-          console.error('Error removing from wishlist:', error);
-          this.processingId.set(null);
+          console.error('Error removing from wishlist, rolling back:', error);
+          // ROLLBACK: Revert to previous state
+          this.wishlistIds.set(previousIds);
         }
       });
     } else {
-      // Add to wishlist - wait for API response
+      // Add to wishlist in background
       this.wishService.addWish({ userId, productId }).subscribe({
         next: () => {
-          // Update UI after successful API response
-          const currentIds = this.wishlistIds();
-          const newIds = new Set<string>();
-          currentIds.forEach(id => newIds.add(id));
-          newIds.add(productId);
-          this.wishlistIds.set(newIds);
-          this.processingId.set(null);
+          // Success: No further action needed
+          console.log('Successfully added to wishlist');
         },
         error: (error) => {
-          console.error('Error adding to wishlist:', error);
-          this.processingId.set(null);
+          console.error('Error adding to wishlist, rolling back:', error);
+          // ROLLBACK: Revert to previous state
+          this.wishlistIds.set(previousIds);
         }
       });
     }
@@ -387,7 +386,7 @@ export class HomeComponent implements OnInit {
       return;
     }
     
-    this.cartService.addToCart(product.id, 1).subscribe({
+    this.cartService.addToCart(product.id, 1, product).subscribe({
       next: () => {
         console.log('Added to cart successfully');
       },

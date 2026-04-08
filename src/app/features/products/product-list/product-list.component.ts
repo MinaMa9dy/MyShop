@@ -162,27 +162,36 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
     const productId = product.id;
     const isCurrentlyInWishlist = this.wishlistIds().has(productId);
-    this.processingId.set(productId);
+    
+    // --- OPTIMISTIC UPDATE START ---
+    const previousIds = new Set(this.wishlistIds());
+    const newIds = new Set(this.wishlistIds());
+    
+    if (isCurrentlyInWishlist) {
+      newIds.delete(productId);
+    } else {
+      newIds.add(productId);
+    }
+    
+    // Update local state immediately
+    this.wishlistIds.set(newIds);
+    // --- OPTIMISTIC UPDATE END ---
 
     if (isCurrentlyInWishlist) {
       this.wishService.removeWish(userId, productId).subscribe({
-        next: () => {
-          const newIds = new Set(this.wishlistIds());
-          newIds.delete(productId);
-          this.wishlistIds.set(newIds);
-          this.processingId.set(null);
-        },
-        error: () => this.processingId.set(null)
+        next: () => console.log('Optimistic UI: Successfully removed'),
+        error: (err) => {
+          console.error('Optimistic UI: Error removing from wishlist, rolling back', err);
+          this.wishlistIds.set(previousIds);
+        }
       });
     } else {
       this.wishService.addWish({ userId, productId }).subscribe({
-        next: () => {
-          const newIds = new Set(this.wishlistIds());
-          newIds.add(productId);
-          this.wishlistIds.set(newIds);
-          this.processingId.set(null);
-        },
-        error: () => this.processingId.set(null)
+        next: () => console.log('Optimistic UI: Successfully added'),
+        error: (err) => {
+          console.error('Optimistic UI: Error adding to wishlist, rolling back', err);
+          this.wishlistIds.set(previousIds);
+        }
       });
     }
   }
@@ -217,7 +226,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   addToCart(product: any, event: Event): void {
     event.preventDefault(); event.stopPropagation();
     if (product.shownQuantity <= 0) return;
-    this.cartService.addToCart(product.id, 1).subscribe({
+    this.cartService.addToCart(product.id, 1, product).subscribe({
       next: () => console.log('Added to cart'),
       error: (err) => console.error('Cart error:', err)
     });
