@@ -10,7 +10,7 @@ import { GetProductDto } from '../models/product.model';
 })
 export class CouponService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/Coupon`;
+  private apiUrl = `${environment.apiUrl}/Coupons`;
 
   getAll(): Observable<Coupon[]> {
     return this.http.get<Coupon[]>(`${this.apiUrl}/GetAll`);

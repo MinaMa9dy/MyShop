@@ -9,7 +9,7 @@ import { Category, AddCategoryDto, UpdateCategoryDto } from '../models/category.
 })
 export class CategoryService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/category`;
+  private apiUrl = `${environment.apiUrl}/Categories`;
 
   // Cache the categories response — replayed to all subscribers with no extra HTTP call
   private categories$ = this.http.get<any>(this.apiUrl).pipe(
@@ -31,23 +31,7 @@ export class CategoryService {
     return this.categories$;
   }
   
-  getById(id: string): Observable<Category> {
-    return this.http.get<Category>(`${this.apiUrl}/${id}`);
-  }
-  
-  getTree(): Observable<Category[]> {
-    return this.http.get<Category[]>(`${this.apiUrl}/tree`);
-  }
-  
   create(category: AddCategoryDto): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/AddCategory`, category);
-  }
-  
-  update(category: UpdateCategoryDto): Observable<Category> {
-    return this.http.put<Category>(`${this.apiUrl}/${category.id}`, category);
-  }
-  
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

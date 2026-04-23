@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { UserProfile } from '../../../../core/models/auth.model';
+import { ProfileService } from '../../../../core/services/profile.service';
 import { environment } from '../../../../../environments/environment';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -59,7 +60,7 @@ import { TranslateModule } from '@ngx-translate/core';
                           <img [src]="getPhotoUrl()" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                         } @else {
                           <span class="font-headline text-6xl font-black text-outline-variant">
-                             {{ profile()?.firstName?.charAt(0) }}{{ profile()?.lastName?.charAt(0) }}
+                             {{ profile()?.fullName?.charAt(0) || 'U' }}
                           </span>
                         }
 
@@ -87,7 +88,7 @@ import { TranslateModule } from '@ngx-translate/core';
                    <div class="flex-grow space-y-4">
                        <div>
                         <p class="text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-2">{{ 'dashboard.accessGranted' | translate }}</p>
-                        <h2 class="font-headline text-5xl font-black tracking-tighter text-on-surface leading-none">{{ profile()?.firstName }} {{ profile()?.lastName }}</h2>
+                        <h2 class="font-headline text-5xl font-black tracking-tighter text-on-surface leading-none">{{ profile()?.fullName }}</h2>
                       </div>
                       <div class="flex flex-wrap justify-center md:justify-start gap-4 pt-4">
                           <div class="px-6 py-3 bg-surface rounded-2xl border border-outline-variant/20 flex items-center gap-3">
@@ -105,15 +106,15 @@ import { TranslateModule } from '@ngx-translate/core';
 
              <!-- Grid Stats -->
              <div class="p-10 md:p-16 grid grid-cols-1 md:grid-cols-2 gap-8 bg-surface-container-lowest">
-                                <div class="p-8 bg-surface-container rounded-[32px] border border-outline-variant/10 space-y-2 group hover:bg-surface-container-low transition-colors duration-500 text-start">
-                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-outline group-hover:text-primary transition-colors">{{ 'profile.givenSequence' | translate }}</p>
-                    <p class="font-headline text-2xl font-black text-on-surface">{{ profile()?.firstName }}</p>
+                 <div class="p-8 bg-surface-container rounded-[32px] border border-outline-variant/10 space-y-2 group hover:bg-surface-container-low transition-colors duration-500 text-start">
+                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-outline group-hover:text-primary transition-colors">Name</p>
+                    <p class="font-headline text-2xl font-black text-on-surface">{{ profile()?.fullName }}</p>
                     <div class="h-1 w-8 bg-outline-variant/30 rounded-full group-hover:w-16 transition-all"></div>
                  </div>
 
                  <div class="p-8 bg-surface-container rounded-[32px] border border-outline-variant/10 space-y-2 group hover:bg-surface-container-low transition-colors duration-500 text-start">
-                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-outline group-hover:text-primary transition-colors">{{ 'profile.familySequence' | translate }}</p>
-                    <p class="font-headline text-2xl font-black text-on-surface">{{ profile()?.lastName }}</p>
+                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-outline group-hover:text-primary transition-colors">Email</p>
+                    <p class="font-headline text-2xl font-black text-on-surface">{{ profile()?.email || 'N/A' }}</p>
                     <div class="h-1 w-8 bg-outline-variant/30 rounded-full group-hover:w-16 transition-all"></div>
                  </div>
 
@@ -125,7 +126,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
                  <div class="p-8 bg-surface-container rounded-[32px] border border-outline-variant/10 space-y-2 group hover:bg-surface-container-low transition-colors duration-500 text-start">
                     <p class="text-[10px] font-black uppercase tracking-[0.3em] text-outline group-hover:text-primary transition-colors">Joined</p>
-                    <p class="font-headline text-2xl font-black text-on-surface">{{ 'profile.precisionSeries' | translate }}</p>
+                    <p class="font-headline text-2xl font-black text-on-surface">{{ getCreatedDate() }}</p>
                     <div class="h-1 w-8 bg-outline-variant/30 rounded-full group-hover:w-16 transition-all"></div>
                  </div>
 
@@ -144,6 +145,7 @@ import { TranslateModule } from '@ngx-translate/core';
 })
 export class ProfileComponent implements OnInit {
   private authService = inject(AuthService);
+  private profileService = inject(ProfileService);
   private route = inject(ActivatedRoute);
   
   profile = signal<UserProfile | null>(null);
@@ -176,7 +178,7 @@ export class ProfileComponent implements OnInit {
   
   loadProfile(userId: string): void {
     this.loading.set(true);
-    this.authService.getUserProfile(userId).subscribe({
+    this.profileService.getProfile(userId).subscribe({
       next: (profile) => { this.profile.set(profile); this.loading.set(false); },
       error: () => { this.error.set('Failed to synchronize identity profile.'); this.loading.set(false); }
     });
@@ -186,11 +188,10 @@ export class ProfileComponent implements OnInit {
     const file = event.target.files[0];
     if (file) {
       this.uploadingPhoto.set(true);
-      this.authService.changeUserPhoto(file).subscribe({
+      this.profileService.uploadImage(file).subscribe({
         next: () => {
           this.uploadingPhoto.set(false);
-          const currentUserId = this.authService.getUserId();
-          if (currentUserId) this.loadProfile(currentUserId);
+          this.loadProfile(this.authService.getUserId());
         },
         error: (err) => {
           this.uploadingPhoto.set(false);
@@ -201,14 +202,13 @@ export class ProfileComponent implements OnInit {
   }
   
   getPhotoUrl(): string {
-    if (this.profile()?.userPhoto?.relativePath) {
-      const normalizedPath = this.profile()!.userPhoto!.relativePath!.replace(/\\/g, '/');
+    if (this.profile()?.imageUrl) {
+      const normalizedPath = this.profile()!.imageUrl!.replace(/\\/g, '/');
       const parts = normalizedPath.split('/');
       return `${environment.apiUrl}/Photo/UserPhoto/${parts[parts.length - 1]}`;
     }
     return '';
   }
-  
   getGenderText(): string {
     const g = this.profile()?.gender;
     return g === true ? 'Masculine' : g === false ? 'Feminine' : 'Not Binary/Specified';

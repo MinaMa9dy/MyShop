@@ -73,19 +73,17 @@ export interface AuthResult {
   data?: AuthenticationResponseDto;
 }
 
-export interface UserPhoto {
-  userId: string;
-  fileName: string;
-  relativePath: string;
-  contentType: string;
-  fileSize: number;
-  createdAt: string;
-}
 
 export interface UserProfile {
-  firstName: string;
-  lastName: string;
-  gender: boolean;
-  createdAt: string;
-  userPhoto: UserPhoto | null;
+  id: string;
+  userName?: string;
+  email?: string;
+  fullName?: string;
+  address?: string;
+  imageUrl?: string;
+  phoneNumber?: string;
+  gender?: boolean;
+  createdAt?: string;
+  emailConfirmed?: boolean;
+  phoneNumberConfirmed?: boolean;
 }

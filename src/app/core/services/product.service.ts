@@ -26,16 +26,13 @@ export class ProductService {
   getAll(pageNumber: number = 1, pageSize: number = 10): Observable<any> {
     let params = new HttpParams()
       .set('PageNumber', pageNumber.toString())
-      .set('PageSize', pageSize.toString())
-      .set('Includes', 'ProductPhotos');
+      .set('PageSize', pageSize.toString());
       
     return this.http.get<any>(this.apiUrl, { params });
   }
   
   getById(id: string): Observable<Product> {
-    return this.http.get<Product>(`${this.apiUrl}/${id}`, {
-      params: { Includes: 'ProductPhotos' }
-    });
+    return this.http.get<Product>(`${this.apiUrl}/${id}`);
   }
   
   getFiltered(filter: ProductFilter): Observable<any> {
@@ -72,7 +69,8 @@ export class ProductService {
   }
   
   create(product: AddProductDto): Observable<Product> {
-    return this.http.post<Product>(this.apiUrl, product);
+    const formData = this.toFormData(product);
+    return this.http.post<Product>(this.apiUrl, formData);
   }
   
   update(product: UpdateProductDto): Observable<Product> {
@@ -119,8 +117,7 @@ export class ProductService {
   
   getHotestProducts(numberOfProducts: number = 8): Observable<any> {
     let params = new HttpParams()
-      .set('numberOfProducts', numberOfProducts.toString())
-      .set('Includes', 'ProductPhotos');
+      .set('numberOfProducts', numberOfProducts.toString());
     
     return this.http.get<any>(`${this.apiUrl}/GetHotestProducts`, { params });
   }

@@ -10,6 +10,7 @@ import { TokenService } from '../../core/services/token.service';
 import { LanguageService } from '../../core/services/language.service';
 import { OrderService } from '../../core/services/order.service';
 import { User, UserProfile } from '../../core/models/auth.model';
+import { ProfileService } from '../../core/services/profile.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -225,6 +226,7 @@ export class DashboardComponent implements OnInit {
   private tokenService = inject(TokenService);
   private languageService = inject(LanguageService);
   private orderService = inject(OrderService);
+  private profileService = inject(ProfileService);
   
   user = signal<User | null>(null);
   profile = signal<UserProfile | null>(null);
@@ -242,15 +244,18 @@ export class DashboardComponent implements OnInit {
   ];
 
   profileFields = [
-    { label: 'auth.firstName', value: () => this.profile()?.firstName || '-' },
-    { label: 'auth.lastName', value: () => this.profile()?.lastName || '-' },
-    { label: 'auth.email', value: () => this.userEmail() },
-    { label: 'auth.phone', value: () => this.user()?.phoneNumber || '-' },
+    { label: 'auth.fullName', value: () => this.profile()?.fullName || '-' },
+    { label: 'auth.email', value: () => this.profile()?.email || this.userEmail() },
+    { label: 'auth.phone', value: () => this.profile()?.phoneNumber || this.user()?.phoneNumber || '-' },
+    { label: 'dashboard.address', value: () => this.profile()?.address || '-' },
     { label: 'auth.gender', value: () => this.getGenderText() },
     { label: 'dashboard.memberSince', value: () => this.getCreatedDate() }
   ];
 
   userFullName = computed(() => {
+    const p = this.profile();
+    if (p?.fullName) return p.fullName;
+    
     const user = this.user();
     return (user?.firstName || user?.lastName) ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : this.tokenService.getName() || 'User';
   });
@@ -258,10 +263,15 @@ export class DashboardComponent implements OnInit {
   canAddProduct = computed(() => this.authService.isLoggedIn() && (this.tokenService.isSeller() || this.tokenService.hasRole('Admin')));
   isAdmin = computed(() => this.tokenService.hasRole('Admin'));
   userInitials = computed(() => {
+    const p = this.profile();
+    if (p?.fullName) {
+      const parts = p.fullName.split(' ');
+      return parts.length > 1 ? `${parts[0].charAt(0)}${parts[parts.length-1].charAt(0)}`.toUpperCase() : p.fullName.substring(0, 2).toUpperCase();
+    }
     const user = this.user();
-    if (user?.firstName || user?.lastName) return `${user.firstName?.charAt(0)}${user.lastName?.charAt(0)}`.toUpperCase();
+    if (user?.firstName || user?.lastName) return `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase();
     const name = this.tokenService.getName();
-    return name ? name.split(' ').map(p => p.charAt(0)).join('').toUpperCase().slice(0, 2) : 'U';
+    return name ? name.split(' ').map(part => part.charAt(0)).join('').toUpperCase().slice(0, 2) : 'U';
   });
   
   currentLang(): string { return this.languageService.currentLanguage(); }
@@ -275,21 +285,20 @@ export class DashboardComponent implements OnInit {
   }
   
   loadProfile(): void {
-    const userId = this.tokenService.getUserId();
-    if (userId) this.authService.getUserProfile(userId).subscribe(p => this.profile.set(p));
+    this.profileService.getProfile().subscribe(p => this.profile.set(p));
   }
   
   getPhotoUrl(): string {
     const profile = this.profile();
-    if (profile?.userPhoto?.relativePath) {
-      const fileName = profile.userPhoto.relativePath.split(/[\\/]/).pop();
+    if (profile?.imageUrl) {
+      const fileName = profile.imageUrl.split(/[\\/]/).pop();
       return `${environment.apiUrl}/Photo/UserPhoto/${fileName}`;
     }
     return '';
   }
   
   getGenderText(): string { return this.profile()?.gender === true ? 'Male' : this.profile()?.gender === false ? 'Female' : 'Not specified'; }
-  getCreatedDate(): string { return this.profile()?.createdAt ? new Date(this.profile()!.createdAt).toLocaleDateString() : '-'; }
+  getCreatedDate(): string { return this.profile()?.createdAt ? new Date(this.profile()!.createdAt!).toLocaleDateString() : '-'; }
   
   loadOrdersCount(): void {
     const userId = this.tokenService.getUserId();
@@ -307,7 +316,13 @@ export class DashboardComponent implements OnInit {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
       this.photoUploading.set(true);
-      this.authService.changeUserPhoto(file).subscribe({ next: () => { this.loadProfile(); this.photoUploading.set(false); }, error: () => this.photoUploading.set(false) });
+      this.profileService.uploadImage(file).subscribe({ 
+        next: () => { 
+          this.loadProfile(); 
+          this.photoUploading.set(false); 
+        }, 
+        error: () => this.photoUploading.set(false) 
+      });
     }
   }
   

@@ -9,12 +9,20 @@ import { AddProductDto } from '../models/product.model';
 })
 export class AdminProductService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/products`;
+  private apiUrl = `${environment.apiUrl}/Products`;
 
-  // Add a new product - uses POST api/Product/AddProduct
+  // Add a new product - uses POST api/Products
   addProduct(product: AddProductDto): Observable<any> {
-    console.log('Adding product - POST api/Product/AddProduct:', product);
-    
-    return this.http.post(`${this.apiUrl}/AddProduct`, product);
+    const formData = new FormData();
+    for (const key in product) {
+      if ((product as any)[key] !== null && (product as any)[key] !== undefined) {
+        if (key === 'Photos' && Array.isArray(product.Photos)) {
+          product.Photos.forEach(file => formData.append('Photos', file, file.name));
+        } else {
+          formData.append(key, (product as any)[key]);
+        }
+      }
+    }
+    return this.http.post(this.apiUrl, formData);
   }
 }

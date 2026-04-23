@@ -175,12 +175,12 @@ export class CartComponent {
   closeCart(): void { this.cartService.close(); }
 
   increaseQuantity(item: any): void {
-    this.cartService.addToCart(item.productId, 1).subscribe();
+    this.cartService.updateQuantity(item.productId, item.quantity + 1).subscribe();
   }
 
   decreaseQuantity(item: any): void {
     if (item.quantity > 1) {
-      this.cartService.removeFromCart(item.productId, 1).subscribe();
+      this.cartService.updateQuantity(item.productId, item.quantity - 1).subscribe();
     } else {
       this.removeFromCart(item);
     }

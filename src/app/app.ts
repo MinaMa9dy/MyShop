@@ -10,6 +10,7 @@ import { ToastComponent } from './shared/toast/toast.component';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { UserProfile } from './core/models/auth.model';
+import { ProfileService } from './core/services/profile.service';
 import { environment } from '../environments/environment';
 
 @Component({
@@ -25,6 +26,7 @@ export class App implements OnInit, OnDestroy {
   private tokenService = inject(TokenService);
   private renderer = inject(Renderer2);
   private router = inject(Router);
+  private profileService = inject(ProfileService);
   
   private loginSubscription?: Subscription;
   private routerSubscription?: Subscription;
@@ -51,8 +53,8 @@ export class App implements OnInit, OnDestroy {
   // Get user photo URL — computed so it only recalculates when userProfile changes
   userPhotoUrl = computed(() => {
     const profile = this.userProfile();
-    if (profile?.userPhoto?.relativePath) {
-      const normalizedPath = profile.userPhoto.relativePath.replace(/\\/g, '/');
+    if (profile?.imageUrl) {
+      const normalizedPath = profile.imageUrl.replace(/\\/g, '/');
       const parts = normalizedPath.split('/');
       const fileName = parts[parts.length - 1];
       return `${environment.apiUrl}/Photo/UserPhoto/${fileName}`;
@@ -111,10 +113,7 @@ export class App implements OnInit, OnDestroy {
   }
   
   private loadUserProfile(): void {
-    const userId = this.tokenService.getUserId();
-    if (!userId) return;
-    
-    this.authService.getUserProfile(userId).subscribe({
+    this.profileService.getProfile().subscribe({
       next: (profile) => {
         this.userProfile.set(profile);
       },

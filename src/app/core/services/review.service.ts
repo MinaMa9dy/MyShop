@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment';
 })
 export class ReviewService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.apiUrl}/Review`;
+  private baseUrl = `${environment.apiUrl}/Reviews`;
 
   addReview(review: any): Observable<any> {
     return this.http.post<any>(this.baseUrl, review);

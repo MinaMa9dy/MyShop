@@ -11,7 +11,7 @@ import { TokenService } from './token.service';
 export class WishService {
   private http = inject(HttpClient);
   private tokenService = inject(TokenService);
-  private apiUrl = `${environment.apiUrl}/wish`;
+  private apiUrl = `${environment.apiUrl}/WishList`;
 
   private getCurrentUserId(): string {
     const userId = this.tokenService.getUserId();

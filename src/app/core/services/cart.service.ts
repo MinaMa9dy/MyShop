@@ -8,10 +8,15 @@ import { CouponResponse, Coupon } from '../models/coupon.models';
 
 // Helper function to get main photo URL from product
 function getProductMainPhoto(product: any): string {
-  if (!product || !product.productPhotos || !Array.isArray(product.productPhotos) || product.productPhotos.length === 0) {
+  if (!product) return 'assets/images/placeholder.svg';
+  
+  // Support both 'product' and 'productDto' nested objects
+  const p = product.productDto || product;
+  
+  if (!p || !p.productPhotos || !Array.isArray(p.productPhotos) || p.productPhotos.length === 0) {
     return 'assets/images/placeholder.svg';
   }
-  const mainPhoto = product.productPhotos.find((photo: any) => photo.isMain);
+  const mainPhoto = p.productPhotos.find((photo: any) => photo.isMain);
   if (mainPhoto && mainPhoto.fileName) {
     return `${environment.apiUrl}/Photo/ProductPhoto/${mainPhoto.fileName}`;
   }
@@ -24,7 +29,8 @@ function getProductMainPhoto(product: any): string {
 export class CartService {
   private http = inject(HttpClient);
   private tokenService = inject(TokenService);
-  private apiUrl = `${environment.apiUrl}/Cart`;
+  private cartsUrl = `${environment.apiUrl}/Carts`;
+  private cartItemsUrl = `${environment.apiUrl}/CartItems`;
 
   // State using Signals
   private _items = signal<CartItem[]>([]);
@@ -144,11 +150,10 @@ export class CartService {
 
     const dto = {
       productId: productId,
-      customerId: customerId,
       quantity: quantity
     };
 
-    return this.http.post<any>(this.apiUrl, dto).pipe(
+    return this.http.post<any>(this.cartItemsUrl, dto).pipe(
       tap((response: any) => {
         const item = response || response?.data;
         if (item) {
@@ -157,9 +162,9 @@ export class CartService {
               i.productId === productId
                 ? {
                     ...i,
-                    productName: item.product?.name || item.productName || i.productName,
-                    productPrice: item.product?.newPrice || item.product?.price || item.productPrice || i.productPrice,
-                    productImage: getProductMainPhoto(item.product) || item.productImage || i.productImage,
+                    productName: item.productDto?.name || item.product?.name || item.productName || i.productName,
+                    productPrice: item.productDto?.newPrice || item.product?.newPrice || item.productDto?.price || item.product?.price || item.productPrice || i.productPrice,
+                    productImage: getProductMainPhoto(item.productDto || item.product) || item.productImage || i.productImage,
                     quantity: item.quantity || i.quantity
                   }
                 : i
@@ -170,6 +175,52 @@ export class CartService {
       }),
       catchError(error => {
         console.error('Optimistic Add to Cart failed, rolling back:', error);
+        this._items.set(previousItems);
+        this.saveToStorage();
+        return throwError(() => error);
+      })
+    );
+  }
+
+  // Update item quantity - uses PUT api/CartItems
+  updateQuantity(productId: string, quantity: number): Observable<any> {
+    const customerId = this.getCurrentUserId();
+    const previousItems = [...this._items()];
+    
+    // Perform optimistic update
+    this._items.update(items =>
+      items.map(i =>
+        i.productId === productId
+          ? { ...i, quantity: quantity }
+          : i
+      )
+    );
+    this.saveToStorage();
+
+    const dto = {
+      productId: productId,
+      quantity: quantity
+    };
+
+    return this.http.put<any>(this.cartItemsUrl, dto).pipe(
+      tap((response: any) => {
+        const item = response || response?.data;
+        if (item) {
+          this._items.update(items =>
+            items.map(i =>
+              i.productId === productId
+                ? {
+                    ...i,
+                    quantity: item.quantity || i.quantity
+                  }
+                : i
+            )
+          );
+          this.saveToStorage();
+        }
+      }),
+      catchError(error => {
+        console.error('Update Quantity failed, rolling back:', error);
         this._items.set(previousItems);
         this.saveToStorage();
         return throwError(() => error);
@@ -199,13 +250,7 @@ export class CartService {
       this.saveToStorage();
     }
 
-    const dto = {
-      productId: productId,
-      customerId: customerId,
-      quantity: quantityToRemove
-    };
-
-    return this.http.delete<any>(this.apiUrl, { body: dto }).pipe(
+    return this.http.delete<any>(`${this.cartItemsUrl}?cartItemId=${productId}`).pipe(
       tap((response: any) => {
         const isSuccess = response?.isSuccess || response?.data !== undefined;
         if (isSuccess && response?.data) {
@@ -248,32 +293,39 @@ export class CartService {
       return throwError(() => new Error('No customer ID'));
     }
     
-    console.log('Getting cart - GET api/Cart for customerId:', customerId);
+    console.log('Getting cart - GET api/Carts/my-cart');
     
-    return this.http.get<any>(`${this.apiUrl}?customerId=${customerId}`).pipe(
+    return this.http.get<any>(`${this.cartsUrl}/my-cart`).pipe(
       tap((response: any) => {
         console.log('Get cart response:', response);
         
         let rawItems: any[] = [];
         
         if (response?.data) {
-          rawItems = Array.isArray(response.data) ? response.data : [response.data];
-        } else if (Array.isArray(response)) {
-          rawItems = response;
+          if (response.data.items && Array.isArray(response.data.items)) {
+            rawItems = response.data.items;
+          } else {
+            rawItems = Array.isArray(response.data) ? response.data : [response.data];
+          }
         } else if (response?.items && Array.isArray(response.items)) {
           rawItems = response.items;
+        } else if (Array.isArray(response)) {
+          rawItems = response;
         }
         
         console.log('Raw cart items:', rawItems);
         
-        const items = rawItems.map(item => ({
-          productId: item.productId,
-          customerId: item.customerId || customerId,
-          quantity: item.quantity,
-          productName: item.product?.name || item.productName || '',
-          productPrice: item.product?.newPrice || item.product?.price || item.productPrice || 0,
-          productImage: getProductMainPhoto(item.product) || item.productImage || ''
-        }));
+        const items = rawItems.map(item => {
+          const product = item.productDto || item.product;
+          return {
+            productId: item.productId,
+            customerId: item.customerId || customerId,
+            quantity: item.quantity,
+            productName: product?.name || item.productName || '',
+            productPrice: product?.newPrice || product?.price || item.productPrice || 0,
+            productImage: getProductMainPhoto(product) || item.productImage || ''
+          };
+        });
         
         console.log('Mapped cart items with prices and photos:', items);
         this._items.set(items);
@@ -297,6 +349,10 @@ export class CartService {
 
   // Clear cart (local only)
   clear(): void {
+    const customerId = this.getCurrentUserId();
+    if (customerId) {
+      this.http.delete(`${this.cartsUrl}/clear`).subscribe();
+    }
     this._items.set([]);
     localStorage.removeItem('cart');
   }

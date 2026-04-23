@@ -26,7 +26,7 @@ export class AuthService {
   private tokenService = inject(TokenService);
   private cartService = inject(CartService);
   
-  private apiUrl = `${environment.apiUrl}/Account`;
+  private apiUrl = `${environment.apiUrl}/Auth`;
   
   // Signals for user state
   private currentUserSubject = new BehaviorSubject<User | null>(null);
@@ -191,17 +191,6 @@ export class AuthService {
   getUserId(): string {
     const user = this.currentUserSubject.value;
     return user?.id || '';
-  }
-  
-  getUserProfile(userId?: string): Observable<UserProfile> {
-    const url = userId ? `${this.apiUrl}/profile/${userId}` : `${this.apiUrl}/profile`;
-    return this.http.get<UserProfile>(url);
-  }
-  
-  changeUserPhoto(file: File): Observable<any> {
-    const formData = new FormData();
-    formData.append('file', file);
-    return this.http.post(`${environment.apiUrl}/Photo/ChangePhoto`, formData);
   }
   
   isAuthenticated(): boolean {
