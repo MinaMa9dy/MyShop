@@ -10,15 +10,21 @@ import { CouponResponse, Coupon } from '../models/coupon.models';
 function getProductMainPhoto(product: any): string {
   if (!product) return 'assets/images/placeholder.svg';
   
-  // Support both 'product' and 'productDto' nested objects
-  const p = product.productDto || product;
+  // Support 'data.productDto', 'productDto', or the product object itself
+  const p = product.data?.productDto || product.data?.product || product.productDto || product.product || product;
   
-  if (!p || !p.productPhotos || !Array.isArray(p.productPhotos) || p.productPhotos.length === 0) {
+  // Handle various casing for productPhotos
+  const photos = p.productPhotos || p.ProductPhotos || p.productphotos;
+  
+  if (!photos || !Array.isArray(photos) || photos.length === 0) {
     return 'assets/images/placeholder.svg';
   }
-  const mainPhoto = p.productPhotos.find((photo: any) => photo.isMain);
-  if (mainPhoto && mainPhoto.fileName) {
-    return `${environment.apiUrl}/Photo/ProductPhoto/${mainPhoto.fileName}`;
+  
+  const mainPhoto = photos.find((photo: any) => photo.isMain || photo.IsMain) || photos[0];
+  
+  if (mainPhoto && (mainPhoto.fileName || mainPhoto.FileName)) {
+    const fileName = mainPhoto.fileName || mainPhoto.FileName;
+    return `${environment.apiUrl}/Photo/ProductPhoto/${fileName}`;
   }
   return 'assets/images/placeholder.svg';
 }
@@ -155,17 +161,17 @@ export class CartService {
 
     return this.http.post<any>(this.cartItemsUrl, dto).pipe(
       tap((response: any) => {
-        const item = response || response?.data;
+        const item = response?.data || response;
         if (item) {
           this._items.update(items =>
             items.map(i =>
               i.productId === productId
                 ? {
                     ...i,
-                    productName: item.productDto?.name || item.product?.name || item.productName || i.productName,
-                    productPrice: item.productDto?.newPrice || item.product?.newPrice || item.productDto?.price || item.product?.price || item.productPrice || i.productPrice,
-                    productImage: getProductMainPhoto(item.productDto || item.product) || item.productImage || i.productImage,
-                    quantity: item.quantity || i.quantity
+                    productName: item.productDto?.name || item.productDto?.Name || item.product?.name || item.product?.Name || item.productName || i.productName,
+                    productPrice: item.productDto?.newPrice || item.productDto?.NewPrice || item.product?.newPrice || item.product?.NewPrice || item.productDto?.price || item.productDto?.Price || item.product?.price || item.product?.Price || item.productPrice || i.productPrice,
+                    productImage: getProductMainPhoto(item) || i.productImage,
+                    quantity: item.quantity || item.Quantity || i.quantity
                   }
                 : i
             )
@@ -204,14 +210,17 @@ export class CartService {
 
     return this.http.put<any>(this.cartItemsUrl, dto).pipe(
       tap((response: any) => {
-        const item = response || response?.data;
+        const item = response?.data || response;
         if (item) {
           this._items.update(items =>
             items.map(i =>
               i.productId === productId
                 ? {
                     ...i,
-                    quantity: item.quantity || i.quantity
+                    productName: item.productDto?.name || item.productDto?.Name || item.product?.name || item.product?.Name || item.productName || i.productName,
+                    productPrice: item.productDto?.newPrice || item.productDto?.NewPrice || item.product?.newPrice || item.product?.NewPrice || item.productDto?.price || item.productDto?.Price || item.product?.price || item.product?.Price || item.productPrice || i.productPrice,
+                    productImage: getProductMainPhoto(item) || i.productImage,
+                    quantity: item.quantity || item.Quantity || i.quantity
                   }
                 : i
             )
