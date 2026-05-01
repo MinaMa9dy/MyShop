@@ -96,45 +96,37 @@ import { ProductVariantManagementComponent } from '../product-variants/product-v
                   </div>
                 </div>
 
-                <div class="space-y-3">
-                  <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addProduct.description' | translate }}</label>
-                  <textarea formControlName="description" rows="4"
-                            class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all resize-none"></textarea>
-                </div>
-              </section>
-
-              <!-- Metrics Section -->
-              <section class="space-y-8">
-                <div class="flex items-center gap-4 border-b border-outline-variant/10 pb-4">
-                  <span class="material-symbols-outlined text-primary">data_usage</span>
-                  <h3 class="font-headline font-black text-xl text-on-surface">{{ 'admin.addProduct.valuationQuantum' | translate }}</h3>
-                </div>
-
-                <div class="grid grid-cols-1 gap-8">
                   <div class="space-y-3">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addProduct.popularity' | translate }}</label>
-                    <input type="number" formControlName="popularity"
-                           class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-headline font-black text-lg text-on-surface transition-all">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addProduct.description' | translate }}</label>
+                    <textarea formControlName="description" rows="4"
+                              class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all resize-none"></textarea>
                   </div>
-                </div>
 
-                <div class="flex flex-wrap gap-8 py-4 px-6 bg-surface rounded-[32px] border border-outline-variant/10">
-                   <label class="flex items-center gap-4 cursor-pointer group">
-                      <input type="checkbox" formControlName="isFasting" class="hidden peer">
-                      <div class="w-6 h-6 border-2 border-outline-variant peer-checked:border-primary peer-checked:bg-primary transition-all rounded-lg flex items-center justify-center">
-                         <span class="material-symbols-outlined text-white text-sm scale-0 peer-checked:scale-100 transition-transform">check</span>
-                      </div>
-                      <span class="text-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">{{ 'admin.addProduct.isFasting' | translate }}</span>
-                   </label>
-                   <label class="flex items-center gap-4 cursor-pointer group">
-                      <input type="checkbox" formControlName="haveSale" class="hidden peer">
-                      <div class="w-6 h-6 border-2 border-outline-variant peer-checked:border-primary peer-checked:bg-primary transition-all rounded-lg flex items-center justify-center">
-                         <span class="material-symbols-outlined text-white text-sm scale-0 peer-checked:scale-100 transition-transform">check</span>
-                      </div>
-                      <span class="text-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">{{ 'admin.addProduct.haveSale' | translate }}</span>
-                   </label>
-                </div>
-              </section>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-3">
+                      <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addProduct.popularity' | translate }}</label>
+                      <input type="number" formControlName="popularity"
+                             class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-headline font-black text-lg text-on-surface transition-all">
+                    </div>
+
+                    <div class="flex flex-wrap gap-6 pt-4">
+                       <label class="flex items-center gap-3 cursor-pointer group">
+                          <input type="checkbox" formControlName="isFasting" class="hidden peer">
+                          <div class="w-6 h-6 border-2 border-outline-variant peer-checked:border-primary peer-checked:bg-primary transition-all rounded-lg flex items-center justify-center">
+                             <span class="material-symbols-outlined text-white text-[16px] scale-0 peer-checked:scale-100 transition-transform font-bold">check</span>
+                          </div>
+                          <span class="text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors">{{ 'admin.addProduct.isFasting' | translate }}</span>
+                       </label>
+                       <label class="flex items-center gap-3 cursor-pointer group">
+                          <input type="checkbox" formControlName="haveSale" class="hidden peer">
+                          <div class="w-6 h-6 border-2 border-outline-variant peer-checked:border-primary peer-checked:bg-primary transition-all rounded-lg flex items-center justify-center">
+                             <span class="material-symbols-outlined text-white text-[16px] scale-0 peer-checked:scale-100 transition-transform font-bold">check</span>
+                          </div>
+                          <span class="text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors">{{ 'admin.addProduct.haveSale' | translate }}</span>
+                       </label>
+                    </div>
+                  </div>
+                </section>
 
               <!-- Visualization Section -->
               <section class="space-y-8">

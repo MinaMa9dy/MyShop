@@ -81,7 +81,7 @@ export class ProductService {
   }
 
   setMainPhoto(productId: string, photoId: string): Observable<Result<ProductPhoto>> {
-    return this.http.patch<Result<ProductPhoto>>(`${this.apiUrl}/${productId}/photos/${photoId}/set-main`, {});
+    return this.http.put<Result<ProductPhoto>>(`${this.apiUrl}/${productId}/photos/${photoId}/set-main`, {});
   }
 
   // Variant Management
@@ -97,6 +97,9 @@ export class ProductService {
     return this.http.delete<Result<boolean>>(`${this.apiUrl}/${productId}/variants/${variantId}`);
   }
 
+  getAttributes(): Observable<Result<any[]>> {
+    return this.http.get<Result<any[]>>(`${this.apiUrl}/Attributes`);
+  }
   
   getCities(): Observable<string[]> {
     return this.http.get<string[]>(`${this.apiUrl}/Cities`);
@@ -107,20 +110,27 @@ export class ProductService {
     for (const key in obj) {
       if (obj[key] === null || obj[key] === undefined) continue;
       
+      // Map frontend camelCase to backend PascalCase for key fields if needed
+      // but usually ASP.NET Core is case-insensitive.
+      // However, for file collections, it's safer to match exactly.
+      let backendKey = key;
+      if (key === 'photos') backendKey = 'Photos';
+      if (key === 'photoIdsToDelete') backendKey = 'PhotoIdsToDelete';
+
       if (Array.isArray(obj[key])) {
         obj[key].forEach((item: any) => {
           if (item instanceof File) {
-            formData.append(key, item, item.name);
+            formData.append(backendKey, item, item.name);
           } else if (typeof item === 'object') {
-            formData.append(key, JSON.stringify(item));
+            formData.append(backendKey, JSON.stringify(item));
           } else {
-            formData.append(key, item);
+            formData.append(backendKey, item);
           }
         });
       } else if (obj[key] instanceof File) {
-        formData.append(key, obj[key], obj[key].name);
+        formData.append(backendKey, obj[key], obj[key].name);
       } else {
-        formData.append(key, obj[key]);
+        formData.append(backendKey, obj[key]);
       }
     }
     return formData;
