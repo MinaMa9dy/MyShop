@@ -149,7 +149,7 @@ import { environment } from '../../../../environments/environment';
                                     [class.scale-105]="selectedAttributes()[group.name] === val"
                                     [class.opacity-40]="!isOptionAvailable(group.name, val)"
                                     [class.bg-surface-container-high]="selectedAttributes()[group.name] !== val"
-                                    class="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-outline-variant/20 min-w-[80px] hover:border-primary/40 relative overflow-hidden group/opt">
+                                    class="px-6 py-3 rounded-2xl text-[10px] font-black tracking-widest transition-all border border-outline-variant/20 min-w-[80px] hover:border-primary/40 relative overflow-hidden group/opt">
                               {{ val }}
                               @if (!isOptionAvailable(group.name, val)) {
                                 <div class="absolute inset-0 bg-outline/5 flex items-center justify-center rotate-12 pointer-events-none">
@@ -170,7 +170,7 @@ import { environment } from '../../../../environments/environment';
                        @for (variant of product()?.productVariants; track variant.id) {
                          <button (click)="selectVariant(variant)" 
                                  [class]="selectedVariant()?.id === variant.id ? 'bg-primary text-on-primary shadow-lg scale-105' : 'bg-surface-container-high text-on-surface-variant'"
-                                 class="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-outline-variant/20 min-w-[80px]">
+                                 class="px-6 py-3 rounded-2xl text-[10px] font-black tracking-widest transition-all border border-outline-variant/20 min-w-[80px]">
                            {{ variant.sku }} ({{ variant.stockQuantity }})
                          </button>
                        }
