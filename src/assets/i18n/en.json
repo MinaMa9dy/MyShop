@@ -284,7 +284,8 @@
     "noItemsFound": "No items found",
     "resetFilters": "Clear Filters",
     "backToProducts": "Back to Shop",
-    "productNotFound": "Product not found"
+    "productNotFound": "Product not found",
+    "units": "Units"
   },
   "orders": {
     "title": "My Orders",

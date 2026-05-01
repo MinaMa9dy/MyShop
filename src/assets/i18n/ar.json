@@ -281,7 +281,8 @@
     "noItemsFound": "لم يتم العثور على عناصر",
     "resetFilters": "مسح الفلاتر",
     "backToProducts": "العودة للمتجر",
-    "productNotFound": "المنتج غير موجود"
+    "productNotFound": "المنتج غير موجود",
+    "units": "وحدات"
   },
   "orders": {
     "title": "طلباتي",

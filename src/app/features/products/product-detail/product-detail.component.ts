@@ -139,23 +139,28 @@ import { environment } from '../../../../environments/environment';
                   <div class="space-y-8 animate-fade-in">
                     @for (group of attributeGroups(); track group.name) {
                       <div class="space-y-4">
-                        <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ group.name }}</label>
+                        <div class="flex items-center justify-between px-2">
+                          <label class="text-[10px] font-black uppercase tracking-[0.2em] text-outline">{{ group.name }}</label>
+                          <span class="text-[10px] font-bold text-primary">{{ selectedAttributes()[group.name] }}</span>
+                        </div>
                         <div class="flex flex-wrap gap-3">
                           @for (val of group.values; track val) {
                             <button (click)="selectAttributeValue(group.name, val)"
                                     [class.bg-primary]="selectedAttributes()[group.name] === val"
                                     [class.text-on-primary]="selectedAttributes()[group.name] === val"
-                                    [class.shadow-lg]="selectedAttributes()[group.name] === val"
+                                    [class.border-primary]="selectedAttributes()[group.name] === val"
+                                    [class.shadow-[0_8px_20px_-6px_rgba(var(--primary-rgb),0.4)]]="selectedAttributes()[group.name] === val"
                                     [class.scale-105]="selectedAttributes()[group.name] === val"
                                     [class.opacity-40]="!isOptionAvailable(group.name, val)"
-                                    [class.bg-surface-container-high]="selectedAttributes()[group.name] !== val"
-                                    class="px-6 py-3 rounded-2xl text-[10px] font-black tracking-widest transition-all border border-outline-variant/20 min-w-[80px] hover:border-primary/40 relative overflow-hidden group/opt">
-                              {{ val }}
+                                    [class.bg-surface-container-low]="selectedAttributes()[group.name] !== val"
+                                    class="px-6 py-4 rounded-[20px] text-[11px] font-black tracking-widest transition-all border border-outline-variant/30 min-w-[100px] hover:border-primary/50 relative overflow-hidden group/opt active:scale-95">
+                              <span class="relative z-10">{{ val }}</span>
                               @if (!isOptionAvailable(group.name, val)) {
                                 <div class="absolute inset-0 bg-outline/5 flex items-center justify-center rotate-12 pointer-events-none">
-                                  <div class="w-full h-[1px] bg-outline-variant/30"></div>
+                                  <div class="w-full h-[1.5px] bg-outline-variant/40"></div>
                                 </div>
                               }
+                              <div class="absolute inset-0 bg-primary opacity-0 group-hover/opt:opacity-5 transition-opacity"></div>
                             </button>
                           }
                         </div>
@@ -179,50 +184,75 @@ import { environment } from '../../../../environments/environment';
                 }
 
                 <!-- Stock Status Tag -->
-                 <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4">
-                   <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/50 border border-outline-variant/20 shadow-sm">
-                      <div class="w-2 h-2 rounded-full" [class.bg-success]="(selectedVariant()?.stockQuantity || 0) > 0" [class.bg-error]="(selectedVariant()?.stockQuantity || 0) <= 0"></div>
-                      <span class="text-[10px] font-black uppercase tracking-widest" [class.text-success]="(selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) > 0" [class.text-error]="(selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) <= 0">
+                <!-- Stock & Source Information -->
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-6 px-2">
+                   <div class="flex items-center gap-3">
+                      <div class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" 
+                              [class.bg-success]="(selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) > 0"
+                              [class.bg-error]="(selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) <= 0"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3"
+                              [class.bg-success]="(selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) > 0"
+                              [class.bg-error]="(selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) <= 0"></span>
+                      </div>
+                      <span class="text-[11px] font-black uppercase tracking-[0.15em]" 
+                            [class.text-success]="(selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) > 0" 
+                            [class.text-error]="(selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) <= 0">
                         {{ (selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) > 0 ? ('product.inStock' | translate) : ('product.outOfStock' | translate) }}
                         @if ((selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) > 0) {
-                          ({{ selectedVariant()?.stockQuantity ?? product()?.stockQuantity }})
+                          <span class="ml-1 opacity-60">({{ selectedVariant()?.stockQuantity ?? product()?.stockQuantity }})</span>
                         }
                       </span>
                    </div>
                    @if (product()?.supplierName) {
-                    <span class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'product.source' | translate }}: {{ product()?.supplierName }}</span>
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-sm text-outline">verified</span>
+                      <span class="text-[11px] font-black uppercase tracking-[0.15em] text-outline">{{ 'product.source' | translate }}: {{ product()?.supplierName }}</span>
+                    </div>
                    }
                 </div>
 
-                <!-- Quantity & Add to Cart -->
-                <div class="space-y-6 pt-4">
-                  <div class="flex items-center justify-between">
-                      <span class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'product.configurationQuantity' | translate }}</span>
-                      <div class="flex items-center gap-6 bg-surface p-2 rounded-2xl border border-outline-variant/30">
-                        <button (click)="decreaseQuantity()" class="w-10 h-10 rounded-xl hover:bg-surface-container transition-colors flex items-center justify-center">
-                          <span class="material-symbols-outlined text-lg">remove</span>
-                        </button>
-                        <span class="font-headline font-black text-lg min-w-[20px] text-center">{{ quantity }}</span>
-                        <button (click)="increaseQuantity()" class="w-10 h-10 rounded-xl hover:bg-surface-container transition-colors flex items-center justify-center">
-                          <span class="material-symbols-outlined text-lg">add</span>
-                        </button>
+                <!-- Quantity & Selection Section -->
+                <div class="flex flex-col sm:flex-row items-center gap-6 pt-6 border-t border-outline-variant/10">
+                  <div class="flex flex-col gap-2 w-full sm:w-auto">
+                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-outline text-center lg:text-start px-2">
+                      {{ 'product.configurationQuantity' | translate }}
+                    </label>
+                    <div class="inline-flex items-center self-center lg:self-start bg-surface-container-low p-1.5 rounded-[24px] border border-outline-variant/20 shadow-sm hover:border-primary/30 transition-all group/qty">
+                      <button (click)="decreaseQuantity()" 
+                              class="w-12 h-12 rounded-[20px] flex items-center justify-center text-on-surface-variant hover:bg-white hover:text-primary hover:shadow-md transition-all active:scale-90">
+                        <span class="material-symbols-outlined text-xl">remove</span>
+                      </button>
+                      
+                      <div class="px-8 flex flex-col items-center justify-center min-w-[60px]">
+                        <span class="font-headline font-black text-xl text-on-surface leading-none">{{ quantity }}</span>
+                        <span class="text-[8px] font-bold uppercase tracking-widest text-outline-variant mt-0.5">{{ 'common.units' | translate }}</span>
                       </div>
+
+                      <button (click)="increaseQuantity()" 
+                              class="w-12 h-12 rounded-[20px] flex items-center justify-center text-on-surface-variant hover:bg-white hover:text-primary hover:shadow-md transition-all active:scale-90">
+                        <span class="material-symbols-outlined text-xl">add</span>
+                      </button>
+                    </div>
                   </div>
 
-                  @if ((selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) > 0) {
-                    <button (click)="addToCart()"
-                            [disabled]="loading()"
-                            class="w-full py-5 bg-primary text-on-primary rounded-[32px] font-headline font-black text-xs uppercase tracking-[0.3em] shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50 disabled:scale-100 group">
-                      <span class="material-symbols-outlined group-hover:rotate-12 transition-transform">shopping_bag</span>
-                      {{ 'product.initializeAcquisition' | translate }}
-                    </button>
-                  } @else {
-                    <button disabled
-                            class="w-full py-5 bg-surface-container text-outline-variant rounded-[32px] font-headline font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-4 opacity-50">
-                      <span class="material-symbols-outlined">inventory_2</span>
-                      {{ 'product.outOfStock' | translate }}
-                    </button>
-                  }
+                  <div class="flex-1 w-full pt-4 sm:pt-6">
+                    @if ((selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) > 0) {
+                      <button (click)="addToCart()"
+                              [disabled]="loading()"
+                              class="w-full h-[72px] bg-primary text-on-primary rounded-[28px] font-headline font-black text-xs uppercase tracking-[0.3em] shadow-[0_20px_40px_-12px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_25px_50px_-12px_rgba(var(--primary-rgb),0.4)] hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50 disabled:translate-y-0 group">
+                        <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                          <span class="material-symbols-outlined text-xl">shopping_cart</span>
+                        </div>
+                        <span>{{ 'product.initializeAcquisition' | translate }}</span>
+                      </button>
+                    } @else {
+                      <div class="w-full h-[72px] bg-surface-container-high text-outline-variant rounded-[28px] border-2 border-dashed border-outline-variant/20 flex items-center justify-center gap-4 opacity-60">
+                        <span class="material-symbols-outlined">block</span>
+                        <span class="font-headline font-black text-xs uppercase tracking-widest">{{ 'product.outOfStock' | translate }}</span>
+                      </div>
+                    }
+                  </div>
                 </div>
 
                 @if (canEditProduct()) {
