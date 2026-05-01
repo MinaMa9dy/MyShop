@@ -51,20 +51,10 @@ import { TokenService } from '../../core/services/token.service';
 
       <!-- Bento-Style Categories -->
       <section class="categories px-6 py-12 max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-center md:items-end mb-12 gap-6 text-center md:text-start">
-          <div class="space-y-2">
-            <h2 class="font-headline text-4xl md:text-5xl font-black tracking-tighter text-on-surface">
-              {{ 'home.categories' | translate }}
-            </h2>
-            <p class="text-on-surface-variant font-body text-xs md:text-sm font-black uppercase tracking-[0.3em] opacity-50 animate-fade-in-up" style="animation-delay: 100ms">
-              {{ 'home.browseByDept' | translate }}
-            </p>
-          </div>
-          <a [routerLink]="['/' + currentLang + '/categories']" 
-             class="text-primary font-semibold flex items-center gap-1 hover:gap-2 transition-all group">
-            {{ 'home.viewAll' | translate }}
-            <span class="material-symbols-outlined transform group-hover:translate-x-1 transition-transform">chevron_right</span>
-          </a>
+        <div class="mb-12 text-center md:text-start">
+          <h2 class="font-headline text-4xl md:text-5xl font-black tracking-tighter text-on-surface">
+            {{ 'home.categories' | translate }}
+          </h2>
         </div>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
@@ -79,9 +69,7 @@ import { TokenService } from '../../core/services/token.service';
               </div>
               
               <span class="font-headline font-bold text-lg text-on-surface">{{ category.name }}</span>
-              <p class="text-on-surface-variant text-xs mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                {{ category.productsCount || 0 }} {{ 'nav.products' | translate }}
-              </p>
+              <!-- Removed products count -->
               
               <!-- Subtle inner glow on hover -->
               <div class="absolute inset-0 border-2 border-primary/0 group-hover:border-primary/5 rounded-2xl transition-all pointer-events-none"></div>
@@ -121,7 +109,7 @@ import { TokenService } from '../../core/services/token.service';
                 <!-- Product Media Area -->
                 <div class="relative aspect-[4/5] overflow-hidden bg-surface-container-low">
                   <a [routerLink]="['/' + currentLang + '/products', product.id]">
-                    <img [src]="photoService.getMainPhotoUrl(product.productPhotos || product.productphotos) || placeholder" 
+                    <img [src]="getMainPhotoUrl(product) || placeholder" 
                          [alt]="product.name"
                          loading="lazy"
                          decoding="async"
@@ -169,31 +157,43 @@ import { TokenService } from '../../core/services/token.service';
                         {{ product.name }}
                       </h3>
                     </a>
-
                   </div>
                   
+                  <p class="text-[10px] md:text-sm text-on-surface-variant line-clamp-2 mb-4 opacity-70 min-h-[30px] md:min-h-[40px]">
+                    {{ product.description }}
+                  </p>
 
-
-                  <div class="flex items-center justify-between mt-auto pt-4 border-t border-outline-variant/10">
-                    <div class="flex flex-col">
-                      <span class="text-sm md:text-2xl font-black text-primary font-headline">{{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
-                      @if (product.oldPrice > product.newPrice) {
-                        <span class="text-[8px] md:text-xs text-outline line-through">{{ product.oldPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
-                      }
+                  <div class="space-y-4 mt-auto pt-6 border-t border-outline-variant/10">
+                    <div class="flex items-center justify-between">
+                      <div class="flex flex-col">
+                        <span class="text-lg md:text-2xl font-black text-primary font-headline">{{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+                        @if (product.oldPrice > product.newPrice) {
+                          <span class="text-[8px] md:text-xs text-outline line-through">{{ product.oldPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+                        }
+                      </div>
+                      
+                      <div class="flex flex-col items-end gap-1">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-outline opacity-40">{{ product.categoryName }}</span>
+                        <div class="flex items-center gap-1 text-on-surface-variant opacity-60" [title]="'product.configurationQuantity' | translate">
+                          <span class="material-symbols-outlined text-xs">inventory_2</span>
+                          <span class="text-[10px] font-bold">{{ product.stockQuantity }}</span>
+                        </div>
+                      </div>
                     </div>
                     
-                    <div class="flex items-center gap-2">
-                       @if (product.shownQuantity > 0) {
-                         <button (click)="addToCart(product, $event)"
-                                 class="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-primary text-on-primary flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all">
-                           <span class="material-symbols-outlined text-xl md:text-2xl">add_shopping_cart</span>
-                         </button>
-                       } @else {
-                         <span class="px-3 py-1 bg-surface-container-high text-on-surface-variant text-[10px] font-bold rounded-full">
-                           {{ 'product.outOfStock' | translate }}
-                         </span>
-                       }
-                    </div>
+                    @if (product.stockQuantity > 0) {
+                      <button (click)="addToCart(product, $event)"
+                              class="w-full py-3 bg-primary text-on-primary rounded-xl font-headline font-bold text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group/btn">
+                        <span class="material-symbols-outlined text-sm group-hover/btn:rotate-12 transition-transform">shopping_bag</span>
+                        {{ 'product.initializeAcquisition' | translate }}
+                      </button>
+                    } @else {
+                      <button disabled
+                              class="w-full py-3 bg-surface-container text-outline-variant rounded-xl font-headline font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 opacity-50">
+                        <span class="material-symbols-outlined text-sm">inventory_2</span>
+                        {{ 'product.outOfStock' | translate }}
+                      </button>
+                    }
                   </div>
                 </div>
               </div>
@@ -269,17 +269,11 @@ export class HomeComponent implements OnInit {
   }
   
   private loadFeaturedProducts(): void {
-    this.productService.getHotestProducts(8).subscribe({
-      next: (response: any) => {
-        let products: any[] = [];
-        if (Array.isArray(response)) {
-          products = response;
-        } else if (response && typeof response === 'object') {
-          products = response.getProducts || response.GetProducts ||
-                     response.items || response.Items || 
-                     response.data || response.Data || [];
+    this.productService.getHotProducts(8).subscribe({
+      next: (result) => {
+        if (result.isSuccess && result.data) {
+          this.featuredProducts.set(result.data.items.map((p: any) => this.normalizeProduct(p)));
         }
-        this.featuredProducts.set(products.map(p => this.normalizeProduct(p)));
       },
       error: (error) => {
         console.error('Error loading hotest products:', error);
@@ -308,13 +302,15 @@ export class HomeComponent implements OnInit {
     const userId = this.tokenService.getUserId();
     if (!userId) return;
     
-    this.wishService.getWishes(userId).subscribe({
-      next: (wishes) => {
-        const ids = new Set<string>();
-        wishes.forEach(w => {
-          if (w.productId) ids.add(w.productId);
-        });
-        this.wishlistIds.set(ids);
+    this.wishService.getWishes().subscribe({
+      next: (res) => {
+        if (res.isSuccess && res.data) {
+          const ids = new Set<string>();
+          res.data.forEach(w => {
+            if (w.productId) ids.add(w.productId);
+          });
+          this.wishlistIds.set(ids);
+        }
       },
       error: (error) => {
         console.error('Error loading wishlist:', error);
@@ -351,7 +347,7 @@ export class HomeComponent implements OnInit {
 
     if (isCurrentlyInWishlist) {
       // Remove from wishlist in background
-      this.wishService.removeWish(userId, productId).subscribe({
+      this.wishService.removeWish(productId).subscribe({
         next: () => {
           // Success: No further action needed as UI is already updated
           console.log('Successfully removed from wishlist');
@@ -364,7 +360,7 @@ export class HomeComponent implements OnInit {
       });
     } else {
       // Add to wishlist in background
-      this.wishService.addWish({ userId, productId }).subscribe({
+      this.wishService.addWish({ productId }).subscribe({
         next: () => {
           // Success: No further action needed
           console.log('Successfully added to wishlist');
@@ -389,11 +385,13 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    if (product.shownQuantity <= 0) {
+    if (product.stockQuantity <= 0) {
       return;
     }
     
-    this.cartService.addToCart(product.id, 1, product).subscribe({
+    const variantId = product.productVariants?.[0]?.id || (product as any)?.productVariants?.[0]?.id || product.id;
+    
+    this.cartService.addToCart(variantId, 1, product).subscribe({
       next: () => {
         console.log('Added to cart successfully');
       },
@@ -401,6 +399,12 @@ export class HomeComponent implements OnInit {
         console.error('Error adding to cart:', error);
       }
     });
+  }
+
+  getMainPhotoUrl(product: any): string | null {
+    if (!product || !product.productPhotos || product.productPhotos.length === 0) return null;
+    const main = product.productPhotos.find((p: any) => p.isMain) || product.productPhotos[0];
+    return this.photoService.getPhotoUrl(main.url);
   }
 
   private normalizeProduct(p: any): any {
@@ -416,7 +420,8 @@ export class HomeComponent implements OnInit {
       categoryId: p.categoryId || p.CategoryId,
       categoryName: p.categoryName || p.CategoryName,
       supplierId: p.supplierId || p.SupplierId,
-      shownQuantity: p.shownQuantity || (p.shownQuantity === 0 ? 0 : (p.ShownQuantity || 0)),
+      shownQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.shownQuantity ?? p.ShownQuantity) ?? 1,
+      stockQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.shownQuantity ?? p.ShownQuantity) ?? 1,
       quantityInStock: p.quantityInStock || p.QuantityInStock,
       productPhotos: p.productPhotos || p.ProductPhotos || p.productphotos || [],
       haveSale: p.haveSale ?? p.HaveSale ?? false,

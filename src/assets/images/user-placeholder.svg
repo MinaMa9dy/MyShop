@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <!-- Soft background circle -->
+  <circle cx="50" cy="50" r="50" fill="#f8fafc"/>
+  
+  <!-- Minimalist person shape (Emoji style) -->
+  <circle cx="50" cy="38" r="14" fill="#cbd5e1"/>
+  <path d="M50 58 C30 58 18 72 18 85 C18 88 20 90 23 90 L77 90 C80 90 82 88 82 85 C82 72 70 58 50 58 Z" fill="#cbd5e1"/>
+</svg>

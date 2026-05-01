@@ -1,9 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Order, AddOrderDto } from '../models/order.model';
 import { TokenService } from './token.service';
+import { Result } from '../models/result.model';
+import { PageResult } from '../models/result.model';
 
 @Injectable({
   providedIn: 'root'
@@ -18,26 +20,52 @@ export class OrderService {
     return userId || '';
   }
 
-  // Get orders by user ID - uses GET api/Order?userId={userId}
-  getOrdersByUserId(userId?: string): Observable<Order[]> {
+  // Get all orders (Admin only)
+  getAllOrders(page: number = 1, pageSize: number = 10): Observable<Result<PageResult<Order>>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+    return this.http.get<Result<PageResult<Order>>>(this.apiUrl, { params });
+  }
+
+  // Get orders for the current user
+  getMyOrders(): Observable<Result<Order[]>> {
+    return this.http.get<Result<Order[]>>(`${this.apiUrl}/my-orders`);
+  }
+
+  // Legacy support or specific user lookup (if allowed)
+  getOrdersByUserId(userId?: string): Observable<Result<Order[]>> {
     const id = userId || this.getCurrentUserId();
-    
-    return this.http.get<Order[]>(`${this.apiUrl}?customerId=${id}`);
+    return this.http.get<Result<Order[]>>(`${this.apiUrl}/my-orders`); // Simplified to my-orders for now
   }
 
-  // Create a new order - uses POST api/Order
-  createOrder(order: AddOrderDto): Observable<Order> {
-    return this.http.post<Order>(this.apiUrl, order);
+  // Get order by ID
+  getOrderById(id: string): Observable<Result<Order>> {
+    return this.http.get<Result<Order>>(`${this.apiUrl}/${id}`);
   }
 
-  // Get orders by seller ID - uses GET api/Order/SellerOrders?sellerId={sellerId}
-  getOrdersBySellerId(sellerId: string): Observable<Order[]> {
-    return this.http.get<Order[]>(`${this.apiUrl}/SellerOrders?sellerId=${sellerId}`);
+  // Create a new order
+  createOrder(order: AddOrderDto): Observable<Result<Order>> {
+    return this.http.post<Result<Order>>(this.apiUrl, order);
   }
 
   // Get orders for the current logged-in seller
-  getCurrentSellerOrders(): Observable<Order[]> {
-    const sellerId = this.getCurrentUserId();
-    return this.getOrdersBySellerId(sellerId);
+  getCurrentSellerOrders(): Observable<Result<Order[]>> {
+    return this.http.get<Result<Order[]>>(`${this.apiUrl}/SellerOrders`);
+  }
+
+  // Get orders by seller ID (Legacy support, now uses current user context)
+  getOrdersBySellerId(sellerId?: string): Observable<Result<Order[]>> {
+    return this.getCurrentSellerOrders();
+  }
+
+  // Update order status (Admin only)
+  updateOrderStatus(id: string, status: number): Observable<Result<Order>> {
+    return this.http.patch<Result<Order>>(`${this.apiUrl}/${id}/status`, { orderId: id, status });
+  }
+
+  // Cancel order
+  cancelOrder(id: string): Observable<Result<Order>> {
+    return this.http.patch<Result<Order>>(`${this.apiUrl}/${id}/cancel`, {});
   }
 }

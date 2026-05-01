@@ -2,8 +2,18 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Coupon, CreateCouponDto, UpdateCouponDto } from '../models/coupon.model';
-import { GetProductDto } from '../models/product.model';
+import { 
+  Coupon, 
+  CreateCouponDto, 
+  UpdateCouponDto, 
+  UserCouponDto, 
+  AssignCouponDto, 
+  BulkAssignCouponDto, 
+  BulkAssignResultDto, 
+  CouponResponseDto 
+} from '../models/coupon.model';
+import { Product } from '../models/product.model';
+import { Result } from '../models/result.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,39 +22,70 @@ export class CouponService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/Coupons`;
 
-  getAll(): Observable<Coupon[]> {
-    return this.http.get<Coupon[]>(`${this.apiUrl}/GetAll`);
+  // Admin Actions
+  getAll(): Observable<Result<Coupon[]>> {
+    return this.http.get<Result<Coupon[]>>(`${this.apiUrl}/GetAll`);
   }
 
-  getById(id: string): Observable<Coupon> {
-    return this.http.get<Coupon>(`${this.apiUrl}/${id}`);
+  getActive(): Observable<Result<Coupon[]>> {
+    return this.http.get<Result<Coupon[]>>(`${this.apiUrl}/Active`);
   }
 
-  create(coupon: CreateCouponDto): Observable<Coupon> {
-    return this.http.post<Coupon>(`${this.apiUrl}/Create`, coupon);
+  getById(id: string): Observable<Result<Coupon>> {
+    return this.http.get<Result<Coupon>>(`${this.apiUrl}/${id}`);
   }
 
-  update(id: string, coupon: UpdateCouponDto): Observable<Coupon> {
-    return this.http.put<Coupon>(`${this.apiUrl}/Update/${id}`, coupon);
+  getByCode(code: string): Observable<Result<Coupon>> {
+    return this.http.get<Result<Coupon>>(`${this.apiUrl}/ByCode/${code}`);
   }
 
-  delete(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/Delete/${id}`);
+  create(coupon: CreateCouponDto): Observable<Result<Coupon>> {
+    return this.http.post<Result<Coupon>>(`${this.apiUrl}/Create`, coupon);
   }
 
-  getAssignedProducts(couponCode: string): Observable<GetProductDto[]> {
-    return this.http.get<GetProductDto[]>(`${this.apiUrl}/GetAssignedProducts/${couponCode}`);
+  update(id: string, coupon: UpdateCouponDto): Observable<Result<Coupon>> {
+    return this.http.put<Result<Coupon>>(`${this.apiUrl}/Update/${id}`, coupon);
   }
 
-  assignProducts(couponCode: string, productIds: string[]): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/AssignProducts/${couponCode}`, productIds);
+  delete(id: string): Observable<Result<boolean>> {
+    return this.http.delete<Result<boolean>>(`${this.apiUrl}/Delete/${id}`);
   }
 
-  removeProducts(couponCode: string, productIds: string[]): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/RemoveProducts/${couponCode}`, productIds);
+  assignToUser(dto: AssignCouponDto): Observable<Result<boolean>> {
+    return this.http.post<Result<boolean>>(`${this.apiUrl}/AssignToUser`, dto);
   }
 
-  applyCoupon(couponCode: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/Apply/${couponCode}`, {});
+  removeFromUser(couponId: string, userId: string): Observable<Result<boolean>> {
+    return this.http.delete<Result<boolean>>(`${this.apiUrl}/RemoveFromUser/${couponId}/${userId}`);
+  }
+
+  bulkAssign(dto: BulkAssignCouponDto): Observable<Result<BulkAssignResultDto>> {
+    return this.http.post<Result<BulkAssignResultDto>>(`${this.apiUrl}/BulkAssign`, dto);
+  }
+
+  getCouponUsers(couponId: string): Observable<Result<UserCouponDto[]>> {
+    return this.http.get<Result<UserCouponDto[]>>(`${this.apiUrl}/Users/${couponId}`);
+  }
+
+  // User Actions
+  getMyCoupons(): Observable<Result<UserCouponDto[]>> {
+    return this.http.get<Result<UserCouponDto[]>>(`${this.apiUrl}/MyCoupons`);
+  }
+
+  validate(code: string): Observable<Result<CouponResponseDto>> {
+    return this.http.post<Result<CouponResponseDto>>(`${this.apiUrl}/Validate/${code}`, {});
+  }
+
+  // Product Actions
+  getAssignedProducts(couponId: string): Observable<Result<Product[]>> {
+    return this.http.get<Result<Product[]>>(`${this.apiUrl}/GetAssignedProducts/${couponId}`);
+  }
+
+  assignProducts(couponId: string, productIds: string[]): Observable<Result<boolean>> {
+    return this.http.post<Result<boolean>>(`${this.apiUrl}/AssignProducts/${couponId}`, productIds);
+  }
+
+  removeProducts(couponId: string, productIds: string[]): Observable<Result<boolean>> {
+    return this.http.post<Result<boolean>>(`${this.apiUrl}/RemoveProducts/${couponId}`, productIds);
   }
 }

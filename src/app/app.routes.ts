@@ -87,6 +87,12 @@ export const routes: Routes = [
         title: 'MyShop - Dashboard'
       },
       {
+        path: 'dashboard/my-coupons',
+        loadComponent: () => import('./features/dashboard/my-coupons/my-coupons.component').then(m => m.MyCouponsComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - My Coupons'
+      },
+      {
         path: 'categories',
         loadComponent: () => import('./features/categories/category-list/category-list.component').then(m => m.CategoryListComponent),
         title: 'MyShop - Categories'
@@ -137,7 +143,13 @@ export const routes: Routes = [
         path: 'admin/coupons/assign/:id',
         loadComponent: () => import('./features/admin/coupons/coupon-assign/coupon-assign.component').then(m => m.CouponAssignComponent),
         canActivate: [authGuard],
-        title: 'MyShop - Assign Coupon'
+        title: 'MyShop - Assign Products'
+      },
+      {
+        path: 'admin/coupons/users/:id',
+        loadComponent: () => import('./features/admin/coupons/coupon-user/coupon-user.component').then(m => m.CouponUserComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - User Assignments'
       },
       {
         path: 'wishes',
@@ -230,6 +242,12 @@ export const routes: Routes = [
         title: 'MyShop - لوحة التحكم'
       },
       {
+        path: 'dashboard/my-coupons',
+        loadComponent: () => import('./features/dashboard/my-coupons/my-coupons.component').then(m => m.MyCouponsComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - كوبوناتي'
+      },
+      {
         path: 'categories',
         loadComponent: () => import('./features/categories/category-list/category-list.component').then(m => m.CategoryListComponent),
         title: 'MyShop - الفئات'
@@ -281,6 +299,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/coupons/coupon-assign/coupon-assign.component').then(m => m.CouponAssignComponent),
         canActivate: [authGuard],
         title: 'MyShop - تعيين الكوبون'
+      },
+      {
+        path: 'admin/coupons/users/:id',
+        loadComponent: () => import('./features/admin/coupons/coupon-user/coupon-user.component').then(m => m.CouponUserComponent),
+        canActivate: [authGuard],
+        title: 'MyShop - تعيين المستخدمين'
       },
       {
         path: 'wishes',

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { UserProfile } from '../models/auth.model';
+import { Result } from '../models/result.model';
 
 export interface UpdateProfileDto {
   firstName?: string;
@@ -24,30 +25,30 @@ export class ProfileService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/Profile`;
 
-  getProfile(userId?: string): Observable<UserProfile> {
+  getProfile(userId?: string): Observable<Result<UserProfile>> {
     const url = userId ? `${this.apiUrl}/${userId}` : `${this.apiUrl}/me`;
-    return this.http.get<UserProfile>(url);
+    return this.http.get<Result<UserProfile>>(url);
   }
 
-  updateProfile(dto: UpdateProfileDto): Observable<any> {
-    return this.http.put(this.apiUrl, dto);
+  updateProfile(dto: UpdateProfileDto): Observable<Result<any>> {
+    return this.http.put<Result<any>>(this.apiUrl, dto);
   }
 
-  changePassword(dto: ChangePasswordDto): Observable<any> {
-    return this.http.put(`${this.apiUrl}/Change-Password`, dto);
+  changePassword(dto: ChangePasswordDto): Observable<Result<any>> {
+    return this.http.put<Result<any>>(`${this.apiUrl}/Change-Password`, dto);
   }
 
-  uploadImage(file: File): Observable<any> {
+  uploadImage(file: File): Observable<Result<any>> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post(`${this.apiUrl}/Upload-Image`, formData);
+    return this.http.post<Result<any>>(`${this.apiUrl}/Upload-Image`, formData);
   }
 
-  deleteImage(): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/Delete-Image`);
+  deleteImage(): Observable<Result<any>> {
+    return this.http.delete<Result<any>>(`${this.apiUrl}/Delete-Image`);
   }
 
-  deleteAccount(): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/Delete-Account`);
+  deleteAccount(): Observable<Result<any>> {
+    return this.http.delete<Result<any>>(`${this.apiUrl}/Delete-Account`);
   }
 }

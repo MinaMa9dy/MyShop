@@ -17,7 +17,7 @@ export class ReviewService {
 
   getReviewsByProductId(productId: string): Observable<Review[]> {
     return this.http.get<Review[]>(
-      `${this.baseUrl}/GetReviewsByProductId?productId=${productId}`
+      `${this.baseUrl}/Product/${productId}`
     );
   }
 }

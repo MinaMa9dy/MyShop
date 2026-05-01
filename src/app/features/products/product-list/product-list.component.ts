@@ -83,8 +83,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.loadWishlist();
 
     this.route.queryParams.subscribe(params => {
-      const categoryId = params['categoryId'];
-      if (categoryId) this.selectedCategory = categoryId;
+      this.selectedCategory = params['categoryId'] || '';
+      this.searchTerm = params['searchTerm'] || '';
       this.loadProducts();
     });
   }
@@ -92,34 +92,21 @@ export class ProductListComponent implements OnInit, OnDestroy {
   loadProducts(): void {
     this.loading.set(true);
 
-    this.productService.getFiltered({
+    this.productService.getAll({
       searchTerm: this.searchTerm,
       categoryId: this.selectedCategory || undefined,
       minPrice: this.minPrice || undefined,
       maxPrice: this.maxPrice || undefined,
       haveSale: this.onSaleOnly || undefined,
       isFasting: this.isFastingOnly || undefined,
-      page: this.currentPage(),
+      pageNumber: this.currentPage(),
       pageSize: this.pageSize
     }).subscribe({
-      next: (response: any) => {
-        let prods: any[] = [];
-        if (Array.isArray(response)) {
-          prods = response;
-        } else if (response && typeof response === 'object') {
-          prods = response.getProducts || response.GetProducts ||
-                  response.items || response.Items ||
-                  response.data || response.Data ||
-                  response.products || response.Products || [];
+      next: (result) => {
+        if (result.isSuccess && result.data) {
+          this.products.set(result.data.items.map((p: any) => this.normalizeProduct(p)));
+          this.totalPages.set(result.data.totalPages);
         }
-        this.products.set(prods.map(p => this.normalizeProduct(p)));
-
-        let totalPages = 1;
-        if (response) {
-          totalPages = response.totalPages || response.TotalPages ||
-                       (response.totalCount || response.TotalCount ? Math.ceil((response.totalCount || response.TotalCount) / this.pageSize) : 1);
-        }
-        this.totalPages.set(Math.max(1, totalPages));
         this.loading.set(false);
       },
       error: (error) => {
@@ -145,11 +132,13 @@ export class ProductListComponent implements OnInit, OnDestroy {
     const userId = this.tokenService.getUserId();
     if (!userId) return;
 
-    this.wishService.getWishes(userId).subscribe({
-      next: (wishes) => {
-        const ids = new Set<string>();
-        wishes.forEach(w => { if (w.productId) ids.add(w.productId); });
-        this.wishlistIds.set(ids);
+    this.wishService.getWishes().subscribe({
+      next: (res) => {
+        if (res.isSuccess && res.data) {
+          const ids = new Set<string>();
+          res.data.forEach(w => { if (w.productId) ids.add(w.productId); });
+          this.wishlistIds.set(ids);
+        }
       },
       error: (error) => console.error('Error loading wishlist:', error)
     });
@@ -178,7 +167,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
     // --- OPTIMISTIC UPDATE END ---
 
     if (isCurrentlyInWishlist) {
-      this.wishService.removeWish(userId, productId).subscribe({
+      this.wishService.removeWish(productId).subscribe({
         next: () => console.log('Optimistic UI: Successfully removed'),
         error: (err) => {
           console.error('Optimistic UI: Error removing from wishlist, rolling back', err);
@@ -186,7 +175,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
         }
       });
     } else {
-      this.wishService.addWish({ userId, productId }).subscribe({
+      this.wishService.addWish({ productId }).subscribe({
         next: () => console.log('Optimistic UI: Successfully added'),
         error: (err) => {
           console.error('Optimistic UI: Error adding to wishlist, rolling back', err);
@@ -233,8 +222,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (product.shownQuantity <= 0) return;
-    this.cartService.addToCart(product.id, 1, product).subscribe({
+    const variantId = product.productVariants?.[0]?.id || (product as any)?.productVariants?.[0]?.id || product.id;
+
+    if (product.stockQuantity <= 0) return;
+    this.cartService.addToCart(variantId, 1, product).subscribe({
       next: () => console.log('Added to cart'),
       error: (err) => console.error('Cart error:', err)
     });
@@ -270,6 +261,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
     return iconMap[name] || 'label';
   }
 
+  getMainPhotoUrl(product: any): string | null {
+    if (!product || !product.productPhotos || product.productPhotos.length === 0) return null;
+    const main = product.productPhotos.find((p: any) => p.isMain) || product.productPhotos[0];
+    return this.photoService.getPhotoUrl(main.url);
+  }
+
   private normalizeProduct(p: any): any {
     if (!p) return p;
     return {
@@ -283,9 +280,23 @@ export class ProductListComponent implements OnInit, OnDestroy {
       categoryId: p.categoryId || p.CategoryId,
       categoryName: p.categoryName || p.CategoryName,
       supplierId: p.supplierId || p.SupplierId,
-      shownQuantity: p.shownQuantity || (p.shownQuantity === 0 ? 0 : (p.ShownQuantity || 0)),
+      supplierName: p.supplierName || p.SupplierName || p.supplier || p.Supplier,
+      shownQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.shownQuantity ?? p.ShownQuantity) ?? 1,
+      stockQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.shownQuantity ?? p.ShownQuantity) ?? 1,
       quantityInStock: p.quantityInStock || p.QuantityInStock,
-      productPhotos: p.productPhotos || p.ProductPhotos || p.productphotos || [],
+      productPhotos: (p.productPhotos || p.ProductPhotos || p.productphotos || []).map((ph: any) => ({
+        id: ph.id || ph.Id,
+        url: ph.url || ph.Url,
+        isMain: ph.isMain ?? ph.IsMain ?? false,
+        fileName: ph.fileName || ph.FileName || ph.url || ph.Url
+      })),
+      productVariants: (p.productVariants || p.ProductVariants || p.productvariants || []).map((v: any) => ({
+        id: v.id || v.Id,
+        sku: v.sku || v.Sku,
+        oldPrice: v.oldPrice || v.OldPrice,
+        newPrice: v.newPrice || v.NewPrice,
+        stockQuantity: (v.stockQuantity ?? v.StockQuantity ?? v.shownQuantity ?? v.ShownQuantity) ?? 1
+      })),
       haveSale: p.haveSale ?? p.HaveSale ?? false,
       isFasting: p.isFasting ?? p.IsFasting ?? false,
       popularity: p.popularity || p.Popularity || 0,

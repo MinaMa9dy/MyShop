@@ -58,9 +58,21 @@
                 (click)="goToProduct(wish.productId)">
               {{ wish.product?.name }}
             </h3>
-            <p class="text-[10px] text-gray-500 mb-1 truncate">
-              {{ wish.product?.categoryName }}
+            
+            <p class="text-[10px] text-gray-500 line-clamp-2 mb-1 min-h-[2.5em]">
+              {{ wish.product?.description }}
             </p>
+
+            <div class="flex items-center justify-center gap-2 mb-1">
+              <p class="text-[10px] text-gray-500 truncate">
+                {{ wish.product?.categoryName }}
+              </p>
+              <div class="flex items-center gap-1 text-[10px] text-gray-400" [title]="'product.configurationQuantity' | translate">
+                <span class="material-symbols-outlined text-xs">inventory_2</span>
+                <span>{{ wish.product?.stockQuantity }}</span>
+              </div>
+            </div>
+
             <div class="mb-2">
               <span class="text-sm font-bold text-red-600">
                 {{ wish.product?.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}

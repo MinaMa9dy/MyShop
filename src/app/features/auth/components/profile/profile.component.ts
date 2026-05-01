@@ -6,6 +6,7 @@ import { UserProfile } from '../../../../core/models/auth.model';
 import { ProfileService } from '../../../../core/services/profile.service';
 import { environment } from '../../../../../environments/environment';
 import { TranslateModule } from '@ngx-translate/core';
+import { PhotoService } from '../../../../core/services/photo.service';
 
 @Component({
   selector: 'app-profile',
@@ -146,6 +147,7 @@ import { TranslateModule } from '@ngx-translate/core';
 export class ProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private profileService = inject(ProfileService);
+  private photoService = inject(PhotoService);
   private route = inject(ActivatedRoute);
   
   profile = signal<UserProfile | null>(null);
@@ -179,8 +181,16 @@ export class ProfileComponent implements OnInit {
   loadProfile(userId: string): void {
     this.loading.set(true);
     this.profileService.getProfile(userId).subscribe({
-      next: (profile) => { this.profile.set(profile); this.loading.set(false); },
-      error: () => { this.error.set('Failed to synchronize identity profile.'); this.loading.set(false); }
+      next: (res) => { 
+        if (res.isSuccess && res.data) {
+          this.profile.set(res.data);
+        }
+        this.loading.set(false); 
+      },
+      error: () => { 
+        this.error.set('Failed to synchronize identity profile.'); 
+        this.loading.set(false); 
+      }
     });
   }
   
@@ -202,12 +212,7 @@ export class ProfileComponent implements OnInit {
   }
   
   getPhotoUrl(): string {
-    if (this.profile()?.imageUrl) {
-      const normalizedPath = this.profile()!.imageUrl!.replace(/\\/g, '/');
-      const parts = normalizedPath.split('/');
-      return `${environment.apiUrl}/Photo/UserPhoto/${parts[parts.length - 1]}`;
-    }
-    return '';
+    return this.photoService.getPhotoUrl(this.profile()?.imageUrl, 'user');
   }
   getGenderText(): string {
     const g = this.profile()?.gender;

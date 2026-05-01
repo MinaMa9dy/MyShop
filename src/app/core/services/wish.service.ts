@@ -2,8 +2,9 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Wish, AddWishDto } from '../models/wish.model';
+import { Wish, WishDto } from '../models/wish.model';
 import { TokenService } from './token.service';
+import { Result } from '../models/result.model';
 
 @Injectable({
   providedIn: 'root'
@@ -18,19 +19,18 @@ export class WishService {
     return userId || '';
   }
 
-  // Get all wishes for a user - uses GET api/Wish?userId={userId}
-  getWishes(userId?: string): Observable<Wish[]> {
-    const id = userId || this.getCurrentUserId();
-    return this.http.get<Wish[]>(`${this.apiUrl}?userId=${id}`);
+  // Get all wishes for current user
+  getWishes(): Observable<Result<Wish[]>> {
+    return this.http.get<Result<Wish[]>>(this.apiUrl);
   }
 
-  // Add a wish - uses POST api/Wish
-  addWish(wish: AddWishDto): Observable<Wish> {
-    return this.http.post<Wish>(this.apiUrl, wish);
+  // Add a wish
+  addWish(wish: WishDto): Observable<Result<Wish>> {
+    return this.http.post<Result<Wish>>(this.apiUrl, wish);
   }
 
-  // Remove a wish - uses DELETE api/Wish?userId={userId}&productId={productId}
-  removeWish(userId: string, productId: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}?userId=${userId}&productId=${productId}`);
+  // Remove a wish
+  removeWish(productId: string): Observable<Result<boolean>> {
+    return this.http.delete<Result<boolean>>(`${this.apiUrl}/${productId}`);
   }
 }

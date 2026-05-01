@@ -42,9 +42,9 @@ import { environment } from '../../../../environments/environment';
             <a routerLink="/" class="hover:text-primary transition-colors">{{ 'common.home' | translate }}</a>
             <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
             <a routerLink="/products" class="hover:text-primary transition-colors">{{ 'common.catalog' | translate }}</a>
-            @if (product()?.category) {
+            @if (product()?.categoryName) {
               <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
-              <span class="text-on-surface">{{ product()?.category }}</span>
+              <span class="text-on-surface">{{ product()?.categoryName }}</span>
             }
           </nav>
           
@@ -58,7 +58,7 @@ import { environment } from '../../../../environments/environment';
                   <div class="flex h-full w-full overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-smooth" #carousel (scroll)="onScroll($event)">
                     @for (photo of allPhotos(); track photo.id) {
                       <div class="flex-shrink-0 w-full h-full snap-center flex items-center justify-center p-12">
-                        <img [src]="photoService.getPhotoUrl(photo.fileName)" 
+                        <img [src]="photoService.getPhotoUrl(photo.url)" 
                              [alt]="product()?.name" 
                              class="w-full h-full object-contain transition-transform duration-700 hover:scale-105">
                       </div>
@@ -102,25 +102,14 @@ import { environment } from '../../../../environments/environment';
                 }
               </div>
 
-              @if (allPhotos().length > 1) {
-                <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                  @for (photo of allPhotos(); track photo.id; let i = $index) {
-                    <button (click)="scrollToPhoto(i)"
-                            class="flex-shrink-0 w-24 h-24 rounded-2xl bg-surface-container-lowest border-2 transition-all p-2 overflow-hidden"
-                            [class.border-primary]="currentPhotoIndex() === i"
-                            [class.border-transparent]="currentPhotoIndex() !== i">
-                      <img [src]="photoService.getPhotoUrl(photo.fileName)" class="w-full h-full object-contain">
-                    </button>
-                  }
-                </div>
-              }
+
             </div>
 
             <!-- Content Section (5 cols) -->
             <div class="lg:col-span-5 space-y-10 animate-slide-up text-center lg:text-start" style="animation-delay: 100ms">
               <div class="space-y-4">
                 <div class="flex items-center justify-center lg:justify-start gap-3">
-                   <span class="text-[10px] font-black uppercase tracking-[0.3em] text-primary px-3 py-1 bg-primary/10 rounded-full">{{ product()?.category }}</span>
+                   <span class="text-[10px] font-black uppercase tracking-[0.3em] text-primary px-3 py-1 bg-primary/10 rounded-full">{{ product()?.categoryName }}</span>
                    <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
                    <span class="text-[10px] font-black uppercase tracking-[0.3em] text-outline">{{ totalReviewCount() }} {{ 'product.reviews' | translate }}</span>
                 </div>
@@ -136,21 +125,68 @@ import { environment } from '../../../../environments/environment';
                 <!-- Price Display -->
                 <div class="flex items-baseline justify-center lg:justify-start gap-4">
                    <span class="font-headline text-4xl font-black text-on-surface tracking-tighter">
-                     {{ product()?.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
+                     {{ (selectedVariant()?.newPrice || product()?.newPrice) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
                    </span>
                    @if (isOnSale()) {
                      <span class="font-body text-xl text-outline-variant line-through opacity-50">
-                        {{ product()?.oldPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
+                        {{ (selectedVariant()?.oldPrice || product()?.oldPrice) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
                      </span>
                    }
                 </div>
 
+                <!-- Dynamic Attribute Matrix -->
+                @if (attributeGroups().length > 0 && product()?.productVariants && product()?.productVariants!.length > 1) {
+                  <div class="space-y-8 animate-fade-in">
+                    @for (group of attributeGroups(); track group.name) {
+                      <div class="space-y-4">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ group.name }}</label>
+                        <div class="flex flex-wrap gap-3">
+                          @for (val of group.values; track val) {
+                            <button (click)="selectAttributeValue(group.name, val)"
+                                    [class.bg-primary]="selectedAttributes()[group.name] === val"
+                                    [class.text-on-primary]="selectedAttributes()[group.name] === val"
+                                    [class.shadow-lg]="selectedAttributes()[group.name] === val"
+                                    [class.scale-105]="selectedAttributes()[group.name] === val"
+                                    [class.opacity-40]="!isOptionAvailable(group.name, val)"
+                                    [class.bg-surface-container-high]="selectedAttributes()[group.name] !== val"
+                                    class="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-outline-variant/20 min-w-[80px] hover:border-primary/40 relative overflow-hidden group/opt">
+                              {{ val }}
+                              @if (!isOptionAvailable(group.name, val)) {
+                                <div class="absolute inset-0 bg-outline/5 flex items-center justify-center rotate-12 pointer-events-none">
+                                  <div class="w-full h-[1px] bg-outline-variant/30"></div>
+                                </div>
+                              }
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else if (product()?.productVariants && product()?.productVariants!.length > 1) {
+                  <!-- Fallback to list if no structured attributes -->
+                  <div class="space-y-4">
+                     <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'product.variants' | translate }}</label>
+                     <div class="flex flex-wrap gap-3">
+                       @for (variant of product()?.productVariants; track variant.id) {
+                         <button (click)="selectVariant(variant)" 
+                                 [class]="selectedVariant()?.id === variant.id ? 'bg-primary text-on-primary shadow-lg scale-105' : 'bg-surface-container-high text-on-surface-variant'"
+                                 class="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-outline-variant/20 min-w-[80px]">
+                           {{ variant.sku }} ({{ variant.stockQuantity }})
+                         </button>
+                       }
+                     </div>
+                  </div>
+                }
+
                 <!-- Stock Status Tag -->
-                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+                 <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4">
                    <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/50 border border-outline-variant/20 shadow-sm">
-                      <div class="w-2 h-2 rounded-full" [class.bg-success]="product()?.shownQuantity > 0" [class.bg-error]="product()?.shownQuantity <= 0"></div>
-                      <span class="text-[10px] font-black uppercase tracking-widest" [class.text-success]="product()?.shownQuantity > 0" [class.text-error]="product()?.shownQuantity <= 0">
-                        {{ product()?.shownQuantity > 0 ? (('product.inStock' | translate) + ' (' + product()?.shownQuantity + ')') : ('product.outOfStock' | translate) }}
+                      <div class="w-2 h-2 rounded-full" [class.bg-success]="(selectedVariant()?.stockQuantity || 0) > 0" [class.bg-error]="(selectedVariant()?.stockQuantity || 0) <= 0"></div>
+                      <span class="text-[10px] font-black uppercase tracking-widest" [class.text-success]="(selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) > 0" [class.text-error]="(selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) <= 0">
+                        {{ (selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) > 0 ? ('product.inStock' | translate) : ('product.outOfStock' | translate) }}
+                        @if ((selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) > 0) {
+                          ({{ selectedVariant()?.stockQuantity ?? product()?.stockQuantity }})
+                        }
                       </span>
                    </div>
                    @if (product()?.supplierName) {
@@ -159,34 +195,40 @@ import { environment } from '../../../../environments/environment';
                 </div>
 
                 <!-- Quantity & Add to Cart -->
-                @if (product()?.shownQuantity > 0) {
-                  <div class="space-y-6 pt-4">
-                    <div class="flex items-center justify-between">
-                       <span class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'product.configurationQuantity' | translate }}</span>
-                       <div class="flex items-center gap-6 bg-surface p-2 rounded-2xl border border-outline-variant/30">
-                          <button (click)="decreaseQuantity()" class="w-10 h-10 rounded-xl hover:bg-surface-container transition-colors flex items-center justify-center">
-                            <span class="material-symbols-outlined text-lg">remove</span>
-                          </button>
-                          <span class="font-headline font-black text-lg min-w-[20px] text-center">{{ quantity }}</span>
-                          <button (click)="increaseQuantity()" class="w-10 h-10 rounded-xl hover:bg-surface-container transition-colors flex items-center justify-center">
-                            <span class="material-symbols-outlined text-lg">add</span>
-                          </button>
-                       </div>
-                    </div>
-
-                    <button (click)="addToCart()"
-                              [disabled]="loading() || product()?.shownQuantity === 0"
-                              class="w-full py-5 bg-primary text-on-primary rounded-[32px] font-headline font-black text-xs uppercase tracking-[0.3em] shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50 disabled:scale-100 group">
-                        <span class="material-symbols-outlined group-hover:rotate-12 transition-transform">shopping_bag</span>
-                        {{ 'product.initializeAcquisition' | translate }}
-                      </button>
+                <div class="space-y-6 pt-4">
+                  <div class="flex items-center justify-between">
+                      <span class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'product.configurationQuantity' | translate }}</span>
+                      <div class="flex items-center gap-6 bg-surface p-2 rounded-2xl border border-outline-variant/30">
+                        <button (click)="decreaseQuantity()" class="w-10 h-10 rounded-xl hover:bg-surface-container transition-colors flex items-center justify-center">
+                          <span class="material-symbols-outlined text-lg">remove</span>
+                        </button>
+                        <span class="font-headline font-black text-lg min-w-[20px] text-center">{{ quantity }}</span>
+                        <button (click)="increaseQuantity()" class="w-10 h-10 rounded-xl hover:bg-surface-container transition-colors flex items-center justify-center">
+                          <span class="material-symbols-outlined text-lg">add</span>
+                        </button>
+                      </div>
                   </div>
-                }
+
+                  @if ((selectedVariant()?.stockQuantity ?? product()?.stockQuantity ?? 0) > 0) {
+                    <button (click)="addToCart()"
+                            [disabled]="loading()"
+                            class="w-full py-5 bg-primary text-on-primary rounded-[32px] font-headline font-black text-xs uppercase tracking-[0.3em] shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50 disabled:scale-100 group">
+                      <span class="material-symbols-outlined group-hover:rotate-12 transition-transform">shopping_bag</span>
+                      {{ 'product.initializeAcquisition' | translate }}
+                    </button>
+                  } @else {
+                    <button disabled
+                            class="w-full py-5 bg-surface-container text-outline-variant rounded-[32px] font-headline font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-4 opacity-50">
+                      <span class="material-symbols-outlined">inventory_2</span>
+                      {{ 'product.outOfStock' | translate }}
+                    </button>
+                  }
+                </div>
 
                 @if (canEditProduct()) {
                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-                      <button (click)="editProduct()" class="py-4 bg-tertiary/10 text-tertiary rounded-2xl font-headline font-bold text-sm tracking-tight hover:bg-tertiary hover:text-on-tertiary transition-all">{{ 'dashboard.editProfile' | translate }}</button>
-                      <button (click)="deleteProduct()" class="py-4 bg-error/10 text-error rounded-2xl font-headline font-bold text-sm tracking-tight hover:bg-error hover:text-on-error transition-all">{{ 'dashboard.decommission' | translate }}</button>
+                      <button (click)="editProduct()" class="py-4 bg-tertiary/10 text-tertiary rounded-2xl font-headline font-bold text-sm tracking-tight hover:bg-tertiary hover:text-on-tertiary transition-all">{{ 'admin.editProduct' | translate }}</button>
+                      <button (click)="deleteProduct()" class="py-4 bg-error/10 text-error rounded-2xl font-headline font-bold text-sm tracking-tight hover:bg-error hover:text-on-error transition-all">{{ 'admin.deleteProduct' | translate }}</button>
                    </div>
                 }
               </div>
@@ -333,9 +375,33 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   private wishService = inject(WishService);
   
   product = signal<any>(null);
+  selectedVariant = signal<any>(null);
   loading = signal(true);
   mainImage = signal<string | null>(null);
   quantity = 1;
+  
+  // Variant Matrix Selection State
+  selectedAttributes = signal<Record<string, string>>({});
+  
+  attributeGroups = computed(() => {
+    const p = this.product();
+    if (!p || !p.productVariants) return [];
+    
+    const groups: Record<string, Set<string>> = {};
+    
+    p.productVariants.forEach((v: any) => {
+      if (!v.attributes) return;
+      v.attributes.forEach((a: any) => {
+        if (!groups[a.attributeName]) groups[a.attributeName] = new Set();
+        groups[a.attributeName].add(a.value);
+      });
+    });
+    
+    return Object.keys(groups).map(name => ({
+      name,
+      values: Array.from(groups[name])
+    }));
+  });
   
   isWishlisted = signal<boolean>(false);
   reviews = signal<Review[]>([]);
@@ -347,14 +413,14 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   reviewSuccess = signal(false);
   
   salePercentage = computed(() => {
-    const p = this.product();
-    if (!p || !p.oldPrice || !p.newPrice || p.oldPrice <= p.newPrice) return 0;
-    return Math.round(((p.oldPrice - p.newPrice) / p.oldPrice) * 100);
+    const v = this.selectedVariant();
+    if (!v || !v.oldPrice || !v.newPrice || v.oldPrice <= v.newPrice) return 0;
+    return Math.round(((v.oldPrice - v.newPrice) / v.oldPrice) * 100);
   });
   
   isOnSale = computed(() => {
-    const p = this.product();
-    return p ? p.oldPrice > p.newPrice : false;
+    const v = this.selectedVariant();
+    return v ? v.oldPrice > v.newPrice : false;
   });
   
   totalReviewCount = computed(() => Math.max(this.product()?.reviewCount || 0, this.reviews().length));
@@ -380,11 +446,7 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   });
   
   getReviewerPhotoUrl(photoPath: string | undefined): string {
-    if (!photoPath) return '';
-    const normalizedPath = photoPath.replace(/\\/g, '/');
-    const parts = normalizedPath.split('/');
-    const fileName = parts[parts.length - 1];
-    return `${environment.apiUrl}/Photo/UserPhoto/${fileName}`;
+    return this.photoService.getPhotoUrl(photoPath, 'user');
   }
   
   @ViewChild('carousel') carouselElement!: ElementRef;
@@ -429,12 +491,28 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     
     this.product.set(null); this.mainImage.set(null);
     this.productService.getById(id).subscribe({
-      next: (response: any) => {
-        const normalized = this.normalizeProduct(response);
-        this.product.set(normalized);
-        const photos = normalized.productPhotos;
-        if (photos && photos.length > 0) {
-          this.mainImage.set(this.photoService.getPhotoUrl(photos[0].fileName));
+      next: (result) => {
+        if (result.isSuccess && result.data) {
+          const p = this.normalizeProduct(result.data);
+          console.log('Normalized Product Data:', p);
+          this.product.set(p);
+          if (p.productPhotos && p.productPhotos.length > 0) {
+            const main = p.productPhotos.find((ph: any) => ph.isMain) || p.productPhotos[0];
+            this.mainImage.set(this.photoService.getPhotoUrl(main.url));
+          }
+          
+          // Select first variant by default if exists
+          if (p.productVariants && p.productVariants.length > 0) {
+            const firstVariant = p.productVariants[0];
+            this.selectedVariant.set(firstVariant);
+            
+            // Pre-select attributes of the first variant
+            const initialAttrs: Record<string, string> = {};
+            if (firstVariant.attributes) {
+              firstVariant.attributes.forEach((a: any) => initialAttrs[a.attributeName] = a.value);
+            }
+            this.selectedAttributes.set(initialAttrs);
+          }
         }
         this.loading.set(false);
         this.loadReviews(id);
@@ -447,8 +525,12 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   checkWishlistStatus(productId: string): void {
     const userId = this.tokenService.getUserId();
     if (!userId) return;
-    this.wishService.getWishes(userId).subscribe({
-      next: (wishes) => this.isWishlisted.set(wishes.some(w => w.productId === productId))
+    this.wishService.getWishes().subscribe({
+      next: (res) => {
+        if (res.isSuccess && res.data) {
+          this.isWishlisted.set(res.data.some(w => w.productId === productId));
+        }
+      }
     });
   }
   
@@ -464,7 +546,7 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     // --- OPTIMISTIC UPDATE END ---
 
     if (wasWishlisted) {
-      this.wishService.removeWish(userId, productId).subscribe({
+      this.wishService.removeWish(productId).subscribe({
         next: () => console.log('Optimistic UI (Detail): Successfully removed'),
         error: (err) => {
           console.error('Optimistic UI (Detail): Error removing, rolling back', err);
@@ -472,7 +554,7 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
         }
       });
     } else {
-      this.wishService.addWish({ userId, productId }).subscribe({
+      this.wishService.addWish({ productId }).subscribe({
         next: () => console.log('Optimistic UI (Detail): Successfully added'),
         error: (err) => {
           console.error('Optimistic UI (Detail): Error adding, rolling back', err);
@@ -494,16 +576,92 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   }
   
   setMainImage(photo: any): void {
-    this.mainImage.set(this.photoService.getPhotoUrl(photo.fileName));
+    this.mainImage.set(this.photoService.getPhotoUrl(photo.url));
   }
   
   increaseQuantity(): void {
-    const maxStock = this.product()?.shownQuantity || 99;
+    const maxStock = this.selectedVariant()?.stockQuantity ?? this.product()?.stockQuantity ?? 99;
     if (this.quantity < maxStock) this.quantity++;
   }
   
   decreaseQuantity(): void { if (this.quantity > 1) this.quantity--; }
   
+  selectAttributeValue(attrName: string, value: string): void {
+    const p = this.product();
+    if (!p || !p.productVariants) return;
+
+    const newSelection = { ...this.selectedAttributes() };
+    newSelection[attrName] = value;
+    
+    // 1. Try to find an exact match for the new selection
+    let match = p.productVariants.find((v: any) => {
+      return Object.entries(newSelection).every(([name, val]) => {
+        return v.attributes.some((a: any) => a.attributeName === name && a.value === val);
+      });
+    });
+
+    // 2. If no exact match, find the first variant that has the NEWLY selected value
+    // and adopt its other attributes (Auto-Correction)
+    if (!match) {
+      match = p.productVariants.find((v: any) => {
+        return v.attributes.some((a: any) => a.attributeName === attrName && a.value === value);
+      });
+    }
+
+    if (match) {
+      this.selectVariant(match);
+    }
+  }
+
+  syncVariantFromAttributes(): void {
+    const p = this.product();
+    if (!p || !p.productVariants) return;
+    
+    const selection = this.selectedAttributes();
+    
+    // Find a variant that matches ALL selected attributes
+    const match = p.productVariants.find((v: any) => {
+      return Object.entries(selection).every(([name, value]) => {
+        return v.attributes.some((a: any) => a.attributeName === name && a.value === value);
+      });
+    });
+    
+    if (match) {
+      this.selectedVariant.set(match);
+      this.quantity = 1;
+    }
+  }
+
+  isOptionAvailable(attrName: string, value: string): boolean {
+    const p = this.product();
+    if (!p || !p.productVariants) return false;
+    
+    // To check if an option is available, we look if there's any variant 
+    // that has this value PLUS the other currently selected values.
+    const currentSelection = { ...this.selectedAttributes() };
+    currentSelection[attrName] = value;
+    
+    return p.productVariants.some((v: any) => {
+      return Object.entries(currentSelection).every(([name, val]) => {
+        // Only check attributes that exist in this variant
+        const attr = v.attributes.find((a: any) => a.attributeName === name);
+        return attr ? attr.value === val : true; 
+      });
+    });
+  }
+
+  selectVariant(variant: any): void {
+    this.selectedVariant.set(variant);
+    this.quantity = 1;
+    
+    // Update selected attributes to match this variant
+    const newAttrs: Record<string, string> = {};
+    if (variant.attributes) {
+      variant.attributes.forEach((a: any) => newAttrs[a.attributeName] = a.value);
+    }
+    this.selectedAttributes.set(newAttrs);
+  }
+
   addToCart(): void {
     const userId = this.tokenService.getUserId();
     if (!userId) {
@@ -512,9 +670,28 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     }
 
     const currentProduct = this.product();
-    if (currentProduct) {
-      this.cartService.addToCart(currentProduct.id, this.quantity, currentProduct).subscribe();
+    const variant = this.selectedVariant();
+    
+    // Use variantId if it exists
+    const targetId = variant?.id || currentProduct?.id;
+    
+    if (targetId) {
+      // Create a combined object for optimistic UI display
+      const displayData = {
+        ...currentProduct,
+        newPrice: variant?.newPrice || currentProduct.newPrice,
+        variantDetails: this.formatSelectedVariantDetails()
+      };
+      
+      this.cartService.addToCart(targetId, this.quantity, displayData).subscribe();
     }
+  }
+
+  private formatSelectedVariantDetails(): string {
+    const attrs = this.selectedAttributes();
+    return Object.entries(attrs)
+      .map(([name, val]) => `${name}: ${val}`)
+      .join(', ');
   }
   
   isLoggedIn(): boolean { return this.authService.isLoggedIn(); }
@@ -559,12 +736,29 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
       oldPrice: p.oldPrice || p.OldPrice,
       categoryId: p.categoryId || p.CategoryId,
       categoryName: p.categoryName || p.CategoryName,
-      category: p.category || p.Category || p.categoryName || p.CategoryName,
       supplierId: p.supplierId || p.SupplierId,
       supplierName: p.supplierName || p.SupplierName || p.supplier || p.Supplier,
-      shownQuantity: p.shownQuantity || (p.shownQuantity === 0 ? 0 : (p.ShownQuantity || 0)),
+      shownQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.shownQuantity ?? p.ShownQuantity) ?? 0,
+      stockQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.shownQuantity ?? p.ShownQuantity) ?? 0,
       quantityInStock: p.quantityInStock || p.QuantityInStock,
-      productPhotos: p.productPhotos || p.ProductPhotos || p.productphotos || [],
+      productPhotos: (p.productPhotos || p.ProductPhotos || p.productphotos || []).map((ph: any) => ({
+        id: ph.id || ph.Id,
+        url: ph.url || ph.Url,
+        isMain: ph.isMain ?? ph.IsMain ?? false,
+        fileName: ph.fileName || ph.FileName || ph.url || ph.Url
+      })),
+      productVariants: (p.productVariants || p.ProductVariants || p.productvariants || []).map((v: any) => ({
+        id: v.id || v.Id,
+        sku: v.sku || v.Sku,
+        oldPrice: v.oldPrice || v.OldPrice,
+        newPrice: v.newPrice || v.NewPrice,
+        stockQuantity: (v.stockQuantity ?? v.StockQuantity ?? v.shownQuantity ?? v.ShownQuantity) ?? 0,
+        attributes: (v.attributes || v.Attributes || []).map((a: any) => ({
+          attributeId: a.attributeId || a.AttributeId,
+          attributeName: a.attributeName || a.AttributeName,
+          value: a.value || a.Value
+        }))
+      })),
       haveSale: p.haveSale ?? p.HaveSale ?? false,
       isFasting: p.isFasting ?? p.IsFasting ?? false,
       popularity: p.popularity || p.Popularity || 0,

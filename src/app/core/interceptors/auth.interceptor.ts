@@ -48,14 +48,14 @@ export const authInterceptor: HttpInterceptorFn = (
   // Check if this is an authentication-related endpoint (login, register, refresh, etc.)
   // These should not have the current token added to them and should not trigger a refresh 401 loop
   const authEndpoints = [
-    '/account/login',
-    '/account/register',
-    '/account/refresh',
-    '/account/confirmemail',
-    '/account/forgotpassword',
-    '/account/resetpassword',
-    '/account/resendemailconfirmation',
-    '/account/google-login'
+    '/auth/login',
+    '/auth/register',
+    '/auth/refresh',
+    '/auth/confirmemail',
+    '/auth/forgotpassword',
+    '/auth/resetpassword',
+    '/auth/resendemailconfirmation',
+    '/auth/google-login'
   ];
   
   const isAuthEndpoint = authEndpoints.some(path => req.url.toLowerCase().includes(path));
@@ -118,28 +118,10 @@ export const authInterceptor: HttpInterceptorFn = (
             // This indicates the session is fully compromised (both tokens invalid)
             if (refreshError.status === 401) {
               console.log('AuthInterceptor - Token refresh returned 401, logging out user');
-              
-              // Clear all authentication tokens
-              tokenService.clearTokens();
-              
-              // Clear session storage
-              sessionStorage.removeItem('accessToken');
-              sessionStorage.removeItem('refreshToken');
-              
-              // Clear any auth-related cookies
-              document.cookie.split(";").forEach((c) => {
-                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-              });
-              
-              // Clear cart data
-              cartService.clear();
-              
-              // Redirect to login page
-              const lang = localStorage.getItem('language') || 'en';
-              router.navigate([`/${lang}/auth/login`]);
+              authService.logout();
             } else {
               // Refresh returned other error (404, 400, etc.)
-              // Don't logout - just pass the error through
+              // Don't logout automatically - just pass the error through
               console.log('AuthInterceptor - Token refresh returned non-401 error, passing through');
             }
             

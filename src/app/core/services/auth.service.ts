@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, catchError, throwError, BehaviorSubject, shareReplay, finalize } from 'rxjs';
+import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { 
   LoginDto, 
@@ -25,6 +26,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private tokenService = inject(TokenService);
   private cartService = inject(CartService);
+  private router = inject(Router);
   
   private apiUrl = `${environment.apiUrl}/Auth`;
   
@@ -160,12 +162,17 @@ export class AuthService {
       );
   }
   
-  logout(): void {
+  logout(redirect: boolean = true): void {
     this.tokenService.clearTokens();
     this.isLoggedInSignal.set(false);
     this.currentUserSubject.next(null);
     // Clear cart data on logout to prevent stale data persistence
     this.cartService.clear();
+
+    if (redirect) {
+      const lang = localStorage.getItem('language') || 'en';
+      this.router.navigate([`/${lang}/auth/login`]);
+    }
   }
   
   loadCurrentUser(): void {

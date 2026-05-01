@@ -79,24 +79,24 @@ import { PhotoService } from '../../../core/services/photo.service';
                 </div>
 
                 <!-- Order Content -->
-                <div class="p-8 md:p-10">
-                   <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div class="p-4 md:p-10">
+                   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
                       <!-- Items -->
-                      <div class="space-y-6">
-                         <p class="text-[10px] font-black uppercase tracking-widest text-outline mb-4">{{ 'orders.unitInventory' | translate }}</p>
+                      <div class="space-y-4">
+                         <p class="text-[10px] font-black uppercase tracking-widest text-outline mb-2">{{ 'orders.unitInventory' | translate }}</p>
                         @for (item of order.orderItems; track item.id) {
-                          <div class="flex items-center gap-5 p-4 bg-surface rounded-3xl border border-outline-variant/5 group/item hover:bg-surface-container-low transition-colors duration-500">
-                             <div class="w-14 h-14 bg-white rounded-2xl overflow-hidden flex-shrink-0 border border-outline-variant/10 p-1">
+                          <div class="flex items-start gap-4 p-4 bg-surface rounded-3xl border border-outline-variant/5 group/item hover:bg-surface-container-low transition-colors duration-500">
+                             <div class="w-12 h-12 md:w-14 md:h-14 bg-white rounded-2xl overflow-hidden flex-shrink-0 border border-outline-variant/10 p-1">
                                 <img [src]="photoService.getPhotoUrlFromPath(getPhotoPath(item) || '')" 
                                      class="w-full h-full object-contain transition-transform group-hover/item:scale-110"
                                      (error)="handleImageError($event)">
                              </div>
                              <div class="flex-grow min-w-0">
-                                <h4 class="font-headline font-bold text-xs text-on-surface truncate pr-4">{{ item.productName }}</h4>
-                                <p class="text-[10px] font-black uppercase tracking-widest text-outline pt-1">QTY: {{ item.quantity }} × {{ item.unitPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
+                                <h4 class="font-headline font-bold text-[10px] md:text-xs text-on-surface break-words">{{ item.productName }}</h4>
+                                <p class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-outline pt-1">QTY: {{ item.quantity }} × {{ item.unitPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
                              </div>
-                             <div class="text-end">
-                                <p class="font-headline font-black text-sm text-on-surface">
+                             <div class="text-end flex-shrink-0">
+                                <p class="font-headline font-black text-xs md:text-sm text-on-surface">
                                    {{ (item.unitPrice * item.quantity) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
                                 </p>
                              </div>
@@ -105,32 +105,34 @@ import { PhotoService } from '../../../core/services/photo.service';
                       </div>
 
                       <!-- Logistics & Valuation -->
-                      <div class="space-y-10">
+                      <div class="space-y-8">
                          <div class="space-y-6">
                             <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'orderConfirm.shippingInfo' | translate }}</p>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                               <div class="space-y-2">
+                                  <span class="material-symbols-outlined text-outline-variant text-sm">person</span>
+                                  <p class="text-[10px] md:text-xs font-black text-on-surface">{{ order.buyerName }}</p>
+                                  <p class="text-[9px] md:text-[10px] text-outline opacity-60 break-words">{{ order.buyerEmail }}</p>
+                               </div>
                                <div class="space-y-2">
                                   <span class="material-symbols-outlined text-outline-variant text-sm">location_on</span>
-                                  <p class="text-xs font-black text-on-surface">{{ order.city }}</p>
-                                  <p class="text-[10px] text-outline opacity-60">{{ order.street }}</p>
+                                  <p class="text-[10px] md:text-xs font-black text-on-surface">{{ order.city }}</p>
+                                  <p class="text-[9px] md:text-[10px] text-outline opacity-60 break-words">{{ order.street }}</p>
                                </div>
                                <div class="space-y-2">
                                   <span class="material-symbols-outlined text-outline-variant text-sm">contact_phone</span>
-                                  <p class="text-xs font-black text-on-surface">{{ order.buyerPhone || 'Linked Identity' }}</p>
+                                  <p class="text-[10px] md:text-xs font-black text-on-surface">{{ order.buyerPhone || 'Linked Identity' }}</p>
                                   @if (order.comment) {
-                                    <p class="text-[10px] text-outline opacity-60 italic truncate">"{{ order.comment }}"</p>
+                                    <p class="text-[9px] md:text-[10px] text-outline opacity-60 italic break-words">"{{ order.comment }}"</p>
                                   }
-                               </div>
+                                </div>
                             </div>
                          </div>
 
-                         <div class="pt-8 border-t border-outline-variant/10">
-                            <div class="flex justify-between items-end">
-                               <div>
-                                  <p class="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2">Final Valuation</p>
-                                  <p class="font-headline text-4xl font-black text-on-surface tracking-tighter">{{ calculateOrderTotal(order) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
-                               </div>
-
+                         <div class="pt-8 border-t border-outline-variant/10 text-end">
+                            <div class="flex flex-col items-end">
+                               <p class="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2">{{ 'orders.finalValuation' | translate }}</p>
+                               <p class="font-headline text-3xl md:text-5xl font-black text-on-surface tracking-tighter leading-none">{{ calculateOrderTotal(order) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
                             </div>
                          </div>
                       </div>
@@ -139,7 +141,12 @@ import { PhotoService } from '../../../core/services/photo.service';
 
                 <!-- Footer Action -->
                 <!-- Order Status Footer -->
-                <div class="px-10 py-6 bg-surface-container border-t border-outline-variant/5">
+                <div class="px-10 py-6 bg-surface-container border-t border-outline-variant/5 flex justify-end">
+                   @if (order.status === 'Pending' || order.status === '1') {
+                      <button (click)="cancelOrder(order.id)" class="px-6 py-3 bg-error/10 text-error rounded-xl font-headline font-black text-[10px] uppercase tracking-widest border border-error/20 hover:bg-error hover:text-white transition-all">
+                         {{ 'orders.cancelAction' | translate }}
+                      </button>
+                   }
                 </div>
 
               </div>
@@ -166,47 +173,61 @@ export class OrderListComponent implements OnInit {
   
   loadOrders(): void {
     this.loading.set(true); this.error.set(null);
-    const api = this.tokenService.isSeller() ? this.orderService.getCurrentSellerOrders() : this.orderService.getOrdersByUserId();
+    const api = this.tokenService.isSeller() ? this.orderService.getCurrentSellerOrders() : this.orderService.getMyOrders();
     
     api.subscribe({
-      next: (response: any) => {
-        let data = Array.isArray(response) ? response : response.data || response.items || [];
-        this.orders.set(data);
+      next: (res) => {
+        if (res.isSuccess && res.data) {
+          this.orders.set(res.data);
+        } else {
+          this.error.set(res.error?.message || 'Failed to synchronize order records.');
+        }
         this.loading.set(false);
       },
       error: () => { this.error.set('Failed to synchronize order records.'); this.loading.set(false); }
     });
   }
   
+  cancelOrder(id: string): void {
+    if (!confirm('Are you sure you want to cancel this order?')) return;
+    this.orderService.cancelOrder(id).subscribe({
+      next: (res) => {
+        if (res.isSuccess) {
+          this.loadOrders();
+        } else {
+          alert(res.error?.message || 'Failed to cancel order.');
+        }
+      },
+      error: () => alert('Error cancelling order.')
+    });
+  }
+  
   calculateOrderTotal(order: Order): number {
-    return (order.orderItems || []).reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+    return order.totalAmount || (order.orderItems || []).reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
   }
   
   getStatusText(status: any): string {
     const s = status.toString();
     const map: { [key: string]: string } = { 
-      '0': 'orders.processing', 'Processing': 'orders.processing',
-      '1': 'orders.shipped', 'Shipped': 'orders.shipped',
-      '2': 'orders.delivered', 'Delivered': 'orders.delivered',
-      '3': 'orders.cancelled', 'Cancelled': 'orders.cancelled', 'Canceled': 'orders.cancelled'
+      '1': 'orders.pending', 'Pending': 'orders.pending',
+      '2': 'orders.shipped', 'Shipped': 'orders.shipped',
+      '3': 'orders.delivered', 'Delivered': 'orders.delivered',
+      '4': 'orders.cancelled', 'Cancelled': 'orders.cancelled', 'Canceled': 'orders.cancelled'
     };
-    return map[s] || 'orders.processing';
+    return map[s] || 'orders.pending';
   }
 
   getStatusClasses(status: any): string {
     const s = status.toString();
-    if (s === '0' || s === 'Processing') return 'bg-tertiary/10 text-tertiary border border-tertiary/20';
-    if (s === '1' || s === 'Shipped') return 'bg-primary/10 text-primary border border-primary/20';
-    if (s === '2' || s === 'Delivered') return 'bg-success/10 text-success border border-success/20';
-    if (s === '3' || s === 'Cancelled' || s === 'Canceled') return 'bg-error/10 text-error border border-error/20';
+    if (s === '1' || s === 'Pending' || s === '0') return 'bg-tertiary/10 text-tertiary border border-tertiary/20';
+    if (s === '2' || s === 'Shipped') return 'bg-primary/10 text-primary border border-primary/20';
+    if (s === '3' || s === 'Delivered') return 'bg-success/10 text-success border border-success/20';
+    if (s === '4' || s === 'Cancelled' || s === 'Canceled') return 'bg-error/10 text-error border border-error/20';
     return 'bg-surface-container-high text-outline border border-outline-variant/30';
   }
   
   getPhotoPath(item: any): string | null {
-    const path = item.productPhotoPath || item.ProductPhotoPath || item.productphotopath || item.photoPath || item.Photo || null;
-    if (!path) return null;
-    const lastSlash = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
-    return lastSlash >= 0 ? path.substring(lastSlash + 1) : path;
+    return item.productPhotoPath || item.ProductPhotoPath || item.productphotopath || item.photoPath || item.Photo || null;
   }
   
   handleImageError(event: Event): void {

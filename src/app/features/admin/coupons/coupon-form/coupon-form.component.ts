@@ -14,42 +14,42 @@ import { CreateCouponDto, UpdateCouponDto, DiscountType } from '../../../../core
   template: `
     <main class="min-h-screen bg-surface pb-24" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
       <!-- Hero Header -->
-      <header class="bg-surface-container-low pt-24 pb-16 border-b border-outline-variant/30 relative overflow-hidden">
+      <header class="bg-surface-container-low pt-24 pb-12 md:pb-16 border-b border-outline-variant/30 relative overflow-hidden">
         <div class="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(circle_at_top_right,_var(--primary)_0%,_transparent_70%)]"></div>
         <div class="max-w-3xl mx-auto px-6 relative z-10 text-center">
            <div class="w-16 h-16 bg-white/50 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl border border-white/20">
               <span class="material-symbols-outlined text-3xl text-primary">confirmation_number</span>
            </div>
-           <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-2">
+           <h1 class="font-headline text-4xl md:text-5xl font-black tracking-tighter text-on-surface mb-2">
              {{ (isEditMode() ? 'admin.coupons.editCoupon' : 'admin.coupons.addCoupon') | translate }}
            </h1>
-           <p class="font-body text-on-surface-variant opacity-70">Define the incentive parameters and operational scope.</p>
+           <p class="font-body text-sm md:text-base text-on-surface-variant opacity-70">{{ 'admin.coupons.formSubtitle' | translate }}</p>
         </div>
       </header>
 
-      <div class="max-w-3xl mx-auto px-6 py-16 animate-slide-up">
+      <div class="max-w-3xl mx-auto px-4 md:px-6 py-12 md:py-16 animate-slide-up">
         <div class="bg-surface-container-lowest rounded-[48px] shadow-2xl border border-outline-variant/10 overflow-hidden">
           @if (loading()) {
             <div class="flex flex-col items-center justify-center py-40 gap-4">
                <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-               <p class="font-headline font-black text-xs uppercase tracking-widest text-outline">Synchronizing Sequence</p>
+               <p class="font-headline font-black text-xs uppercase tracking-widest text-outline">{{ 'admin.coupons.syncSequence' | translate }}</p>
             </div>
           } @else {
-            <form [formGroup]="couponForm" (ngSubmit)="onSubmit()" class="p-10 md:p-16 space-y-10">
+            <form [formGroup]="couponForm" (ngSubmit)="onSubmit()" class="p-6 md:p-16 space-y-8 md:space-y-10">
               
               <!-- Core Metadata -->
               <section class="space-y-8">
                 <div class="flex items-center gap-4 border-b border-outline-variant/10 pb-4">
                   <span class="material-symbols-outlined text-primary">label</span>
-                  <h3 class="font-headline font-black text-xl text-on-surface">Incentive Metadata</h3>
+                  <h3 class="font-headline font-black text-xl text-on-surface">{{ 'admin.coupons.metadataSection' | translate }}</h3>
                 </div>
 
                 <div class="space-y-3">
-                  <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.coupons.name' | translate }} *</label>
-                  <input type="text" formControlName="couponName" [placeholder]="'admin.coupons.namePlaceholder' | translate"
+                  <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.coupons.code' | translate }} *</label>
+                  <input type="text" formControlName="couponCode" [placeholder]="'admin.coupons.codePlaceholder' | translate"
                          class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all">
-                  @if (couponForm.get('couponName')?.invalid && couponForm.get('couponName')?.touched) {
-                    <p class="text-[10px] font-black text-error uppercase px-2">Identifier Required</p>
+                  @if (couponForm.get('couponCode')?.invalid && couponForm.get('couponCode')?.touched) {
+                    <p class="text-[10px] font-black text-error uppercase px-2">{{ 'admin.coupons.codeRequired' | translate }}</p>
                   }
                 </div>
 
@@ -64,7 +64,7 @@ import { CreateCouponDto, UpdateCouponDto, DiscountType } from '../../../../core
               <section class="space-y-8">
                 <div class="flex items-center gap-4 border-b border-outline-variant/10 pb-4">
                   <span class="material-symbols-outlined text-primary">settings_input_component</span>
-                  <h3 class="font-headline font-black text-xl text-on-surface">Operational Parameters</h3>
+                  <h3 class="font-headline font-black text-xl text-on-surface">{{ 'admin.coupons.operationalSection' | translate }}</h3>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -95,20 +95,28 @@ import { CreateCouponDto, UpdateCouponDto, DiscountType } from '../../../../core
                   </div>
 
                   <div class="space-y-3 text-start">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.coupons.usageLimit' | translate }}</label>
+                    <input type="number" formControlName="usageLimit" min="1" [placeholder]="'admin.coupons.usageLimitPlaceholder' | translate"
+                           class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-headline font-black text-xl text-on-surface transition-all">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div class="space-y-3 text-start">
                     <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.coupons.expirationDate' | translate }}</label>
                     <input type="datetime-local" formControlName="expirationDate"
                            class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all">
                   </div>
-                </div>
 
-                <div class="py-4 px-6 bg-surface rounded-2xl border border-outline-variant/10">
-                   <label class="flex items-center gap-4 cursor-pointer group">
-                      <input type="checkbox" formControlName="isActive" class="hidden peer">
-                      <div class="w-6 h-6 border-2 border-outline-variant peer-checked:border-primary peer-checked:bg-primary transition-all rounded-lg flex items-center justify-center">
-                         <span class="material-symbols-outlined text-white text-sm scale-0 peer-checked:scale-100 transition-transform">check</span>
-                      </div>
-                      <span class="text-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors text-start">{{ 'admin.coupons.isActive' | translate }}</span>
-                   </label>
+                  <div class="py-4 px-6 bg-surface rounded-2xl border border-outline-variant/10 self-end">
+                    <label class="flex items-center gap-4 cursor-pointer group">
+                        <input type="checkbox" formControlName="isActive" class="hidden peer">
+                        <div class="w-6 h-6 border-2 border-outline-variant peer-checked:border-primary peer-checked:bg-primary transition-all rounded-lg flex items-center justify-center">
+                          <span class="material-symbols-outlined text-white text-sm scale-0 peer-checked:scale-100 transition-transform">check</span>
+                        </div>
+                        <span class="text-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors text-start">{{ 'admin.coupons.isActive' | translate }}</span>
+                    </label>
+                  </div>
                 </div>
               </section>
 
@@ -125,13 +133,13 @@ import { CreateCouponDto, UpdateCouponDto, DiscountType } from '../../../../core
                    @if (submitting()) {
                      <span class="w-6 h-6 border-4 border-surface/30 border-t-white rounded-full animate-spin"></span>
                    } @else {
-                     <span>Establish Incentive</span>
+                     <span>{{ 'admin.coupons.establishIncentive' | translate }}</span>
                      <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">local_activity</span>
                    }
                 </button>
                 <a [routerLink]="['/' + currentLang + '/admin/coupons']"
                    class="flex-1 py-6 bg-surface-container rounded-[32px] font-headline font-bold text-xs uppercase tracking-widest text-outline hover:bg-surface-container-high transition-all text-center flex items-center justify-center">
-                   Cancel
+                   {{ 'admin.coupons.cancel' | translate }}
                 </a>
               </footer>
             </form>
@@ -149,7 +157,7 @@ export class CouponFormComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  couponCode = signal<string | null>(null);
+  couponId = signal<string | null>(null);
   isEditMode = signal(false);
   loading = signal(false);
   submitting = signal(false);
@@ -158,11 +166,12 @@ export class CouponFormComponent implements OnInit {
   couponForm: FormGroup = this.fb.group({
     discountType: [1, [Validators.required]],
     discountValue: [0, [Validators.required, Validators.min(0)]],
-    couponName: ['', [Validators.required]],
+    couponCode: ['', [Validators.required]],
     couponDescription: [''],
     minAmount: [0, [Validators.required, Validators.min(0)]],
     expirationDate: [''],
-    isActive: [true]
+    isActive: [true],
+    usageLimit: [null]
   });
 
   get currentLang(): string { return this.languageService.currentLanguage(); }
@@ -170,7 +179,7 @@ export class CouponFormComponent implements OnInit {
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
-      if (id) { this.couponCode.set(id); this.isEditMode.set(true); this.loadCoupon(id); }
+      if (id) { this.couponId.set(id); this.isEditMode.set(true); this.loadCoupon(id); }
     });
 
     this.couponForm.get('discountType')?.valueChanges.subscribe(type => {
@@ -183,9 +192,18 @@ export class CouponFormComponent implements OnInit {
   loadCoupon(id: string) {
     this.loading.set(true);
     this.couponService.getById(id).subscribe({
-      next: (coupon) => {
-        let formattedDate = coupon.expirationDate ? coupon.expirationDate.toString().slice(0, 16) : '';
-        this.couponForm.patchValue({ ...coupon, expirationDate: formattedDate });
+      next: (res) => {
+        if (res.isSuccess && res.data) {
+          const coupon = res.data;
+          let formattedDate = coupon.expirationDate ? coupon.expirationDate.toString().slice(0, 16) : '';
+          this.couponForm.patchValue({ 
+            ...coupon, 
+            couponCode: coupon.code,
+            expirationDate: formattedDate 
+          });
+        } else {
+          this.error.set(res.error?.message || 'Load failed.');
+        }
         this.loading.set(false);
       },
       error: (err) => { this.error.set(err.error?.message || 'Load failed.'); this.loading.set(false); }
@@ -197,9 +215,16 @@ export class CouponFormComponent implements OnInit {
     this.submitting.set(true); this.error.set(null);
     const submissionData = { ...this.couponForm.value, expirationDate: this.couponForm.value.expirationDate || null };
 
-    const api = this.isEditMode() && this.couponCode() ? this.couponService.update(this.couponCode()!, submissionData) : this.couponService.create(submissionData);
+    const api = this.isEditMode() && this.couponId() ? this.couponService.update(this.couponId()!, submissionData) : this.couponService.create(submissionData);
     api.subscribe({
-      next: () => this.router.navigate(['/', this.currentLang, 'admin', 'coupons']),
+      next: (res) => {
+        if (res.isSuccess) {
+          this.router.navigate(['/', this.currentLang, 'admin', 'coupons']);
+        } else {
+          this.submitting.set(false);
+          this.error.set(res.error?.message || 'Submission failed.');
+        }
+      },
       error: (err) => { this.submitting.set(false); this.error.set(err.error?.message || 'Submission failed.'); }
     });
   }

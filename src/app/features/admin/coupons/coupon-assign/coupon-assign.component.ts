@@ -15,47 +15,47 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
   template: `
     <main class="min-h-screen bg-surface pb-24" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
       <!-- Hero Header -->
-      <header class="bg-surface-container-low pt-24 pb-16 border-b border-outline-variant/30 relative overflow-hidden">
+      <header class="bg-surface-container-low pt-24 pb-12 md:pb-16 border-b border-outline-variant/30 relative overflow-hidden">
         <div class="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(circle_at_top_right,_var(--tertiary)_0%,_transparent_70%)]"></div>
         <div class="max-w-4xl mx-auto px-6 relative z-10 text-center">
            <div class="w-16 h-16 bg-white/50 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl border border-white/20">
               <span class="material-symbols-outlined text-3xl text-tertiary">link</span>
            </div>
-           <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-2">
+           <h1 class="font-headline text-4xl md:text-5xl font-black tracking-tighter text-on-surface mb-2">
              {{ 'admin.coupons.assignTitle' | translate }}
            </h1>
-           <p class="font-body text-on-surface-variant opacity-70">Associate specific products with this coupon.</p>
+           <p class="font-body text-sm md:text-base text-on-surface-variant opacity-70">{{ 'admin.coupons.assignSubtitle' | translate }}</p>
         </div>
       </header>
 
-      <div class="max-w-4xl mx-auto px-6 py-16 animate-slide-up">
+      <div class="max-w-4xl mx-auto px-4 md:px-6 py-12 md:py-16 animate-slide-up">
         <div class="bg-surface-container-lowest rounded-[48px] shadow-2xl border border-outline-variant/10 overflow-hidden">
           @if (loading()) {
             <div class="flex flex-col items-center justify-center py-40 gap-4">
                <div class="w-12 h-12 border-4 border-tertiary/20 border-t-tertiary rounded-full animate-spin"></div>
-               <p class="font-headline font-black text-xs uppercase tracking-widest text-outline">Mapping Associations</p>
+               <p class="font-headline font-black text-xs uppercase tracking-widest text-outline">{{ 'admin.coupons.mappingAssociations' | translate }}</p>
             </div>
           } @else {
-            <div class="p-10 md:p-16 space-y-10 focus-within:bg-surface-container-lowest transition-colors">
+            <div class="p-6 md:p-16 space-y-8 md:space-y-10 focus-within:bg-surface-container-lowest transition-colors">
               
-              <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 p-8 bg-tertiary/5 rounded-[32px] border border-tertiary/10">
-                <div>
-                   <h3 class="font-headline font-black text-xl text-on-surface">Entity Selection</h3>
-                   <p class="text-xs font-black uppercase tracking-widest text-outline opacity-60">Select products eligible for this coupon.</p>
+              <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 p-6 md:p-8 bg-tertiary/5 rounded-[32px] border border-tertiary/10">
+                <div class="text-start">
+                   <h3 class="font-headline font-black text-xl text-on-surface">{{ 'admin.coupons.entitySelection' | translate }}</h3>
+                   <p class="text-[10px] font-black uppercase tracking-widest text-outline opacity-60">{{ 'admin.coupons.entitySelectionSubtitle' | translate }}</p>
                 </div>
-                <div class="px-6 py-3 bg-tertiary text-on-tertiary rounded-2xl font-headline font-black text-xs uppercase tracking-widest shadow-lg shadow-tertiary/20">
-                  {{ selectedCount() }} Bound Entities
+                <div class="px-6 py-3 bg-tertiary text-on-tertiary rounded-2xl font-headline font-black text-[10px] uppercase tracking-widest shadow-lg shadow-tertiary/20">
+                  {{ selectedCount() }} {{ 'admin.coupons.boundEntities' | translate }}
                 </div>
               </div>
 
               <!-- Search Detail -->
               <div class="relative group">
                 <input type="text" [value]="searchQuery()" (input)="onSearchChange($event)" 
-                       placeholder="Scan Inventory Log (Term)..." 
-                       class="w-full bg-surface-container-low px-8 py-6 rounded-[32px] border-2 border-transparent focus:border-tertiary/20 outline-none font-headline font-black text-lg text-on-surface transition-all placeholder:font-body placeholder:text-sm placeholder:tracking-widest placeholder:uppercase placeholder:opacity-30">
-                <div class="absolute right-8 top-1/2 -translate-y-1/2 flex items-center gap-4">
+                       [placeholder]="'admin.coupons.scanInventory' | translate" 
+                       class="w-full bg-surface-container-low px-6 md:px-8 py-5 md:py-6 rounded-[24px] md:rounded-[32px] border-2 border-transparent focus:border-tertiary/20 outline-none font-headline font-black text-base md:text-lg text-on-surface transition-all placeholder:font-body placeholder:text-[10px] placeholder:tracking-widest placeholder:uppercase placeholder:opacity-30">
+                <div class="absolute right-6 md:right-8 top-1/2 -translate-y-1/2 flex items-center gap-4">
                   @if (searching()) {
-                    <div class="w-6 h-6 border-4 border-tertiary/20 border-t-tertiary rounded-full animate-spin"></div>
+                    <div class="w-5 h-5 border-4 border-tertiary/20 border-t-tertiary rounded-full animate-spin"></div>
                   } @else {
                     <span class="material-symbols-outlined text-outline-variant group-focus-within:text-tertiary transition-colors">search</span>
                   }
@@ -63,33 +63,33 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
               </div>
 
               <!-- Scrollable List -->
-              <div class="bg-surface-container-low rounded-[40px] border border-outline-variant/10 overflow-hidden">
-                <div class="max-h-[500px] overflow-y-auto p-4 space-y-3 custom-scrollbar">
+              <div class="bg-surface-container-low rounded-[32px] md:rounded-[40px] border border-outline-variant/10 overflow-hidden">
+                <div class="max-h-[400px] md:max-h-[500px] overflow-y-auto p-3 md:p-4 space-y-2 md:space-y-3 custom-scrollbar">
                   @if (products().length === 0 && !searching()) {
                     <div class="py-20 text-center flex flex-col items-center gap-4 opacity-40">
                        <span class="material-symbols-outlined text-5xl">inventory_2</span>
-                       <p class="font-headline font-black text-xs uppercase tracking-[0.2em] text-outline">No matches discovered in current sector.</p>
+                       <p class="font-headline font-black text-[10px] uppercase tracking-[0.2em] text-outline">{{ 'admin.coupons.noMatches' | translate }}</p>
                     </div>
                   }
 
                   @for (product of products(); track (product.id || product.Id)) {
-                    <label class="flex items-center gap-6 p-6 rounded-[24px] bg-surface-container-lowest border border-transparent hover:border-tertiary/20 group cursor-pointer transition-all duration-300">
+                    <label class="flex items-center gap-4 md:gap-6 p-4 md:p-6 rounded-[20px] md:rounded-[24px] bg-surface-container-lowest border border-transparent hover:border-tertiary/20 group cursor-pointer transition-all duration-300">
                        <div class="relative flex items-center justify-center">
                           <input type="checkbox" 
                                  [checked]="isAssigned(product.id || product.Id)" 
                                  (change)="toggleAssignment(product.id || product.Id)"
                                  class="hidden peer">
-                          <div class="w-8 h-8 rounded-xl border-2 border-outline-variant peer-checked:border-tertiary peer-checked:bg-tertiary transition-all flex items-center justify-center shadow-sm">
-                             <span class="material-symbols-outlined text-white text-sm scale-0 peer-checked:scale-100 transition-transform">check</span>
+                          <div class="w-6 h-6 md:w-8 md:h-8 rounded-lg md:rounded-xl border-2 border-outline-variant peer-checked:border-tertiary peer-checked:bg-tertiary transition-all flex items-center justify-center shadow-sm">
+                             <span class="material-symbols-outlined text-white text-xs md:text-sm scale-0 peer-checked:scale-100 transition-transform">check</span>
                           </div>
                        </div>
                        
-                       <div class="flex-grow min-w-0">
-                          <h4 class="font-headline font-black text-sm text-on-surface truncate group-hover:text-tertiary transition-colors">{{ product.name || product.Name }}</h4>
-                          <div class="flex items-center gap-4 pt-1">
-                             <span class="text-[10px] font-black uppercase tracking-widest text-outline">VALUATION: {{ (product.newPrice || product.NewPrice || product.price) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
-                             <div class="w-1 h-1 rounded-full bg-outline-variant opacity-30"></div>
-                             <span class="text-[10px] font-black uppercase tracking-widest text-outline opacity-60">ID: {{ (product.id || product.Id).slice(0,8) }}</span>
+                       <div class="flex-grow min-w-0 text-start">
+                          <h4 class="font-headline font-black text-xs md:text-sm text-on-surface truncate group-hover:text-tertiary transition-colors">{{ product.name || product.Name }}</h4>
+                          <div class="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1">
+                             <span class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-outline">VALUATION: {{ (product.newPrice || product.NewPrice || product.price) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+                             <div class="hidden md:block w-1 h-1 rounded-full bg-outline-variant opacity-30"></div>
+                             <span class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-outline opacity-60">ID: {{ (product.id || product.Id).slice(0,8) }}</span>
                           </div>
                        </div>
                     </label>
@@ -101,7 +101,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
               @if (error()) {
                 <div class="p-6 bg-error/10 text-error rounded-3xl border border-error/20 flex items-start gap-4 animate-fade-in">
                    <span class="material-symbols-outlined">report</span>
-                   <p class="text-xs font-black uppercase tracking-widest">{{ error() }}</p>
+                   <p class="text-xs font-black uppercase tracking-widest text-start">{{ error() }}</p>
                 </div>
               }
               @if (success()) {
@@ -112,19 +112,19 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
               }
 
               <!-- Master Controls -->
-              <footer class="pt-10 border-t border-outline-variant/10 flex flex-col sm:flex-row gap-6">
+              <footer class="pt-8 md:pt-10 border-t border-outline-variant/10 flex flex-col sm:flex-row gap-4 md:gap-6">
                 <button type="button" (click)="saveAssignments()" [disabled]="submitting()"
-                        class="flex-[2] py-6 bg-on-surface text-surface rounded-[32px] font-headline font-bold text-lg shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 group">
+                        class="order-1 sm:order-2 flex-[2] py-5 md:py-6 bg-on-surface text-surface rounded-[24px] md:rounded-[32px] font-headline font-bold text-base md:text-lg shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 group">
                    @if (submitting()) {
                      <span class="w-6 h-6 border-4 border-surface/30 border-t-white rounded-full animate-spin"></span>
                    } @else {
-                     <span>Authorize Associations</span>
+                     <span>{{ 'admin.coupons.authorizeAssociations' | translate }}</span>
                      <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">rocket_launch</span>
                    }
                 </button>
                 <a [routerLink]="['/' + currentLang + '/admin/coupons']"
-                   class="flex-1 py-6 bg-surface-container rounded-[32px] font-headline font-bold text-xs uppercase tracking-widest text-outline hover:bg-surface-container-high transition-all text-center flex items-center justify-center">
-                   Cancel
+                   class="order-2 sm:order-1 flex-1 py-5 md:py-6 bg-surface-container rounded-[24px] md:rounded-[32px] font-headline font-bold text-[10px] uppercase tracking-widest text-outline hover:bg-surface-container-high transition-all text-center flex items-center justify-center">
+                   {{ 'admin.coupons.cancel' | translate }}
                 </a>
               </footer>
             </div>
@@ -147,7 +147,7 @@ export class CouponAssignComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  couponCode = signal<string | null>(null);
+  couponId = signal<string | null>(null);
   products = signal<any[]>([]);
   originallyAssignedIds = signal<Set<string>>(new Set());
   currentlyAssignedIds = signal<Set<string>>(new Set());
@@ -166,27 +166,42 @@ export class CouponAssignComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
-      if (id) { this.couponCode.set(id); this.loadInitialData(id); }
+      if (id) { this.couponId.set(id); this.loadInitialData(id); }
       else { this.error.set("Invalid coupon identifier."); this.loading.set(false); }
     });
 
     this.searchSubscription = this.searchSubject.pipe(
       debounceTime(400), distinctUntilChanged(),
-      switchMap(term => { this.searching.set(true); return this.productService.getFiltered({ searchTerm: term, pageSize: 50 }); })
+      switchMap(term => { this.searching.set(true); return this.productService.getAll({ searchTerm: term, pageSize: 50 }); })
     ).subscribe({
-      next: (res) => { this.handleProductResponse(res); this.searching.set(false); },
+      next: (res) => { 
+        if (res.isSuccess && res.data) {
+          this.handleProductResponse(res.data.items); 
+        }
+        this.searching.set(false); 
+      },
       error: () => this.searching.set(false)
     });
   }
 
   ngOnDestroy() { this.searchSubscription?.unsubscribe(); }
 
-  loadInitialData(couponCode: string) {
+  loadInitialData(couponId: string) {
     this.loading.set(true);
-    forkJoin({ productsRaw: this.productService.getFiltered({ pageSize: 50 }), assignedIds: this.couponService.getAssignedProducts(couponCode) }).subscribe({
+    forkJoin({ 
+      productsRes: this.productService.getAll({ pageSize: 50 }), 
+      assignedRes: this.couponService.getAssignedProducts(couponId) 
+    }).subscribe({
       next: (resp) => {
-        this.handleProductResponse(resp.productsRaw);
-        const assignedIds = (resp.assignedIds || []).map((p: any) => p.id || p.Id || p);
+        if (resp.productsRes.isSuccess && resp.productsRes.data) {
+          this.handleProductResponse(resp.productsRes.data.items);
+        }
+        
+        let assignedIds: string[] = [];
+        if (resp.assignedRes.isSuccess && resp.assignedRes.data) {
+          assignedIds = resp.assignedRes.data.map((p: any) => p.id || p.Id || p);
+        }
+        
         const assignedSet = new Set<string>(assignedIds);
         this.originallyAssignedIds.set(new Set(assignedSet));
         this.currentlyAssignedIds.set(assignedSet);
@@ -215,7 +230,7 @@ export class CouponAssignComponent implements OnInit, OnDestroy {
   }
 
   saveAssignments() {
-    if (!this.couponCode()) return;
+    if (!this.couponId()) return;
     this.submitting.set(true); this.error.set(null); this.success.set(null);
     const original = this.originallyAssignedIds();
     const current = this.currentlyAssignedIds();
@@ -227,13 +242,22 @@ export class CouponAssignComponent implements OnInit, OnDestroy {
     }
 
     const requests: any = {};
-    if (toAdd.length > 0) requests.add = this.couponService.assignProducts(this.couponCode()!, toAdd);
-    if (toRemove.length > 0) requests.remove = this.couponService.removeProducts(this.couponCode()!, toRemove);
+    if (toAdd.length > 0) requests.add = this.couponService.assignProducts(this.couponId()!, toAdd);
+    if (toRemove.length > 0) requests.remove = this.couponService.removeProducts(this.couponId()!, toRemove);
 
     forkJoin(requests).subscribe({
-      next: () => {
-        this.submitting.set(false); this.success.set('Associations saved.');
-        setTimeout(() => this.router.navigate(['/', this.currentLang, 'admin', 'coupons']), 1000);
+      next: (res: any) => {
+        const addSuccess = !res.add || res.add.isSuccess;
+        const removeSuccess = !res.remove || res.remove.isSuccess;
+        
+        if (addSuccess && removeSuccess) {
+          this.submitting.set(false); this.success.set('Associations saved.');
+          setTimeout(() => this.router.navigate(['/', this.currentLang, 'admin', 'coupons']), 1000);
+        } else {
+          this.submitting.set(false);
+          const errorMsg = res.add?.error?.message || res.remove?.error?.message || 'Authorization update failure.';
+          this.error.set(errorMsg);
+        }
       },
       error: () => { this.submitting.set(false); this.error.set('Authorization update failure.'); }
     });

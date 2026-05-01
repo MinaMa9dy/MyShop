@@ -6,15 +6,18 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { ProductService } from '../../../core/services/product.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { Category } from '../../../core/models/category.model';
+import { AddProductDto, UpdateProductDto } from '../../../core/models/product.model';
 import { TokenService } from '../../../core/services/token.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { PhotoService } from '../../../core/services/photo.service';
 import { TranslateService } from '@ngx-translate/core';
 
+import { ProductVariantManagementComponent } from '../product-variants/product-variants.component';
+
 @Component({
   selector: 'app-add-product',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, TranslatePipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, TranslatePipe, ProductVariantManagementComponent],
   template: `
     <main class="min-h-screen bg-surface pb-24" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
       <!-- Hero Header -->
@@ -39,6 +42,22 @@ import { TranslateService } from '@ngx-translate/core';
       </header>
 
       <div class="max-w-4xl mx-auto px-6 py-16 animate-slide-up">
+        <!-- Tab Navigation (Edit Mode Only) -->
+        @if (isEditMode()) {
+          <div class="flex gap-4 mb-12">
+            <button (click)="activeTab.set('basic')" 
+                    [class]="activeTab() === 'basic' ? 'bg-primary text-on-primary' : 'bg-surface-container text-outline'"
+                    class="px-8 py-3 rounded-2xl font-headline font-bold text-xs uppercase tracking-widest transition-all">
+              {{ 'admin.addProduct.entityIdentity' | translate }}
+            </button>
+            <button (click)="activeTab.set('variants')" 
+                    [class]="activeTab() === 'variants' ? 'bg-primary text-on-primary' : 'bg-surface-container text-outline'"
+                    class="px-8 py-3 rounded-2xl font-headline font-bold text-xs uppercase tracking-widest transition-all">
+              {{ 'admin.variants.title' | translate }}
+            </button>
+          </div>
+        }
+
         @if (loadingCategories()) {
           <div class="flex flex-col items-center justify-center py-40 gap-4">
             <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
@@ -46,7 +65,9 @@ import { TranslateService } from '@ngx-translate/core';
           </div>
         } @else {
           <div class="bg-surface-container-lowest rounded-[48px] shadow-2xl border border-outline-variant/10 overflow-hidden">
-            <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="p-10 md:p-16 space-y-12">
+            
+            @if (activeTab() === 'basic') {
+              <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="p-10 md:p-16 space-y-12">
               
               <!-- Basic Identity Section -->
               <section class="space-y-8">
@@ -89,17 +110,7 @@ import { TranslateService } from '@ngx-translate/core';
                   <h3 class="font-headline font-black text-xl text-on-surface">{{ 'admin.addProduct.valuationQuantum' | translate }}</h3>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
-                  <div class="space-y-3">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addProduct.price' | translate }} (EGP)</label>
-                    <input type="number" formControlName="price"
-                           class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-headline font-black text-lg text-primary transition-all">
-                  </div>
-                  <div class="space-y-3">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addProduct.stock' | translate }}</label>
-                    <input type="number" formControlName="stock"
-                           class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-headline font-black text-lg text-on-surface transition-all">
-                  </div>
+                <div class="grid grid-cols-1 gap-8">
                   <div class="space-y-3">
                     <label class="text-[10px] font-black uppercase tracking-widest text-outline px-2">{{ 'admin.addProduct.popularity' | translate }}</label>
                     <input type="number" formControlName="popularity"
@@ -217,6 +228,11 @@ import { TranslateService } from '@ngx-translate/core';
               </footer>
 
             </form>
+            } @else {
+              <div class="p-10 md:p-16">
+                <app-product-variant-management [productId]="productId()!" [variants]="originalProduct()?.productVariants || []"></app-product-variant-management>
+              </div>
+            }
           </div>
         }
       </div>
@@ -238,8 +254,6 @@ export class AddProductComponent implements OnInit {
   productForm: FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(50)]],
     description: ['', [Validators.maxLength(1000)]],
-    price: [0, [Validators.required, Validators.min(0)]],
-    stock: [0, [Validators.required, Validators.min(0)]],
     categoryId: ['', [Validators.required]],
     isFasting: [false],
     haveSale: [false],
@@ -257,6 +271,7 @@ export class AddProductComponent implements OnInit {
   
   selectedFiles = signal<{file: File, name: string, preview: string}[]>([]);
   photoIdsToDelete = signal<string[]>([]);
+  activeTab = signal<'basic' | 'variants'>('basic');
   
   get currentLang(): string { return this.languageService.currentLanguage(); }
   allPhotos = computed(() => this.originalProduct()?.productPhotos || this.originalProduct()?.productphotos || []);
@@ -270,27 +285,80 @@ export class AddProductComponent implements OnInit {
 
   loadProductForEdit(id: string): void {
     this.productService.getById(id).subscribe({
-      next: (product: any) => {
+      next: (result: any) => {
+        const productData = result.data || result;
+        const normalized = this.normalizeProduct(productData);
+        
         const userId = this.tokenService.getUserId();
-        if ((product.supplierId !== userId && product.SupplierId !== userId) && !this.tokenService.hasRole('Admin')) {
+        if ((normalized.supplierId !== userId) && !this.tokenService.hasRole('Admin')) {
            this.error.set(this.translate.instant('admin.addProduct.authFailure')); return;
         }
-        this.originalProduct.set(product);
+        
+        this.originalProduct.set(normalized);
         this.productForm.patchValue({
-          name: product.name, description: product.description,
-          price: product.newPrice || product.price, stock: product.stockQuantity || product.shownQuantity,
-          categoryId: product.categoryId, isFasting: product.isFasting || product.isfasting,
-          haveSale: product.haveSale, popularity: product.popularity
+          name: normalized.name, 
+          description: normalized.description,
+          price: normalized.newPrice || normalized.price, 
+          stock: normalized.stockQuantity || normalized.shownQuantity,
+          categoryId: normalized.categoryId, 
+          isFasting: normalized.isFasting,
+          haveSale: normalized.haveSale, 
+          popularity: normalized.popularity
         });
       },
       error: () => this.error.set(this.translate.instant('admin.addProduct.syncEntityDataFailed'))
     });
   }
 
+  private normalizeProduct(p: any): any {
+    if (!p) return p;
+    return {
+      ...p,
+      id: p.id || p.Id,
+      name: p.name || p.Name,
+      description: p.description || p.Description,
+      categoryId: p.categoryId || p.CategoryId,
+      supplierId: p.supplierId || p.SupplierId,
+      stockQuantity: p.stockQuantity || p.StockQuantity || 0,
+      productPhotos: (p.productPhotos || p.ProductPhotos || p.productphotos || []).map((ph: any) => ({
+        id: ph.id || ph.Id,
+        url: ph.url || ph.Url,
+        isMain: ph.isMain ?? ph.IsMain ?? false,
+        fileName: ph.fileName || ph.FileName || ph.url || ph.Url
+      })),
+      productVariants: (p.productVariants || p.ProductVariants || p.productvariants || []).map((v: any) => ({
+        id: v.id || v.Id,
+        sku: v.sku || v.Sku,
+        oldPrice: v.oldPrice || v.OldPrice,
+        newPrice: v.newPrice || v.NewPrice,
+        stockQuantity: v.stockQuantity || v.StockQuantity,
+        attributes: (v.attributes || v.Attributes || []).map((a: any) => ({
+          attributeId: a.attributeId || a.AttributeId,
+          attributeName: a.attributeName || a.AttributeName,
+          value: a.value || a.Value
+        }))
+      })),
+      haveSale: p.haveSale ?? p.HaveSale ?? false,
+      isFasting: p.isFasting ?? p.IsFasting ?? false,
+      popularity: p.popularity || p.Popularity || 0
+    };
+  }
+
   loadCategories(): void {
     this.categoryService.getAll().subscribe({
-      next: (cats: any) => { this.categories.set(Array.isArray(cats) ? cats : []); this.loadingCategories.set(false); },
-      error: () => { this.error.set(this.translate.instant('admin.addProduct.taxonomySyncFailed')); this.loadingCategories.set(false); }
+      next: (response: any) => {
+        const rawCats = Array.isArray(response) ? response : (response.data || []);
+        const normalized = rawCats.map((c: any) => ({
+          id: c.id || c.Id,
+          name: c.name || c.Name
+        }));
+        this.categories.set(normalized);
+        this.loadingCategories.set(false);
+      },
+      error: () => { 
+        this.error.set(this.translate.instant('admin.addProduct.taxonomySyncFailed')); 
+        this.loadingCategories.set(false); 
+      }
     });
   }
 
@@ -320,18 +388,38 @@ export class AddProductComponent implements OnInit {
     if (this.productForm.invalid) return;
     this.submitting.set(true); this.error.set(null); this.success.set(null);
     
-    const productData: any = { 
-       ...this.productForm.value, isfasting: this.productForm.value.isFasting, 
-       supplierId: this.tokenService.getUserId() || '' 
+    const formVal = this.productForm.value;
+    const productData: AddProductDto = { 
+       name: formVal.name,
+       description: formVal.description,
+       categoryId: formVal.categoryId,
+       supplierId: this.tokenService.getUserId() || '',
+       isFasting: formVal.isFasting,
+       haveSale: formVal.haveSale,
+       popularity: formVal.popularity || 0,
+       photos: this.selectedFiles().map(f => f.file)
     };
-    if (this.selectedFiles().length > 0) productData.Photos = this.selectedFiles().map(f => f.file);
 
-    this.productService.addProduct(productData).subscribe({
-      next: () => {
-        this.submitting.set(false); this.success.set(this.translate.instant('admin.addProduct.entityIntegrated'));
-        this.selectedFiles.set([]); this.productForm.reset();
+    // Note: The backend AddProductDto might need to include price/stock 
+    // or I need to pass them as extra properties if using any.
+    // Given the previous backend check, I'll add them.
+    (productData as any).price = formVal.price;
+    (productData as any).stock = formVal.stock;
+    (productData as any).haveSale = formVal.haveSale;
+
+    this.productService.create(productData).subscribe({
+      next: (result) => {
+        if (result.isSuccess && result.data) {
+          this.submitting.set(false); 
+          this.success.set(this.translate.instant('admin.addProduct.entityIntegrated'));
+          this.selectedFiles.set([]); 
+          this.productForm.reset({ popularity: 0, isFasting: false, haveSale: false });
+        } else {
+          this.submitting.set(false);
+          this.error.set(result.error?.message || 'Error');
+        }
       },
-      error: (err) => { this.submitting.set(false); this.error.set(err.error?.message || this.translate.instant('admin.addProduct.integrationError')); }
+      error: (err) => { this.submitting.set(false); this.error.set('Server error'); }
     });
   }
 
@@ -340,23 +428,34 @@ export class AddProductComponent implements OnInit {
     if (this.productForm.invalid) return;
     this.submitting.set(true); this.error.set(null); this.success.set(null);
 
-    const productData: any = {
-      id: this.productId()!, name: this.productForm.value.name, description: this.productForm.value.description,
-      haveSale: this.productForm.value.haveSale, popularity: this.productForm.value.popularity || 0,
-      oldPrice: this.originalProduct()?.oldPrice || this.productForm.value.price, newPrice: this.productForm.value.price,
-      stockQuantity: this.productForm.value.stock, shownQuantity: this.productForm.value.stock,
-      supplierId: this.tokenService.getUserId() || '', categoryId: this.productForm.value.categoryId
+    const formVal = this.productForm.value;
+    const productData: UpdateProductDto = {
+      id: this.productId()!, 
+      name: formVal.name, 
+      description: formVal.description,
+      categoryId: formVal.categoryId,
+      supplierId: this.tokenService.getUserId() || '',
+      isFasting: formVal.isFasting,
+      haveSale: formVal.haveSale,
+      popularity: formVal.popularity || 0,
+      photos: this.selectedFiles().map(f => f.file),
+      photoIdsToDelete: this.photoIdsToDelete()
     };
+    
 
-    if (this.selectedFiles().length > 0) productData.Photos = this.selectedFiles().map(f => f.file);
-    if (this.photoIdsToDelete().length > 0) productData.PhotoIdsToDelete = this.photoIdsToDelete();
 
-    this.productService.update(productData).subscribe({
-      next: () => {
-        this.submitting.set(false); this.success.set(this.translate.instant('admin.addProduct.modificationVerified'));
-        setTimeout(() => this.router.navigate([`/${this.currentLang}/products/${this.productId()}`]), 1000);
+    this.productService.update(productData.id, productData).subscribe({
+      next: (result) => {
+        if (result.isSuccess) {
+          this.submitting.set(false); 
+          this.success.set(this.translate.instant('admin.addProduct.modificationVerified'));
+          setTimeout(() => this.router.navigate([`/${this.currentLang}/products/${this.productId()}`]), 1000);
+        } else {
+          this.submitting.set(false);
+          this.error.set(result.error?.message || 'Error');
+        }
       },
-      error: () => { this.submitting.set(false); this.error.set(this.translate.instant('admin.addProduct.entityUpdateFailed')); }
+      error: () => { this.submitting.set(false); this.error.set('Server error'); }
     });
   }
 }

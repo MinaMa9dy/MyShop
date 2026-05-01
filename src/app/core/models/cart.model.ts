@@ -1,22 +1,24 @@
 export interface CartItem {
-  productId: string;
-  customerId: string;
+  productVariantId: string;
+  productName: string;
+  sku: string;
+  price: number;
+  photoUrl: string;
   quantity: number;
-  // Additional properties for display
-  productName?: string;
+
+  // UI helpers (may be derived or legacy support)
   productPrice?: number;
   productImage?: string;
+  variantDetails?: string;
 }
 
-export interface AddToCartDto {
-  productId: string;
-  customerId: string;
+export interface CartItemCreateDto {
+  productVariantId: string;
   quantity: number;
 }
 
-export interface UpdateCartDto {
-  productId: string;
-  customerId: string;
+export interface CartItemUpdateDto {
+  productVariantId: string;
   quantity: number;
 }
 

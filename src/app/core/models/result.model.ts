@@ -10,6 +10,14 @@ export interface ResultError {
   code: string;
 }
 
+export interface PageResult<T> {
+  items: T[];
+  totalItems: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 // Helper to check if response is a Result pattern
 export function isResultPattern(response: any): response is Result {
   return response && typeof response.isSuccess === 'boolean';

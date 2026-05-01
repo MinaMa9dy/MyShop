@@ -2,32 +2,11 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CartItem } from '../models/cart.model';
+import { CartItem, CartItemCreateDto, CartItemUpdateDto } from '../models/cart.model';
 import { TokenService } from './token.service';
-import { CouponResponse, Coupon } from '../models/coupon.models';
-
-// Helper function to get main photo URL from product
-function getProductMainPhoto(product: any): string {
-  if (!product) return 'assets/images/placeholder.svg';
-  
-  // Support 'data.productDto', 'productDto', or the product object itself
-  const p = product.data?.productDto || product.data?.product || product.productDto || product.product || product;
-  
-  // Handle various casing for productPhotos
-  const photos = p.productPhotos || p.ProductPhotos || p.productphotos;
-  
-  if (!photos || !Array.isArray(photos) || photos.length === 0) {
-    return 'assets/images/placeholder.svg';
-  }
-  
-  const mainPhoto = photos.find((photo: any) => photo.isMain || photo.IsMain) || photos[0];
-  
-  if (mainPhoto && (mainPhoto.fileName || mainPhoto.FileName)) {
-    const fileName = mainPhoto.fileName || mainPhoto.FileName;
-    return `${environment.apiUrl}/Photo/ProductPhoto/${fileName}`;
-  }
-  return 'assets/images/placeholder.svg';
-}
+import { CouponResponseDto, Coupon } from '../models/coupon.model';
+import { CouponService } from './coupon.service';
+import { PhotoService } from './photo.service';
 
 @Injectable({
   providedIn: 'root'
@@ -35,13 +14,49 @@ function getProductMainPhoto(product: any): string {
 export class CartService {
   private http = inject(HttpClient);
   private tokenService = inject(TokenService);
+  private couponService = inject(CouponService);
+  private photoService = inject(PhotoService);
   private cartsUrl = `${environment.apiUrl}/Carts`;
   private cartItemsUrl = `${environment.apiUrl}/CartItems`;
+
+  // Helper function to get main photo URL from product/variant (Legacy support)
+  private getProductMainPhoto(data: any): string {
+    if (!data) return 'assets/images/placeholder.svg';
+    
+    // If it's already a PhotoUrl from the new DTO
+    if (data.photoUrl) return this.photoService.getPhotoUrl(data.photoUrl);
+
+    // Legacy mapping logic
+    const variant = data.productVariant || data.productDto || data.ProductDto;
+    const product = variant?.product || variant?.productDto || data.product || data;
+    
+    const photos = product.productPhotos || product.ProductPhotos || product.productphotos;
+    
+    if (!photos || !Array.isArray(photos) || photos.length === 0) {
+      return 'assets/images/placeholder.svg';
+    }
+    
+    const mainPhoto = photos.find((photo: any) => photo.isMain || photo.IsMain) || photos[0];
+    const fileName = mainPhoto.url || mainPhoto.Url || mainPhoto.fileName || mainPhoto.FileName;
+    
+    return this.photoService.getPhotoUrl(fileName);
+  }
+
+  // Helper to format variant attributes into a display string
+  private formatVariantDetails(variant: any): string {
+    if (!variant) return '';
+    const attrs = variant.attributes || variant.Attributes || [];
+    if (attrs.length === 0) return '';
+    
+    return attrs
+      .map((a: any) => `${a.attributeName || a.AttributeName}: ${a.value || a.Value}`)
+      .join(', ');
+  }
 
   // State using Signals
   private _items = signal<CartItem[]>([]);
   private _isOpen = signal<boolean>(false);
-  private _appliedCoupon = signal<CouponResponse | null>(null);
+  private _appliedCoupon = signal<CouponResponseDto | null>(null);
 
   // Public signals
   items = this._items.asReadonly();
@@ -50,11 +65,8 @@ export class CartService {
 
   // Computed values
   totalItems = computed(() => this._items().reduce((sum, item) => sum + item.quantity, 0));
-  
-  // Original Total (before any discounts)
   originalTotalPrice = computed(() => this._items().reduce((sum, item) => sum + (item.productPrice || 0) * item.quantity, 0));
 
-  // The Final Deal Price Calculation
   totalPrice = computed(() => {
     const couponData = this._appliedCoupon();
     if (couponData && couponData.finalSubtotal !== undefined) {
@@ -63,325 +75,220 @@ export class CartService {
     return this.originalTotalPrice();
   });
 
+  // Saving calculations
+  discountAmount = computed(() => {
+    const couponData = this._appliedCoupon();
+    return couponData ? (couponData.totalDiscount || 0) : 0;
+  });
+
+  // State Management
+  toggle(): void { this._isOpen.update(v => !v); }
+  open(): void { this._isOpen.set(true); }
+  close(): void { this._isOpen.set(false); }
+
+  setCoupon(couponResult: CouponResponseDto): void {
+    this._appliedCoupon.set(couponResult);
+    this.saveToStorage();
+  }
+
+  clearCoupon(): void {
+    this._appliedCoupon.set(null);
+    this.saveToStorage();
+  }
+
+  private getCurrentUserId(): string {
+    return this.tokenService.getUserId() || '';
+  }
+
+  private findItem(variantId: string): CartItem | undefined {
+    return this._items().find(i => i.productVariantId === variantId);
+  }
+
+  // --- AUTO VALIDATION ---
+
+  private validationTimeout: any;
+
+  private autoValidateCoupon(): void {
+    const currentCoupon = this._appliedCoupon();
+    if (!currentCoupon) return;
+
+    // Debounce to prevent rapid multiple calls (e.g. clicking + quantity button fast)
+    if (this.validationTimeout) clearTimeout(this.validationTimeout);
+    
+    this.validationTimeout = setTimeout(() => {
+      this.couponService.validate(currentCoupon.coupon.code).subscribe({
+        next: (res) => {
+          if (res.isSuccess && res.data) {
+            this.setCoupon(res.data);
+          } else {
+            // Coupon no longer valid for this cart state
+            this.clearCoupon();
+          }
+        },
+        error: () => this.clearCoupon()
+      });
+    }, 500); // 500ms debounce
+  }
+
+  // --- CORE CART OPERATIONS ---
+
+  addToCart(variantId: string, quantity: number = 1, productData?: any): Observable<any> {
+    const customerId = this.getCurrentUserId();
+    const previousItems = [...this._items()];
+    
+    // Optimistic Update
+    const existingItem = this.findItem(variantId);
+    if (existingItem) {
+      this._items.update(items =>
+        items.map(i => i.productVariantId === variantId ? { ...i, quantity: i.quantity + quantity } : i)
+      );
+    } else {
+      this._items.update(items => [...items, {
+        productVariantId: variantId,
+        customerId: customerId,
+        quantity: quantity,
+        productName: productData?.name || productData?.productName || '...',
+        sku: productData?.sku || productData?.SKU || '',
+        price: productData?.newPrice || productData?.price || 0,
+        photoUrl: productData?.photoUrl || '',
+        productPrice: productData?.newPrice || productData?.price || 0,
+        productImage: this.getProductMainPhoto(productData),
+        variantDetails: productData?.variantDetails || this.formatVariantDetails(productData)
+      }]);
+    }
+    
+    this.saveToStorage();
+    this.open();
+    this.autoValidateCoupon();
+
+    const dto: CartItemCreateDto = { productVariantId: variantId, quantity };
+
+    return this.http.post<any>(this.cartItemsUrl, dto).pipe(
+      tap((response: any) => {
+        const item = response?.data || response;
+        if (item) {
+          this.syncItemWithResponse(variantId, item);
+          // Real sync might have changed subtotals, re-validate
+          this.autoValidateCoupon();
+        }
+      }),
+      catchError(error => {
+        this._items.set(previousItems);
+        this.saveToStorage();
+        this.autoValidateCoupon();
+        return throwError(() => error);
+      })
+    );
+  }
+
+  updateQuantity(variantId: string, quantity: number): Observable<any> {
+    const previousItems = [...this._items()];
+    
+    this._items.update(items =>
+      items.map(i => i.productVariantId === variantId ? { ...i, quantity } : i)
+    );
+    this.saveToStorage();
+    this.autoValidateCoupon();
+
+    const dto: CartItemUpdateDto = { productVariantId: variantId, quantity };
+
+    return this.http.put<any>(this.cartItemsUrl, dto).pipe(
+      tap((response: any) => {
+        const item = response?.data || response;
+        if (item) {
+          this.syncItemWithResponse(variantId, item);
+          this.autoValidateCoupon();
+        }
+      }),
+      catchError(error => {
+        this._items.set(previousItems);
+        this.saveToStorage();
+        this.autoValidateCoupon();
+        return throwError(() => error);
+      })
+    );
+  }
+
+  removeFromCart(variantId: string): Observable<any> {
+    const previousItems = [...this._items()];
+    this._items.update(items => items.filter(i => i.productVariantId !== variantId));
+    this.saveToStorage();
+    this.autoValidateCoupon();
+
+    return this.http.delete<any>(`${this.cartItemsUrl}?cartItemId=${variantId}`).pipe(
+      catchError(error => {
+        this._items.set(previousItems);
+        this.saveToStorage();
+        this.autoValidateCoupon();
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getCartItems(): Observable<any> {
+    const customerId = this.getCurrentUserId();
+    if (!customerId) {
+      this._items.set([]);
+      return throwError(() => new Error('No user logged in'));
+    }
+    
+    return this.http.get<any>(`${this.cartsUrl}/my-cart`).pipe(
+      tap((response: any) => {
+        const rawItems = response?.data?.items || response?.items || response || [];
+        const items = rawItems.map((item: any) => this.mapResponseToCartItem(item));
+        this._items.set(items);
+        this.saveToStorage();
+        this.autoValidateCoupon();
+      })
+    );
+  }
+
+  private mapResponseToCartItem(item: any): CartItem {
+    return {
+      productVariantId: item.productVariantId,
+      productName: item.productName || 'Unknown Product',
+      sku: item.sku || '',
+      price: item.price || 0,
+      photoUrl: item.photoUrl || '',
+      quantity: item.quantity,
+      
+      // Aliases for compatibility with existing UI components
+      productPrice: item.price,
+      productImage: item.photoUrl ? this.photoService.getPhotoUrl(item.photoUrl) : 'assets/images/placeholder.svg',
+      variantDetails: item.sku ? `SKU: ${item.sku}` : ''
+    };
+  }
+
+  private syncItemWithResponse(variantId: string, item: any): void {
+    const mapped = this.mapResponseToCartItem(item);
+    this._items.update(items =>
+      items.map(i => i.productVariantId === variantId ? { ...i, ...mapped } : i)
+    );
+    this.saveToStorage();
+  }
+
   getItemDiscountedValue(item: CartItem): number {
     const original = item.productPrice || 0;
     const couponData = this._appliedCoupon();
     
     if (!couponData || !couponData.itemPrices) return original;
 
-    // Use pre-calculated value from backend mapping
-    // We handle both Guid and string keys since JSON serialization might vary
-    const price = couponData.itemPrices[item.productId];
+    // Use variant ID for price lookup if it exists in the coupon response
+    const price = couponData.itemPrices[item.productVariantId];
     return price !== undefined ? price : original;
   }
 
-  // Exported so UI knows exactly how much was saved
-  discountAmount = computed(() => {
-    const couponData = this._appliedCoupon();
-    return couponData ? (couponData.totalDiscount || 0) : 0;
-  });
+  // --- STORAGE & SYNC ---
 
-  // Toggle cart sidebar
-  toggle(): void {
-    this._isOpen.update(v => !v);
-  }
-
-  open(): void {
-    this._isOpen.set(true);
-  }
-
-  close(): void {
-    this._isOpen.set(false);
-  }
-
-  // Set the active coupon (called from Component after API validation)
-  setCoupon(couponResult: CouponResponse): void {
-    this._appliedCoupon.set(couponResult);
-    this.saveToStorage();
-  }
-
-  // Remove the active coupon
-  clearCoupon(): void {
-    this._appliedCoupon.set(null);
-    this.saveToStorage();
-  }
-
-  // Get userId from JWT token
-  private getCurrentUserId(): string {
-    const userId = this.tokenService.getUserId();
-    return userId || '';
-  }
-
-  // Check if item exists in cart
-  private findItem(productId: string): CartItem | undefined {
-    return this._items().find(i => i.productId === productId);
-  }
-
-  // Add item to cart - uses POST api/Cart
-  addToCart(productId: string, quantity: number = 1, productData?: any): Observable<any> {
-    const customerId = this.getCurrentUserId();
-    const previousItems = [...this._items()];
-    
-    // Perform optimistic update
-    const existingItem = this.findItem(productId);
-    if (existingItem) {
-      this._items.update(items =>
-        items.map(i =>
-          i.productId === productId
-            ? { ...i, quantity: i.quantity + quantity }
-            : i
-        )
-      );
-    } else if (productData) {
-      this._items.update(items => [...items, {
-        productId: productId,
-        customerId: customerId,
-        quantity: quantity,
-        productName: productData.name || productData.productName || '',
-        productPrice: productData.newPrice || productData.price || productData.productPrice || 0,
-        productImage: productData.productImage || (productData.productPhotos ? getProductMainPhoto(productData) : '')
-      }]);
-    } else {
-      this._items.update(items => [...items, {
-        productId: productId,
-        customerId: customerId,
-        quantity: quantity,
-        productName: '...',
-        productPrice: 0
-      }]);
-    }
-    
-    this.saveToStorage();
-    this.open();
-
-    const dto = {
-      productId: productId,
-      quantity: quantity
-    };
-
-    return this.http.post<any>(this.cartItemsUrl, dto).pipe(
-      tap((response: any) => {
-        const item = response?.data || response;
-        if (item) {
-          this._items.update(items =>
-            items.map(i =>
-              i.productId === productId
-                ? {
-                    ...i,
-                    productName: item.productDto?.name || item.productDto?.Name || item.product?.name || item.product?.Name || item.productName || i.productName,
-                    productPrice: item.productDto?.newPrice || item.productDto?.NewPrice || item.product?.newPrice || item.product?.NewPrice || item.productDto?.price || item.productDto?.Price || item.product?.price || item.product?.Price || item.productPrice || i.productPrice,
-                    productImage: getProductMainPhoto(item) || i.productImage,
-                    quantity: item.quantity || item.Quantity || i.quantity
-                  }
-                : i
-            )
-          );
-          this.saveToStorage();
-        }
-      }),
-      catchError(error => {
-        console.error('Optimistic Add to Cart failed, rolling back:', error);
-        this._items.set(previousItems);
-        this.saveToStorage();
-        return throwError(() => error);
-      })
-    );
-  }
-
-  // Update item quantity - uses PUT api/CartItems
-  updateQuantity(productId: string, quantity: number): Observable<any> {
-    const customerId = this.getCurrentUserId();
-    const previousItems = [...this._items()];
-    
-    // Perform optimistic update
-    this._items.update(items =>
-      items.map(i =>
-        i.productId === productId
-          ? { ...i, quantity: quantity }
-          : i
-      )
-    );
-    this.saveToStorage();
-
-    const dto = {
-      productId: productId,
-      quantity: quantity
-    };
-
-    return this.http.put<any>(this.cartItemsUrl, dto).pipe(
-      tap((response: any) => {
-        const item = response?.data || response;
-        if (item) {
-          this._items.update(items =>
-            items.map(i =>
-              i.productId === productId
-                ? {
-                    ...i,
-                    productName: item.productDto?.name || item.productDto?.Name || item.product?.name || item.product?.Name || item.productName || i.productName,
-                    productPrice: item.productDto?.newPrice || item.productDto?.NewPrice || item.product?.newPrice || item.product?.NewPrice || item.productDto?.price || item.productDto?.Price || item.product?.price || item.product?.Price || item.productPrice || i.productPrice,
-                    productImage: getProductMainPhoto(item) || i.productImage,
-                    quantity: item.quantity || item.Quantity || i.quantity
-                  }
-                : i
-            )
-          );
-          this.saveToStorage();
-        }
-      }),
-      catchError(error => {
-        console.error('Update Quantity failed, rolling back:', error);
-        this._items.set(previousItems);
-        this.saveToStorage();
-        return throwError(() => error);
-      })
-    );
-  }
-
-  // Remove item from cart - uses DELETE api/Cart (body instead of query params)
-  removeFromCart(productId: string, quantityToRemove: number = 0): Observable<any> {
-    const customerId = this.getCurrentUserId();
-    const previousItems = [...this._items()];
-    
-    // Perform optimistic update
-    const existingItem = this.findItem(productId);
-    if (existingItem) {
-      if (quantityToRemove === 0 || existingItem.quantity <= quantityToRemove) {
-        this._items.update(items => items.filter(item => item.productId !== productId));
-      } else {
-        this._items.update(items =>
-          items.map(item =>
-            item.productId === productId
-              ? { ...item, quantity: item.quantity - quantityToRemove }
-              : item
-          )
-        );
-      }
-      this.saveToStorage();
-    }
-
-    return this.http.delete<any>(`${this.cartItemsUrl}?cartItemId=${productId}`).pipe(
-      tap((response: any) => {
-        const isSuccess = response?.isSuccess || response?.data !== undefined;
-        if (isSuccess && response?.data) {
-          const updatedItem = response.data;
-          if (!updatedItem.quantity || updatedItem.quantity === 0) {
-            this._items.update(items => items.filter(item => item.productId !== productId));
-          } else {
-            this._items.update(items =>
-              items.map(item =>
-                item.productId === productId
-                  ? { ...item, quantity: updatedItem.quantity }
-                  : item
-              )
-            );
-          }
-          this.saveToStorage();
-        }
-      }),
-      catchError(error => {
-        console.error('Optimistic Remove from Cart failed, rolling back:', error);
-        this._items.set(previousItems);
-        this.saveToStorage();
-        return throwError(() => error);
-      })
-    );
-  }
-
-  // Remove item (local only, for immediate UI update)
-  removeItem(productId: string): void {
-    this._items.update(items => items.filter(item => item.productId !== productId));
-    this.saveToStorage();
-  }
-
-  // Get cart items for user - uses GET api/Cart
-  getCartItems(): Observable<any> {
-    const customerId = this.getCurrentUserId();
-    if (!customerId) {
-      console.log('CartService - No customerId found, returning empty cart.');
-      this._items.set([]);
-      return throwError(() => new Error('No customer ID'));
-    }
-    
-    console.log('Getting cart - GET api/Carts/my-cart');
-    
-    return this.http.get<any>(`${this.cartsUrl}/my-cart`).pipe(
-      tap((response: any) => {
-        console.log('Get cart response:', response);
-        
-        let rawItems: any[] = [];
-        
-        if (response?.data) {
-          if (response.data.items && Array.isArray(response.data.items)) {
-            rawItems = response.data.items;
-          } else {
-            rawItems = Array.isArray(response.data) ? response.data : [response.data];
-          }
-        } else if (response?.items && Array.isArray(response.items)) {
-          rawItems = response.items;
-        } else if (Array.isArray(response)) {
-          rawItems = response;
-        }
-        
-        console.log('Raw cart items:', rawItems);
-        
-        const items = rawItems.map(item => {
-          const product = item.productDto || item.product;
-          return {
-            productId: item.productId,
-            customerId: item.customerId || customerId,
-            quantity: item.quantity,
-            productName: product?.name || item.productName || '',
-            productPrice: product?.newPrice || product?.price || item.productPrice || 0,
-            productImage: getProductMainPhoto(product) || item.productImage || ''
-          };
-        });
-        
-        console.log('Mapped cart items with prices and photos:', items);
-        this._items.set(items);
-        this.saveToStorage();
-      }),
-      catchError((error: any) => {
-        // Handle 401 Unauthorized gracefully for unauthenticated users
-        if (error.status === 401) {
-          console.log('CartService - 401 received, user is not authenticated. Keeping local cart data.');
-          // Don't update cart items - keep the local cart data
-          // This allows unauthenticated users to keep their local cart
-          return throwError(() => error);
-        }
-        
-        // For other errors, log and re-throw
-        console.error('CartService - Error fetching cart:', error);
-        return throwError(() => error);
-      })
-    );
-  }
-
-  // Clear cart (local only)
-  clear(): void {
-    const customerId = this.getCurrentUserId();
-    if (customerId) {
-      this.http.delete(`${this.cartsUrl}/clear`).subscribe();
-    }
-    this._items.set([]);
-    localStorage.removeItem('cart');
-  }
-
-  // Sync cart from local storage (for guest users)
   loadFromStorage(): void {
     const saved = localStorage.getItem('cart');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Supports legacy carts array directly, or new object with {items, coupon}
-        if (Array.isArray(parsed)) {
-          console.log('Loaded cart items from storage:', parsed);
-          this._items.set(parsed);
-        } else if (parsed && parsed.items) {
-          console.log('Loaded cart data from storage:', parsed);
-          this._items.set(parsed.items);
-          if (parsed.coupon) {
-            this._appliedCoupon.set(parsed.coupon);
-          }
+        this._items.set(parsed.items || []);
+        if (parsed.coupon) {
+          this._appliedCoupon.set(parsed.coupon);
+          this.autoValidateCoupon();
         }
       } catch (e) {
         console.error('Error loading cart from storage:', e);
@@ -389,12 +296,18 @@ export class CartService {
     }
   }
 
-  // Save cart to local storage
   private saveToStorage(): void {
-    const dataToSave = {
+    localStorage.setItem('cart', JSON.stringify({
       items: this._items(),
       coupon: this._appliedCoupon()
-    };
-    localStorage.setItem('cart', JSON.stringify(dataToSave));
+    }));
+  }
+
+  clear(): void {
+    if (this.getCurrentUserId()) {
+      this.http.delete(`${this.cartsUrl}/clear`).subscribe();
+    }
+    this._items.set([]);
+    localStorage.removeItem('cart');
   }
 }

@@ -37,8 +37,30 @@ export class PhotoService {
     return this.http.post<any>(this.apiUrl, formData);
   }
 
-  getPhotoUrl(fileName: string): string {
-    return `${this.apiUrl}/ProductPhoto/${fileName}`;
+  private getServerRoot(): string {
+    return environment.apiUrl.replace('/api', '');
+  }
+
+  getPhotoUrl(fileName: string | undefined, type: 'product' | 'user' = 'product'): string {
+    if (!fileName) {
+      return type === 'user' ? 'assets/images/user-placeholder.svg' : 'assets/images/placeholder.svg';
+    }
+    if (fileName.startsWith('http')) return fileName;
+    
+    // Normalize path: replace backslashes and remove leading slash
+    let normalizedPath = fileName.replace(/\\/g, '/').replace(/^\//, '');
+    
+    let root = this.getServerRoot();
+    
+    // Deduplicate 'Photos/' if it appears both in the root (via environment/server config) 
+    // and in the returned fileName/path from the backend
+    if (root.endsWith('/Photos') && normalizedPath.startsWith('Photos/')) {
+      normalizedPath = normalizedPath.substring(7);
+    }
+    
+    // Safety check: if for some reason we still have double slashes or double Photos
+    const fullUrl = `${root}/${normalizedPath}`;
+    return fullUrl.replace(/\/Photos\/Photos\//g, '/Photos/');
   }
 
   getPhotosByProductId(productId: string): Observable<ProductPhoto[]> {
@@ -53,30 +75,11 @@ export class PhotoService {
   getMainPhotoUrl(photos: ProductPhoto[]): string | null {
     if (!photos || photos.length === 0) return null;
     const mainPhoto = photos.find(p => p.isMain);
-    return mainPhoto ? this.getPhotoUrl(mainPhoto.fileName) : this.getPhotoUrl(photos[0].fileName);
+    return mainPhoto ? this.getPhotoUrl(mainPhoto.url || (mainPhoto as any).fileName) : this.getPhotoUrl(photos[0].url || (photos[0] as any).fileName);
   }
 
   // Helper method to get photo URL from a path (handles full URLs or partial paths)
   getPhotoUrlFromPath(path: string): string {
-    if (!path) {
-      return 'assets/images/placeholder.svg';
-    }
-    
-    // Backend returns full URLs like http://192.168.1.8:4100/api/Photo/filename.jpg
-    // If it's already a full URL (contains http), return as-is
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-      return path;
-    }
-    
-    // Extract just the filename from the path
-    let fileName = path;
-    
-    // Find the last slash and get everything after it
-    const lastSlashIndex = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
-    if (lastSlashIndex >= 0) {
-      fileName = path.substring(lastSlashIndex + 1);
-    }
-    
-    return `${this.apiUrl}/ProductPhoto/${fileName}`;
+    return this.getPhotoUrl(path);
   }
 }

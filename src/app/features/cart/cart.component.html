@@ -11,7 +11,7 @@
       <div class="item-image" (click)="goToProductDetail(item)">
         <img [src]="item.productImage || placeholder" [alt]="item.productName" 
              (error)="handleImageError($event, item)">
-        <div class="discount-badge" *ngIf="isItemDiscounted(item.productId)">
+        <div class="discount-badge" *ngIf="isItemDiscounted(item.productVariantId)">
           {{ 'CART.DISCOUNT_APPLIED' | translate }}
         </div>
       </div>
@@ -19,8 +19,8 @@
         <h3>{{ item.productName }}</h3>
         <div class="price-row">
           <span class="item-price">
-            <del *ngIf="isItemDiscounted(item.productId) && item.productPrice && getItemDiscountedPrice(item) < item.productPrice">{{ item.productPrice | currency:'EGP':'symbol':'1.2-2':'en-EG' }}</del>
-            <span class="discounted" [class.new]="isItemDiscounted(item.productId)">{{ getItemDiscountedPrice(item) | currency:'EGP':'symbol':'1.2-2':'en-EG' }}</span>
+            <del *ngIf="isItemDiscounted(item.productVariantId) && item.productPrice && getItemDiscountedPrice(item) < item.productPrice">{{ item.productPrice | currency:'EGP':'symbol':'1.2-2':'en-EG' }}</del>
+            <span class="discounted" [class.new]="isItemDiscounted(item.productVariantId)">{{ getItemDiscountedPrice(item) | currency:'EGP':'symbol':'1.2-2':'en-EG' }}</span>
           </span>
           <span class="item-subtotal">{{ getItemSubtotal(item) | currency:'EGP':'symbol':'1.2-2':'en-EG' }}</span>
         </div>

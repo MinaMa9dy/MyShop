@@ -1,7 +1,7 @@
 export interface OrderItem {
   id: string;
   orderId: string;
-  productId: string;
+  productVariantId: string;
   quantity: number;
   unitPrice: number;
   productName: string;

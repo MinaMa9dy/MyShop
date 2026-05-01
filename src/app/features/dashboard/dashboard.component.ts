@@ -9,8 +9,11 @@ import { WishService } from '../../core/services/wish.service';
 import { TokenService } from '../../core/services/token.service';
 import { LanguageService } from '../../core/services/language.service';
 import { OrderService } from '../../core/services/order.service';
+import { PhotoService } from '../../core/services/photo.service';
 import { User, UserProfile } from '../../core/models/auth.model';
 import { ProfileService } from '../../core/services/profile.service';
+import { Result } from '../../core/models/result.model';
+import { Order } from '../../core/models/order.model';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -58,7 +61,7 @@ import { environment } from '../../../environments/environment';
                      }
                   </div>
                   <h1 class="font-headline text-5xl md:text-7xl font-black tracking-tighter text-white mb-2 leading-none">{{ userFullName() }}</h1>
-                  <p class="font-body text-white/60 tracking-widest uppercase text-xs">{{ userEmail() }}</p>
+                  <p class="font-body text-white/60 tracking-widest uppercase text-xs break-all">{{ userEmail() }}</p>
                </div>
             </div>
 
@@ -106,15 +109,15 @@ import { environment } from '../../../environments/environment';
            </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div class="grid grid-cols-1 gap-12">
            <!-- Main Content Area -->
-           <div class="lg:col-span-2 space-y-12">
+           <div class="space-y-12">
               <div class="bg-surface-container-lowest rounded-[48px] shadow-2xl border border-outline-variant/10 overflow-hidden">
                  <!-- Tab Navigation -->
-                 <nav class="flex border-b border-outline-variant/10">
+                 <nav class="flex overflow-x-auto scrollbar-hide border-b border-outline-variant/10">
                     <button *ngFor="let tab of tabs" 
                             (click)="activeTab.set(tab.id)"
-                            [class]="'flex-1 py-8 font-headline font-black text-xs uppercase tracking-widest transition-all ' + (activeTab() === tab.id ? 'text-primary bg-primary/5 border-b-4 border-primary' : 'text-outline hover:text-on-surface')">
+                            [class]="'flex-shrink-0 px-8 py-8 font-headline font-black text-xs uppercase tracking-widest transition-all ' + (activeTab() === tab.id ? 'text-primary bg-primary/5 border-b-4 border-primary' : 'text-outline hover:text-on-surface')">
                        {{ tab.label | translate }}
                     </button>
                  </nav>
@@ -145,9 +148,14 @@ import { environment } from '../../../environments/environment';
                                 <span class="material-symbols-outlined text-4xl text-secondary mb-4 group-hover:scale-125 transition-transform">create_new_folder</span>
                                 <span class="block font-headline font-black text-[10px] uppercase tracking-widest text-secondary text-start">{{ 'admin.addCategory.button' | translate }}</span>
                              </a>
+                             <a [routerLink]="'/' + currentLang() + '/dashboard/my-coupons'" 
+                                class="p-8 rounded-[32px] bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-all text-center group">
+                                <span class="material-symbols-outlined text-4xl text-primary mb-4 group-hover:scale-125 transition-transform">confirmation_number</span>
+                                <span class="block font-headline font-black text-[10px] uppercase tracking-widest text-primary">{{ 'dashboard.myCoupons' | translate }}</span>
+                             </a>
                              <a *ngIf="isAdmin()" [routerLink]="['/' + currentLang() + '/admin/coupons']" 
                                 class="p-8 rounded-[32px] bg-tertiary/5 border border-tertiary/20 hover:bg-tertiary/10 transition-all text-center group">
-                                <span class="material-symbols-outlined text-4xl text-tertiary mb-4 group-hover:scale-125 transition-transform">confirmation_number</span>
+                                <span class="material-symbols-outlined text-4xl text-tertiary mb-4 group-hover:scale-125 transition-transform">settings_input_component</span>
                                 <span class="block font-headline font-black text-[10px] uppercase tracking-widest text-tertiary text-start">{{ 'admin.coupons.title' | translate }}</span>
                              </a>
                           </div>
@@ -158,12 +166,12 @@ import { environment } from '../../../environments/environment';
                      <div *ngIf="activeTab() === 'account'" class="space-y-12 animate-fade-in text-start">
                         <h3 class="font-headline font-black text-2xl text-on-surface tracking-tighter">{{ 'dashboard.identityParameters' | translate }}</h3>
                        <div class="space-y-4">
-                          <div *ngFor="let field of profileFields" class="flex justify-between items-center py-6 border-b border-outline-variant/10">
-                             <div class="space-y-1">
+                          <div *ngFor="let field of profileFields" class="relative py-6 border-b border-outline-variant/10">
+                             <div class="space-y-1 pr-8">
                                 <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ field.label | translate }}</p>
-                                <p class="font-headline font-black text-on-surface">{{ field.value() }}</p>
+                                <p class="font-headline font-black text-on-surface break-all">{{ field.value() }}</p>
                              </div>
-                             <span class="material-symbols-outlined text-outline-variant opacity-30">shield_lock</span>
+                             <span class="material-symbols-outlined absolute right-0 top-1/2 -translate-y-1/2 text-outline-variant opacity-30">shield_lock</span>
                           </div>
                        </div>
                     </div>
@@ -178,41 +186,12 @@ import { environment } from '../../../environments/environment';
                         <p class="font-body text-on-surface-variant max-w-xs mx-auto opacity-70">{{ (activeTab() === 'orders' ? 'dashboard.ordersDescription' : 'dashboard.wishlistDescription') | translate }}</p>
                          <a [routerLink]="activeTab() === 'orders' ? '/' + currentLang() + '/orders' : '/' + currentLang() + '/wishes'" 
                             class="inline-block py-5 px-12 bg-on-surface text-surface rounded-[32px] font-headline font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all">
-                            {{ 'dashboard.synchronizeTarget' | translate }}
+                            {{ (activeTab() === 'orders' ? 'dashboard.viewOrders' : 'dashboard.viewWishlist') | translate }}
                          </a>
                     </div>
                  </div>
               </div>
            </div>
-
-           <!-- Sidebar / Auxiliary Info -->
-           <aside class="space-y-8">
-               <div class="bg-surface-container-lowest p-6 md:p-10 rounded-[48px] shadow-2xl border border-outline-variant/10 text-start">
-                  <h4 class="font-headline font-black text-lg text-on-surface mb-8 tracking-tight">{{ 'dashboard.securityStatus' | translate }}</h4>
-                  <div class="space-y-6">
-                     <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-success/10 text-success flex items-center justify-center">
-                           <span class="material-symbols-outlined text-xl">verified</span>
-                        </div>
-                        <div>
-                           <p class="text-[10px] font-black uppercase tracking-widest text-on-surface">{{ 'dashboard.authenticated' | translate }}</p>
-                           <p class="text-[8px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.verifiedChannel' | translate }}</p>
-                        </div>
-                     </div>
-
-                  </div>
-               </div>
-
-               <div class="bg-gradient-to-br from-primary to-primary-container p-6 md:p-10 rounded-[48px] shadow-2xl text-on-primary relative overflow-hidden group">
-                  <div class="relative z-10 text-start">
-                     <p class="text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">{{ 'dashboard.accountLoyalty' | translate }}</p>
-                     <h4 class="font-headline font-black text-3xl mb-4 tracking-tighter">{{ 'dashboard.eliteSequence' | translate }}</h4>
-                     <p class="font-body text-xs opacity-80 leading-relaxed mb-8">{{ 'dashboard.accessRestricted' | translate }}</p>
-                     <button class="w-full py-4 bg-white text-primary rounded-2xl font-headline font-black text-[10px] uppercase tracking-widest group-hover:bg-primary-container group-hover:text-white transition-all">{{ 'dashboard.reviewBenefits' | translate }}</button>
-                  </div>
-                 <span class="material-symbols-outlined absolute -bottom-10 -right-10 text-[180px] opacity-10 blur-sm transform group-hover:rotate-12 transition-transform">star</span>
-              </div>
-           </aside>
         </div>
       </section>
     </main>
@@ -227,6 +206,7 @@ export class DashboardComponent implements OnInit {
   private languageService = inject(LanguageService);
   private orderService = inject(OrderService);
   private profileService = inject(ProfileService);
+  private photoService = inject(PhotoService);
   
   user = signal<User | null>(null);
   profile = signal<UserProfile | null>(null);
@@ -236,7 +216,7 @@ export class DashboardComponent implements OnInit {
   cartTotalItems = this.cartService.totalItems;
   userEmail = computed(() => this.tokenService.getEmail());
   
-  tabs: {id: any, label: string}[] = [
+  tabs: {id: 'overview' | 'orders' | 'wishlist' | 'account', label: string}[] = [
     { id: 'overview', label: 'dashboard.overview' },
     { id: 'orders', label: 'dashboard.orders' },
     { id: 'wishlist', label: 'dashboard.wishlist' },
@@ -285,16 +265,16 @@ export class DashboardComponent implements OnInit {
   }
   
   loadProfile(): void {
-    this.profileService.getProfile().subscribe(p => this.profile.set(p));
+    this.profileService.getProfile().subscribe(res => {
+      if (res.isSuccess && res.data) {
+        this.profile.set(res.data);
+      }
+    });
   }
   
   getPhotoUrl(): string {
     const profile = this.profile();
-    if (profile?.imageUrl) {
-      const fileName = profile.imageUrl.split(/[\\/]/).pop();
-      return `${environment.apiUrl}/Photo/UserPhoto/${fileName}`;
-    }
-    return '';
+    return this.photoService.getPhotoUrl(profile?.imageUrl, 'user');
   }
   
   getGenderText(): string { return this.profile()?.gender === true ? 'Male' : this.profile()?.gender === false ? 'Female' : 'Not specified'; }
@@ -304,12 +284,18 @@ export class DashboardComponent implements OnInit {
     const userId = this.tokenService.getUserId();
     if (!userId) return;
     const api = this.tokenService.isSeller() ? this.orderService.getOrdersBySellerId(userId) : this.orderService.getOrdersByUserId(userId);
-    api.subscribe(orders => this.stats.update(s => ({ ...s, totalOrders: orders.length })));
+    api.subscribe((res: Result<Order[]>) => {
+      if (res.isSuccess && res.data) {
+        this.stats.update(s => ({ ...s, totalOrders: res.data!.length }));
+      }
+    });
   }
   
   loadWishlistCount(): void {
     const userId = this.tokenService.getUserId();
-    if (userId) this.wishService.getWishes(userId).subscribe(w => this.stats.update(s => ({ ...s, wishlist: w.length })));
+    if (userId) this.wishService.getWishes().subscribe(res => { 
+      if (res.isSuccess && res.data) this.stats.update(s => ({ ...s, wishlist: res.data!.length }));
+    });
   }
   
   onPhotoSelected(event: Event): void {

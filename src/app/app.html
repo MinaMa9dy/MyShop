@@ -10,22 +10,44 @@
         MyShop
       </a>
 
-      <!-- Desktop Navigation Links -->
-      <div class="hidden md:flex items-center space-x-8 rtl:space-x-reverse font-headline font-medium text-sm tracking-tight">
-        <a [routerLink]="'/' + currentLanguage() + '/categories'" 
-           routerLinkActive="active" 
-           [routerLinkActiveOptions]="{exact: true}"
-           class="text-on-surface-variant hover:text-primary transition-all duration-300 py-1 font-medium nav-link-underline">
-          {{ 'nav.categories' | translate }}
-        </a>
-        <a [routerLink]="'/' + currentLanguage() + '/products'" 
-           routerLinkActive="active"
-           class="text-on-surface-variant hover:text-primary transition-all duration-300 py-1 font-medium nav-link-underline">
-          {{ 'nav.products' | translate }}
-        </a>
-        <a [routerLink]="'/' + currentLanguage() + '/'" fragment="deals" class="text-on-surface-variant hover:text-primary transition-all duration-300 py-1 font-medium nav-link-underline">
-          {{ 'nav.deals' | translate }}
-        </a>
+      <!-- Desktop Search Bar -->
+      <div class="hidden md:flex flex-1 max-w-2xl mx-6 relative group">
+        <input type="text" 
+               [ngModel]="searchQuery" 
+               (ngModelChange)="onSearchInput($event)"
+               (keyup.enter)="onSearch()"
+               (focus)="showSearchDropdown.set(searchQuery.length >= 2)"
+               [placeholder]="'home.search' | translate"
+               class="w-full bg-surface-container-lowest px-6 py-2.5 rounded-full border border-outline-variant/30 focus:border-primary focus:bg-surface outline-none transition-all font-body text-sm text-on-surface shadow-sm hover:border-outline-variant/50">
+        <button (click)="onSearch()" class="absolute top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-primary text-on-primary rounded-full hover:bg-primary/90 transition-colors ltr:right-1 rtl:left-1" [class.right-1]="currentLanguage() === 'en'" [class.left-1]="currentLanguage() === 'ar'">
+          <span class="material-symbols-outlined text-[18px] font-bold">search</span>
+        </button>
+
+        <!-- Search Dropdown -->
+        @if (showSearchDropdown() && (searchResults().length > 0 || isSearching())) {
+          <div class="absolute top-full left-0 w-full mt-2 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[100] animate-fade-in">
+            @if (isSearching()) {
+              <div class="p-4 text-center">
+                <div class="inline-block w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+              </div>
+            } @else {
+              <div class="py-2">
+                @for (product of searchResults(); track product.id) {
+                  <div (click)="selectProduct(product.id)" 
+                       class="px-4 py-3 hover:bg-primary/5 cursor-pointer flex items-center gap-4 transition-colors">
+                    <div class="w-10 h-10 bg-surface-container rounded-lg overflow-hidden flex-shrink-0">
+                      <img [src]="photoService.getPhotoUrl(product.productPhotos[0].url)" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-grow min-w-0">
+                      <p class="text-sm font-bold text-on-surface truncate">{{ product.name }}</p>
+                      <p class="text-xs text-primary font-black">{{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
       </div>
 
       <!-- Actions (Standardized Order for Mobile, Standard RTL for Desktop) -->
@@ -65,6 +87,48 @@
           </span>
         </button>
       </div>
+    </div>
+
+    <!-- Mobile Search Bar -->
+    <div class="md:hidden px-4 pb-3 relative">
+      <div class="relative w-full">
+        <input type="text" 
+               [ngModel]="searchQuery" 
+               (ngModelChange)="onSearchInput($event)"
+               (keyup.enter)="onSearch()"
+               (focus)="showSearchDropdown.set(searchQuery.length >= 2)"
+               [placeholder]="'home.search' | translate"
+               class="w-full bg-surface-container-lowest px-4 py-2 rounded-full border border-outline-variant/30 focus:border-primary focus:bg-surface outline-none transition-all font-body text-sm text-on-surface shadow-sm">
+        <button (click)="onSearch()" class="absolute top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-primary text-on-primary rounded-full ltr:right-1 rtl:left-1" [class.right-1]="currentLanguage() === 'en'" [class.left-1]="currentLanguage() === 'ar'">
+          <span class="material-symbols-outlined text-[16px] font-bold">search</span>
+        </button>
+      </div>
+
+      <!-- Mobile Search Dropdown -->
+      @if (showSearchDropdown() && (searchResults().length > 0 || isSearching())) {
+        <div class="absolute top-full left-4 right-4 mt-2 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[100] animate-fade-in">
+          @if (isSearching()) {
+            <div class="p-4 text-center">
+              <div class="inline-block w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            </div>
+          } @else {
+            <div class="py-2">
+              @for (product of searchResults(); track product.id) {
+                <div (click)="selectProduct(product.id)" 
+                     class="px-4 py-3 hover:bg-primary/5 cursor-pointer flex items-center gap-4 transition-colors">
+                  <div class="w-10 h-10 bg-surface-container rounded-lg overflow-hidden flex-shrink-0">
+                    <img [src]="photoService.getPhotoUrl(product.productPhotos[0].url)" class="w-full h-full object-cover">
+                  </div>
+                  <div class="flex-grow min-w-0">
+                    <p class="text-sm font-bold text-on-surface truncate">{{ product.name }}</p>
+                    <p class="text-xs text-primary font-black">{{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
     </div>
   </nav>
 
@@ -129,7 +193,7 @@
   <app-cart></app-cart>
   
   <!-- Main Execution Context -->
-  <main class="pt-16 min-h-[calc(100vh-400px)]">
+  <main class="pt-[104px] md:pt-16 min-h-[calc(100vh-400px)]">
     <router-outlet></router-outlet>
   </main>
   
@@ -158,13 +222,18 @@
         </ul>
       </div>
 
-      <!-- Legal & Privacy -->
+      <!-- Contact Information -->
       <div class="space-y-6">
-        <h4 class="font-headline font-bold text-sm uppercase tracking-tight">{{ 'footer.legal' | translate }}</h4>
-        <ul class="flex flex-col gap-3 font-label text-xs uppercase tracking-widest">
-          <li><a [routerLink]="'/' + currentLanguage() + '/'" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'footer.privacyPolicy' | translate }}</a></li>
-          <li><a [routerLink]="'/' + currentLanguage() + '/'" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'footer.termsOfService' | translate }}</a></li>
-          <li><a [routerLink]="'/' + currentLanguage() + '/'" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'footer.helpCenter' | translate }}</a></li>
+        <h4 class="font-headline font-bold text-sm uppercase tracking-tight">{{ 'footer.contact' | translate }}</h4>
+        <ul class="flex flex-col gap-4 font-label text-[10px] uppercase tracking-widest">
+          <li class="flex items-center gap-3 text-on-surface-variant group cursor-pointer hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-lg opacity-40 group-hover:opacity-100 transition-opacity">mail</span>
+            <span class="break-all">{{ 'footer.email' | translate }}</span>
+          </li>
+          <li class="flex items-center gap-3 text-on-surface-variant group cursor-pointer hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-lg opacity-40 group-hover:opacity-100 transition-opacity">call</span>
+            <span>{{ 'footer.phone' | translate }}</span>
+          </li>
         </ul>
       </div>
 
