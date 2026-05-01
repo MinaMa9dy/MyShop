@@ -24,26 +24,34 @@
         </button>
 
         <!-- Search Dropdown -->
-        @if (showSearchDropdown() && (searchResults().length > 0 || isSearching())) {
+        @if (showSearchDropdown()) {
           <div class="absolute top-full left-0 w-full mt-2 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[100] animate-fade-in">
             @if (isSearching()) {
-              <div class="p-4 text-center">
-                <div class="inline-block w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+              <div class="p-6 flex items-center justify-center gap-3">
+                <div class="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                <span class="text-xs font-bold text-outline uppercase tracking-widest">{{ 'common.loading' | translate }}</span>
               </div>
-            } @else {
-              <div class="py-2">
+            } @else if (searchResults().length > 0) {
+              <div class="py-2 max-h-[400px] overflow-y-auto custom-scrollbar">
                 @for (product of searchResults(); track product.id) {
-                  <div (click)="selectProduct(product.id)" 
-                       class="px-4 py-3 hover:bg-primary/5 cursor-pointer flex items-center gap-4 transition-colors">
-                    <div class="w-10 h-10 bg-surface-container rounded-lg overflow-hidden flex-shrink-0">
-                      <img [src]="photoService.getPhotoUrl(product.productPhotos[0].url)" class="w-full h-full object-cover">
+                  <a [routerLink]="['/' + currentLanguage() + '/products', product.id]"
+                     (click)="closeSearch()"
+                     class="px-4 py-3 hover:bg-primary/5 cursor-pointer flex items-center gap-4 transition-colors group/item no-underline">
+                    <div class="w-12 h-12 bg-surface-container rounded-xl overflow-hidden flex-shrink-0 border border-outline-variant/10 group-hover/item:border-primary/30 transition-colors">
+                      <img [src]="photoService.getPhotoUrl(product.productPhotos[0]?.url)" class="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-500">
                     </div>
                     <div class="flex-grow min-w-0">
-                      <p class="text-sm font-bold text-on-surface truncate">{{ product.name }}</p>
+                      <p class="text-sm font-bold text-on-surface truncate group-hover/item:text-primary transition-colors">{{ product.name }}</p>
                       <p class="text-xs text-primary font-black">{{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
                     </div>
-                  </div>
+                    <span class="material-symbols-outlined text-outline-variant opacity-0 group-hover/item:opacity-100 transition-opacity text-lg ltr:mr-2 rtl:ml-2">chevron_right</span>
+                  </a>
                 }
+              </div>
+            } @else if (searchQuery.length >= 2) {
+              <div class="p-8 text-center flex flex-col items-center gap-3">
+                <span class="material-symbols-outlined text-4xl text-outline-variant opacity-20">search_off</span>
+                <p class="text-xs font-bold text-on-surface-variant opacity-60 uppercase tracking-widest">{{ 'home.noProductsFound' | translate }}</p>
               </div>
             }
           </div>
@@ -105,26 +113,34 @@
       </div>
 
       <!-- Mobile Search Dropdown -->
-      @if (showSearchDropdown() && (searchResults().length > 0 || isSearching())) {
+      @if (showSearchDropdown()) {
         <div class="absolute top-full left-4 right-4 mt-2 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[100] animate-fade-in">
           @if (isSearching()) {
-            <div class="p-4 text-center">
-              <div class="inline-block w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <div class="p-6 flex items-center justify-center gap-3">
+              <div class="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+              <span class="text-xs font-bold text-outline uppercase tracking-widest">{{ 'common.loading' | translate }}</span>
             </div>
-          } @else {
-            <div class="py-2">
+          } @else if (searchResults().length > 0) {
+            <div class="py-2 max-h-[300px] overflow-y-auto custom-scrollbar">
               @for (product of searchResults(); track product.id) {
-                <div (click)="selectProduct(product.id)" 
-                     class="px-4 py-3 hover:bg-primary/5 cursor-pointer flex items-center gap-4 transition-colors">
-                  <div class="w-10 h-10 bg-surface-container rounded-lg overflow-hidden flex-shrink-0">
-                    <img [src]="photoService.getPhotoUrl(product.productPhotos[0].url)" class="w-full h-full object-cover">
+                <a [routerLink]="['/' + currentLanguage() + '/products', product.id]"
+                   (click)="closeSearch(); closeMobileMenu()"
+                   class="px-4 py-3 hover:bg-primary/5 cursor-pointer flex items-center gap-4 transition-colors no-underline block">
+                  <div class="w-12 h-12 bg-surface-container rounded-xl overflow-hidden flex-shrink-0 border border-outline-variant/10">
+                    <img [src]="photoService.getPhotoUrl(product.productPhotos[0]?.url)" class="w-full h-full object-cover">
                   </div>
                   <div class="flex-grow min-w-0">
                     <p class="text-sm font-bold text-on-surface truncate">{{ product.name }}</p>
                     <p class="text-xs text-primary font-black">{{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
                   </div>
-                </div>
+                  <span class="material-symbols-outlined text-outline-variant text-lg ltr:mr-2 rtl:ml-2">chevron_right</span>
+                </a>
               }
+            </div>
+          } @else if (searchQuery.length >= 2) {
+            <div class="p-8 text-center flex flex-col items-center gap-3">
+              <span class="material-symbols-outlined text-4xl text-outline-variant opacity-20">search_off</span>
+              <p class="text-xs font-bold text-on-surface-variant opacity-60 uppercase tracking-widest">{{ 'home.noProductsFound' | translate }}</p>
             </div>
           }
         </div>

@@ -50,9 +50,28 @@ import { environment } from '../../../../environments/environment';
           
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             
-            <!-- Gallery Section (6 cols) -->
-            <div class="lg:col-span-7 space-y-6 animate-slide-up">
-              <div class="relative aspect-square bg-surface-container-lowest rounded-[40px] overflow-hidden border border-outline-variant/10 shadow-2xl group">
+            <!-- Gallery Section (7 cols) -->
+            <div class="lg:col-span-7 flex flex-col lg:flex-row gap-6 animate-slide-up">
+              
+              <!-- Vertical Thumbnail Strip (PC View) -->
+              @if (allPhotos().length > 1) {
+                <div class="hidden lg:flex flex-col gap-4 w-20 overflow-y-auto max-h-[600px] scrollbar-hide py-2">
+                  @for (photo of allPhotos(); track photo.id; let i = $index) {
+                    <button (click)="scrollToPhoto(i)"
+                            class="relative aspect-square w-full rounded-2xl overflow-hidden border-2 transition-all duration-300 hover:scale-105 active:scale-95 flex-shrink-0 shadow-sm"
+                            [class]="currentPhotoIndex() === i ? 'border-primary shadow-lg ring-4 ring-primary/10' : 'border-outline-variant/20 hover:border-primary/40'">
+                      <img [src]="photoService.getPhotoUrl(photo.url)" 
+                           class="w-full h-full object-cover"
+                           [class.opacity-40]="currentPhotoIndex() !== i">
+                      @if (currentPhotoIndex() === i) {
+                        <div class="absolute inset-0 bg-primary/5"></div>
+                      }
+                    </button>
+                  }
+                </div>
+              }
+
+              <div class="flex-1 relative aspect-square bg-surface-container-lowest rounded-[40px] overflow-hidden border border-outline-variant/10 shadow-2xl group">
                 
                 @if (allPhotos().length > 0) {
                   <div class="flex h-full w-full overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-smooth" #carousel (scroll)="onScroll($event)">
@@ -74,8 +93,8 @@ import { environment } from '../../../../environments/environment';
                       <span class="material-symbols-outlined text-2xl">arrow_forward</span>
                     </button>
 
-                    <!-- Indicators -->
-                    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-10">
+                    <!-- Indicators (Mobile/Compact) -->
+                    <div class="lg:hidden absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-10">
                       @for (photo of allPhotos(); track photo.id; let i = $index) {
                         <button (click)="scrollToPhoto(i)"
                                 class="w-2 h-2 rounded-full transition-all duration-300 hover:scale-125 focus:outline-none" 
@@ -101,8 +120,6 @@ import { environment } from '../../../../environments/environment';
                    </div>
                 }
               </div>
-
-
             </div>
 
             <!-- Content Section (5 cols) -->
@@ -512,14 +529,26 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     }
   }
   
-  ngOnInit(): void { this.loadProduct(); }
+  ngOnInit(): void {
+    // Subscribe to route parameter changes to handle searching for a new product
+    // while already on a product detail page (component reuse)
+    this.route.params.subscribe(params => {
+      if (params['id']) {
+        this.loadProduct(params['id']);
+      }
+    });
+  }
   ngAfterViewInit(): void {}
   
-  loadProduct(): void {
-    const id = this.route.snapshot.paramMap.get('id');
+  loadProduct(id?: string): void {
+    if (!id) {
+      id = this.route.snapshot.paramMap.get('id') || undefined;
+    }
     if (!id) { this.loading.set(false); return; }
     
-    this.product.set(null); this.mainImage.set(null);
+    this.loading.set(true);
+    this.quantity = 1; // Reset quantity on product change
+    this.currentPhotoIndex.set(0); // Reset photo index
     this.productService.getById(id).subscribe({
       next: (result) => {
         if (result.isSuccess && result.data) {

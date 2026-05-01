@@ -10,7 +10,8 @@ import { TokenService } from './core/services/token.service';
 import { CartComponent } from './features/cart/cart.component';
 import { ToastComponent } from './shared/toast/toast.component';
 import { Subscription, Subject } from 'rxjs';
-import { filter, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { filter, debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { UserProfile } from './core/models/auth.model';
 import { ProfileService } from './core/services/profile.service';
 import { PhotoService } from './core/services/photo.service';
@@ -69,19 +70,35 @@ export class App implements OnInit, OnDestroy {
   onSearchInput(term: string): void {
     this.searchQuery = term;
     this.searchSubject.next(term);
-    this.showSearchDropdown.set(term.length >= 2);
+    
+    // Set visibility and searching state immediately to prevent flicker during debounce
+    const isValid = term.trim().length >= 2;
+    this.showSearchDropdown.set(isValid);
+    if (isValid) {
+      this.isSearching.set(true);
+    } else {
+      this.isSearching.set(false);
+      this.searchResults.set([]);
+    }
   }
 
-  selectProduct(productId: string): void {
-    this.router.navigate(['/' + this.currentLanguage() + '/products', productId]);
+  closeSearch(): void {
     this.searchQuery = '';
     this.searchResults.set([]);
     this.showSearchDropdown.set(false);
   }
 
-  @HostListener('document:click', ['$event'])
+  @HostListener('document:mousedown', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.elementRef.nativeElement.contains(event.target)) {
+    const searchContainers = document.querySelectorAll('.group.relative');
+    let clickedInside = false;
+    searchContainers.forEach(container => {
+      if (container.contains(event.target as Node)) {
+        clickedInside = true;
+      }
+    });
+
+    if (!clickedInside) {
       this.showSearchDropdown.set(false);
     }
   }
@@ -139,7 +156,7 @@ export class App implements OnInit, OnDestroy {
       this.showSearchDropdown.set(false);
     });
 
-    // Search Autocomplete Logic
+    // Search Autocomplete Logic with robust error handling
     this.searchSubscription = this.searchSubject.pipe(
       debounceTime(300),
       distinctUntilChanged(),
@@ -149,16 +166,33 @@ export class App implements OnInit, OnDestroy {
           this.isSearching.set(false);
           return [null];
         }
+        
         this.isSearching.set(true);
-        return this.productService.getAll({ searchTerm: term, pageSize: 5 });
+        // Catch errors inside switchMap so the main observable doesn't die
+        return this.productService.getAll({ searchTerm: term, pageSize: 5 }).pipe(
+          // Ensure isSearching is false even on error
+          catchError(err => {
+            console.error('Search error:', err);
+            this.isSearching.set(false);
+            this.searchResults.set([]);
+            return of(null);
+          })
+        );
       })
-    ).subscribe(res => {
-      if (res && 'isSuccess' in res && res.isSuccess && res.data) {
-        this.searchResults.set(res.data.items);
-      } else {
+    ).subscribe({
+      next: (res: any) => {
+        if (res && res.isSuccess && res.data) {
+          this.searchResults.set(res.data.items || []);
+        } else {
+          this.searchResults.set([]);
+        }
+        this.isSearching.set(false);
+      },
+      error: (err) => {
+        console.error('Search subscription fatal error:', err);
+        this.isSearching.set(false);
         this.searchResults.set([]);
       }
-      this.isSearching.set(false);
     });
   }
   
