@@ -93,7 +93,7 @@ import { environment } from '../../../environments/environment';
                   </div>
                   <span class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.activeSequence' | translate }}</span>
                </div>
-               <p class="font-headline text-5xl font-black text-on-surface mb-2">{{ cartTotalItems() }}</p>
+               <p class="font-headline text-5xl font-black text-on-surface mb-2">{{ carttotal() }}</p>
                <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.itemsInBuffer' | translate }}</p>
            </div>
 
@@ -213,7 +213,7 @@ export class DashboardComponent implements OnInit {
   activeTab = signal<'overview' | 'orders' | 'wishlist' | 'account'>('overview');
   stats = signal({ totalOrders: 0, cartItems: 0, wishlist: 0 });
   photoUploading = signal(false);
-  cartTotalItems = this.cartService.totalItems;
+  carttotal = this.cartService.total;
   userEmail = computed(() => this.tokenService.getEmail());
   
   tabs: {id: 'overview' | 'orders' | 'wishlist' | 'account', label: string}[] = [
@@ -266,7 +266,7 @@ export class DashboardComponent implements OnInit {
   
   loadProfile(): void {
     this.profileService.getProfile().subscribe(res => {
-      if (res.isSuccess && res.data) {
+      if (res.success && res.data) {
         this.profile.set(res.data);
       }
     });
@@ -285,7 +285,7 @@ export class DashboardComponent implements OnInit {
     if (!userId) return;
     const api = this.tokenService.isSeller() ? this.orderService.getOrdersBySellerId(userId) : this.orderService.getOrdersByUserId(userId);
     api.subscribe((res: Result<Order[]>) => {
-      if (res.isSuccess && res.data) {
+      if (res.success && res.data) {
         this.stats.update(s => ({ ...s, totalOrders: res.data!.length }));
       }
     });
@@ -294,7 +294,7 @@ export class DashboardComponent implements OnInit {
   loadWishlistCount(): void {
     const userId = this.tokenService.getUserId();
     if (userId) this.wishService.getWishes().subscribe(res => { 
-      if (res.isSuccess && res.data) this.stats.update(s => ({ ...s, wishlist: res.data!.length }));
+      if (res.success && res.data) this.stats.update(s => ({ ...s, wishlist: res.data!.length }));
     });
   }
   
@@ -314,3 +314,4 @@ export class DashboardComponent implements OnInit {
   
   logout(): void { this.authService.logout(); }
 }
+

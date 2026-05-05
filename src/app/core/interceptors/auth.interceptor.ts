@@ -29,7 +29,8 @@ function isUserAuthenticated(tokenService: TokenService): boolean {
  * GET Cart requests should not redirect unauthenticated users
  */
 function shouldHandleSilentlyForUnauthenticated(req: HttpRequest<unknown>): boolean {
-  return req.url.includes('/Cart') && req.method === 'GET';
+  return (req.url.includes('/Cart') && req.method === 'GET') || 
+         req.url.includes('/Profile');
 }
 
 export const authInterceptor: HttpInterceptorFn = (
@@ -80,15 +81,10 @@ export const authInterceptor: HttpInterceptorFn = (
         // CASE 1: User is not authenticated (missing access token or refresh token)
         // Redirect to login immediately without attempting refresh
         if (!isAuthenticated) {
-          // Special case: GET Cart requests from unauthenticated users should be silently handled
-          if (shouldHandleSilentlyForUnauthenticated(req)) {
-            console.log('AuthInterceptor - Unauthenticated GET Cart request, handling 401 silently');
-            return throwError(() => error);
-          }
-          
-          console.log('AuthInterceptor - User not authenticated (missing tokens), redirecting to login');
-          const lang = localStorage.getItem('language') || 'en';
-          router.navigate([`/${lang}/auth/login`]);
+          // Do NOT redirect guests/unauthenticated users to login automatically.
+          // This allows public pages to call endpoints that might return 401 without forcing a redirect.
+          // Navigation to login should be handled by Auth Guards or specific component logic.
+          console.log('AuthInterceptor - User not authenticated (missing tokens) and 401 received, passing through without redirect');
           return throwError(() => error);
         }
         
@@ -102,13 +98,13 @@ export const authInterceptor: HttpInterceptorFn = (
             console.log('AuthInterceptor - Token refresh succeeded');
             
             // Update tokens with new values
-            const newRefreshToken = response.refreshToken || refreshToken || '';
-            tokenService.setTokens(response.accessToken, newRefreshToken);
+            const newRefreshToken = response.data?.refreshToken || refreshToken || '';
+            tokenService.setTokens(response.data?.accessToken || '', newRefreshToken);
             
             // Retry original request with new token
             const clonedReq = req.clone({
               setHeaders: {
-                Authorization: `Bearer ${response.accessToken}`
+                Authorization: `Bearer ${response.data?.accessToken}`
               }
             });
             return next(clonedReq);

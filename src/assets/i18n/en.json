@@ -149,7 +149,10 @@
     "feedbackIntegrated": "Review submitted successfully.",
     "general": "General",
     "paginationPhase": "Page {{current}} of {{total}}",
-    "variants": "Product Options"
+    "variants": "Product Options",
+    "curatedSelection": "Related Products",
+    "relatedProducts": "You Might Also Like",
+    "relatedDesc": "Explore these hand-picked products from the same category."
   },
   "cart": {
     "SHOPPING_CART": "Shopping Cart",
@@ -285,7 +288,9 @@
     "resetFilters": "Clear Filters",
     "backToProducts": "Back to Shop",
     "productNotFound": "Product not found",
-    "units": "Units"
+    "units": "Units",
+    "viewAll": "View All",
+    "viewDetails": "View Details"
   },
   "orders": {
     "title": "My Orders",
@@ -418,13 +423,18 @@
     },
     "addCategory": {
       "title": "New Category",
-      "button": "Save Category",
+      "subtitle": "Define the scope and hierarchy of your taxonomy.",
+      "button": "Add Category",
       "name": "Category Name",
       "namePlaceholder": "Enter name",
       "description": "Description",
       "descriptionPlaceholder": "Enter description",
       "superCategory": "Parent Category",
-      "selectSuperCategory": "Select parent (Optional)"
+      "selectSuperCategory": "Select parent (Optional)",
+      "cancel": "Cancel",
+      "nameRequired": "Category name is required",
+      "success": "Category created successfully",
+      "error": "Failed to create category"
     },
     "coupons": {
       "title": "Manage Coupons",

@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit, OnDestroy, Renderer2, computed, effect, HostListener, ElementRef } from '@angular/core';
-import { RouterOutlet, RouterLink, Router, Event, NavigationEnd } from '@angular/router';
+import { RouterOutlet, RouterLink, Router, Event as RouterEvent, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
@@ -18,6 +18,10 @@ import { PhotoService } from './core/services/photo.service';
 import { ProductService } from './core/services/product.service';
 import { Product } from './core/models/product.model';
 import { environment } from '../environments/environment';
+import { CategoryService } from './core/services/category.service';
+import { Category } from './core/models/category.model';
+
+
 
 @Component({
   selector: 'app-root',
@@ -36,6 +40,7 @@ export class App implements OnInit, OnDestroy {
   public photoService = inject(PhotoService);
   private productService = inject(ProductService);
   private elementRef = inject(ElementRef);
+  private categoryService = inject(CategoryService);
   
   private loginSubscription?: Subscription;
   private routerSubscription?: Subscription;
@@ -45,7 +50,7 @@ export class App implements OnInit, OnDestroy {
   title = 'MyShop';
   
   isLoggedIn = this.authService.isLoggedIn;
-  cartItemCount = this.cartService.totalItems;
+  cartItemCount = this.cartService.total;
   currentLanguage = this.languageService.currentLanguage;
   
   // Search
@@ -53,6 +58,9 @@ export class App implements OnInit, OnDestroy {
   searchResults = signal<Product[]>([]);
   showSearchDropdown = signal(false);
   isSearching = signal(false);
+  
+  // Categories
+  categoryTree = signal<Category[]>([]);
   
   onSearch(): void {
     if (this.searchQuery.trim()) {
@@ -123,6 +131,24 @@ export class App implements OnInit, OnDestroy {
   
   // Mobile menu state
   mobileMenuOpen = signal(false);
+  expandedCategories = signal<Set<string>>(new Set());
+
+  toggleCategory(id: string, event: MouseEvent): void {
+    event.stopPropagation();
+    this.expandedCategories.update(set => {
+      const newSet = new Set(set);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  }
+
+  isExpanded(id: string): boolean {
+    return this.expandedCategories().has(id);
+  }
 
   constructor() {
     effect(() => {
@@ -142,6 +168,8 @@ export class App implements OnInit, OnDestroy {
       this.loadUserProfile();
     }
     
+    this.loadCategoryTree();
+    
     // Subscribe to login success event for cart sync
     this.loginSubscription = this.authService.loginSuccess.subscribe(() => {
       this.fetchUserCart();
@@ -150,7 +178,7 @@ export class App implements OnInit, OnDestroy {
     
     // Scroll to top on navigation
     this.routerSubscription = this.router.events.pipe(
-      filter((event: Event): event is NavigationEnd => event instanceof NavigationEnd)
+      filter((event: RouterEvent): event is NavigationEnd => event instanceof NavigationEnd)
     ).subscribe(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       this.showSearchDropdown.set(false);
@@ -181,8 +209,9 @@ export class App implements OnInit, OnDestroy {
       })
     ).subscribe({
       next: (res: any) => {
-        if (res && res.isSuccess && res.data) {
-          this.searchResults.set(res.data.items || []);
+        if (res && res.success && res.data) {
+          const normalized = (res.data || []).map((p: any) => this.normalizeProduct(p));
+          this.searchResults.set(normalized);
         } else {
           this.searchResults.set([]);
         }
@@ -215,12 +244,23 @@ export class App implements OnInit, OnDestroy {
   private loadUserProfile(): void {
     this.profileService.getProfile().subscribe({
       next: (res) => {
-        if (res.isSuccess && res.data) {
+        if (res.success && res.data) {
           this.userProfile.set(res.data);
         }
       },
       error: (error) => {
         console.error('Error loading user profile:', error);
+      }
+    });
+  }
+
+  private loadCategoryTree(): void {
+    this.categoryService.getTree().subscribe({
+      next: (tree) => {
+        this.categoryTree.set(tree);
+      },
+      error: (err) => {
+        console.error('Error loading category tree:', err);
       }
     });
   }
@@ -256,4 +296,22 @@ export class App implements OnInit, OnDestroy {
   toggleCart(): void {
     this.cartService.toggle();
   }
+
+  private normalizeProduct(p: any): any {
+    if (!p) return p;
+    return {
+      ...p,
+      id: p.id || p.Id,
+      name: p.name || p.Name,
+      description: p.description || p.Description,
+      newPrice: p.newPrice || p.NewPrice || p.productVariants?.[0]?.newPrice || p.productVariants?.[0]?.NewPrice || 0,
+      oldPrice: p.oldPrice || p.OldPrice || p.productVariants?.[0]?.oldPrice || p.productVariants?.[0]?.OldPrice || 0,
+      stockQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.productVariants?.[0]?.stockQuantity ?? p.productVariants?.[0]?.StockQuantity) ?? 0,
+      categoryId: p.categoryId || p.CategoryId,
+      categoryName: p.categoryName || p.CategoryName,
+      productPhotos: p.productPhotos || p.ProductPhotos || p.productphotos || [],
+      productVariants: p.productVariants || p.ProductVariants || p.productvariants || []
+    };
+  }
 }
+

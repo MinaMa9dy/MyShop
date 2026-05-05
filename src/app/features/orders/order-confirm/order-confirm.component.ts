@@ -253,7 +253,7 @@ export class OrderConfirmComponent implements OnInit, OnDestroy {
 
   loadCities(): void {
     this.productService.getCities().subscribe({
-      next: (cities) => this.cities.set(cities),
+      next: (res) => { if (res.success && res.data) this.cities.set(res.data); },
       error: () => console.error('Failed to load cities')
     });
   }
@@ -280,7 +280,7 @@ export class OrderConfirmComponent implements OnInit, OnDestroy {
       couponCode: this.appliedCoupon()?.coupon?.id || undefined
     }).subscribe({
       next: (res) => {
-        if (res.isSuccess) {
+        if (res.success) {
           this.submitting.set(false);
           this.cartService.clear();
           this.cartService.clearCoupon();
@@ -302,7 +302,7 @@ export class OrderConfirmComponent implements OnInit, OnDestroy {
     this.isApplyingCoupon = true; this.couponError = '';
     this.couponService.validate(this.couponInput).subscribe({
       next: (res) => {
-        if (res.isSuccess && res.data) {
+        if (res.success && res.data) {
           this.cartService.setCoupon(res.data);
           this.couponInput = '';
         } else {
@@ -320,3 +320,4 @@ export class OrderConfirmComponent implements OnInit, OnDestroy {
   removeCoupon(): void { this.cartService.clearCoupon(); }
   getItemDiscountedPrice(item: any): number { return this.cartService.getItemDiscountedValue(item); }
 }
+

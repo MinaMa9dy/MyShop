@@ -170,7 +170,7 @@ export class WishListComponent implements OnInit {
 
     this.wishService.getWishes().subscribe({
       next: (res) => { 
-        if (res.isSuccess && res.data) {
+        if (res.success && res.data) {
           const normalizedWishes = res.data.map(w => ({
             ...w,
             product: w.product ? this.normalizeProduct(w.product) : undefined
@@ -199,8 +199,9 @@ export class WishListComponent implements OnInit {
       name: p.name || p.Name,
       description: p.description || p.Description,
       price: p.price || p.Price,
-      newPrice: p.newPrice || p.NewPrice,
-      oldPrice: p.oldPrice || p.OldPrice,
+      newPrice: p.newPrice || p.NewPrice || p.productVariants?.[0]?.newPrice || p.productVariants?.[0]?.NewPrice || 0,
+      oldPrice: p.oldPrice || p.OldPrice || p.productVariants?.[0]?.oldPrice || p.productVariants?.[0]?.OldPrice || 0,
+      stockQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.productVariants?.[0]?.stockQuantity ?? p.productVariants?.[0]?.StockQuantity) ?? 0,
       categoryId: p.categoryId || p.CategoryId,
       categoryName: p.categoryName || p.CategoryName,
       productPhotos: (p.productPhotos || p.ProductPhotos || p.productphotos || []).map((ph: any) => ({
@@ -252,7 +253,7 @@ export class WishListComponent implements OnInit {
     this.removingId.set(wish.productId);
     this.wishService.removeWish(wish.productId).subscribe({
       next: (res) => {
-        if (res.isSuccess) {
+        if (res.success) {
           this.wishes.update(items => items.filter(item => item.productId !== wish.productId));
         } else {
           // Handle error
@@ -271,3 +272,4 @@ export class WishListComponent implements OnInit {
     this.router.navigate(['/' + this.currentLang + '/products']);
   }
 }
+

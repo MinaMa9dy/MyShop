@@ -175,8 +175,8 @@ export class CouponAssignComponent implements OnInit, OnDestroy {
       switchMap(term => { this.searching.set(true); return this.productService.getAll({ searchTerm: term, pageSize: 50 }); })
     ).subscribe({
       next: (res) => { 
-        if (res.isSuccess && res.data) {
-          this.handleProductResponse(res.data.items); 
+        if (res.success && res.data) {
+          this.handleProductResponse(res.data); 
         }
         this.searching.set(false); 
       },
@@ -193,12 +193,12 @@ export class CouponAssignComponent implements OnInit, OnDestroy {
       assignedRes: this.couponService.getAssignedProducts(couponId) 
     }).subscribe({
       next: (resp) => {
-        if (resp.productsRes.isSuccess && resp.productsRes.data) {
-          this.handleProductResponse(resp.productsRes.data.items);
+        if (resp.productsRes.success && resp.productsRes.data) {
+          this.handleProductResponse(resp.productsRes.data);
         }
         
         let assignedIds: string[] = [];
-        if (resp.assignedRes.isSuccess && resp.assignedRes.data) {
+        if (resp.assignedRes.success && resp.assignedRes.data) {
           assignedIds = resp.assignedRes.data.map((p: any) => p.id || p.Id || p);
         }
         
@@ -247,8 +247,8 @@ export class CouponAssignComponent implements OnInit, OnDestroy {
 
     forkJoin(requests).subscribe({
       next: (res: any) => {
-        const addSuccess = !res.add || res.add.isSuccess;
-        const removeSuccess = !res.remove || res.remove.isSuccess;
+        const addSuccess = !res.add || res.add.success;
+        const removeSuccess = !res.remove || res.remove.success;
         
         if (addSuccess && removeSuccess) {
           this.submitting.set(false); this.success.set('Associations saved.');
@@ -263,3 +263,4 @@ export class CouponAssignComponent implements OnInit, OnDestroy {
     });
   }
 }
+

@@ -149,7 +149,10 @@
     "feedbackIntegrated": "تم إرسال التقييم بنجاح.",
     "general": "عام",
     "paginationPhase": "صفحة {{current}} من {{total}}",
-    "variants": "خيارات المنتج"
+    "variants": "خيارات المنتج",
+    "curatedSelection": "منتجات ذات صلة",
+    "relatedProducts": "قد يعجبك أيضاً",
+    "relatedDesc": "استكشف هذه المنتجات المختارة بعناية من نفس الفئة."
   },
   "cart": {
     "SHOPPING_CART": "سلة التسوق",
@@ -282,7 +285,9 @@
     "resetFilters": "مسح الفلاتر",
     "backToProducts": "العودة للمتجر",
     "productNotFound": "المنتج غير موجود",
-    "units": "وحدات"
+    "units": "وحدات",
+    "viewAll": "عرض الكل",
+    "viewDetails": "عرض التفاصيل"
   },
   "orders": {
     "title": "طلباتي",
@@ -415,13 +420,18 @@
     },
     "addCategory": {
       "title": "فئة جديدة",
-      "button": "حفظ الفئة",
+      "subtitle": "حدد نطاق وتدرج فئات منتجاتك.",
+      "button": "إضافة فئة",
       "name": "اسم الفئة",
       "namePlaceholder": "أدخل الاسم",
       "description": "الوصف",
       "descriptionPlaceholder": "أدخل الوصف",
       "superCategory": "الفئة الأب",
-      "selectSuperCategory": "اختر فئة أعلى (اختياري)"
+      "selectSuperCategory": "اختر فئة أعلى (اختياري)",
+      "cancel": "إلغاء",
+      "nameRequired": "اسم الفئة مطلوب",
+      "success": "تم إنشاء الفئة بنجاح",
+      "error": "فشل في إنشاء الفئة"
     },
     "coupons": {
       "title": "إدارة الكوبونات",

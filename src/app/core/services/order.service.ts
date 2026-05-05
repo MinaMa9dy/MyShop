@@ -5,8 +5,6 @@ import { environment } from '../../../environments/environment';
 import { Order, AddOrderDto } from '../models/order.model';
 import { TokenService } from './token.service';
 import { Result } from '../models/result.model';
-import { PageResult } from '../models/result.model';
-
 @Injectable({
   providedIn: 'root'
 })
@@ -21,11 +19,11 @@ export class OrderService {
   }
 
   // Get all orders (Admin only)
-  getAllOrders(page: number = 1, pageSize: number = 10): Observable<Result<PageResult<Order>>> {
+  getAllOrders(page: number = 1, pageSize: number = 10): Observable<Result<Order[]>> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
-    return this.http.get<Result<PageResult<Order>>>(this.apiUrl, { params });
+    return this.http.get<Result<Order[]>>(this.apiUrl, { params });
   }
 
   // Get orders for the current user
@@ -69,3 +67,4 @@ export class OrderService {
     return this.http.patch<Result<Order>>(`${this.apiUrl}/${id}/cancel`, {});
   }
 }
+

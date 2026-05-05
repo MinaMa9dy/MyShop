@@ -30,6 +30,32 @@ export class CategoryService {
   getAll(): Observable<Category[]> {
     return this.categories$;
   }
+
+  getTree(): Observable<Category[]> {
+    return this.getAll().pipe(
+      map(categories => {
+        const categoryMap = new Map<string, Category>();
+        const tree: Category[] = [];
+
+        // First pass: Create map and initialize children
+        categories.forEach(cat => {
+          categoryMap.set(cat.id, { ...cat, children: [] });
+        });
+
+        // Second pass: Build tree
+        categories.forEach(cat => {
+          const item = categoryMap.get(cat.id)!;
+          if (cat.superCategoryId && categoryMap.has(cat.superCategoryId)) {
+            categoryMap.get(cat.superCategoryId)!.children?.push(item);
+          } else {
+            tree.push(item);
+          }
+        });
+
+        return tree;
+      })
+    );
+  }
   
   create(category: AddCategoryDto): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/AddCategory`, category);

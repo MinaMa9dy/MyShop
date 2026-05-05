@@ -4,62 +4,68 @@
   
   <!-- Premium Navigation Shell -->
   <nav class="fixed top-0 w-full z-50 bg-white/95 border-b border-outline-variant/10 backdrop-blur-md">
-    <div class="flex justify-between items-center px-4 md:px-6 py-3 md:py-4 w-full max-w-7xl mx-auto flex-row rtl:md:flex-row-reverse">
+    <div class="flex justify-between items-center px-4 md:px-6 py-3 md:py-4 w-full max-w-7xl mx-auto gap-2 md:gap-6 flex-row">
       <!-- Brand Logo -->
-      <a [routerLink]="'/' + currentLanguage() + '/'" class="text-xl md:text-2xl font-black tracking-tighter text-primary font-headline">
+      <a [routerLink]="'/' + currentLanguage() + '/'" class="text-xl md:text-2xl font-black tracking-tighter text-primary font-headline order-1 shrink-0">
         MyShop
       </a>
 
-      <!-- Desktop Search Bar -->
-      <div class="hidden md:flex flex-1 max-w-2xl mx-6 relative group">
-        <input type="text" 
-               [ngModel]="searchQuery" 
-               (ngModelChange)="onSearchInput($event)"
-               (keyup.enter)="onSearch()"
-               (focus)="showSearchDropdown.set(searchQuery.length >= 2)"
-               [placeholder]="'home.search' | translate"
-               class="w-full bg-surface-container-lowest px-6 py-2.5 rounded-full border border-outline-variant/30 focus:border-primary focus:bg-surface outline-none transition-all font-body text-sm text-on-surface shadow-sm hover:border-outline-variant/50">
-        <button (click)="onSearch()" class="absolute top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-primary text-on-primary rounded-full hover:bg-primary/90 transition-colors ltr:right-1 rtl:left-1" [class.right-1]="currentLanguage() === 'en'" [class.left-1]="currentLanguage() === 'ar'">
-          <span class="material-symbols-outlined text-[18px] font-bold">search</span>
-        </button>
+      <!-- Search & Categories Container (PC View) -->
+      <div class="hidden md:flex flex-1 items-center gap-4 order-2 max-w-4xl">
+        <!-- Desktop Search Bar -->
+        <div class="flex-1 relative group order-last">
+          <input type="text" 
+                 [ngModel]="searchQuery" 
+                 (ngModelChange)="onSearchInput($event)"
+                 (keyup.enter)="onSearch()"
+                 (focus)="showSearchDropdown.set(searchQuery.length >= 2)"
+                 [placeholder]="'home.search' | translate"
+                 class="w-full bg-surface-container-lowest px-6 py-2.5 rounded-full border border-outline-variant/30 focus:border-primary focus:bg-surface outline-none transition-all font-body text-sm text-on-surface shadow-sm hover:border-outline-variant/50">
+          <button (click)="onSearch()" class="absolute top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-primary text-on-primary rounded-full hover:bg-primary/90 transition-colors ltr:right-1 rtl:left-1">
+            <span class="material-symbols-outlined text-[18px] font-bold">search</span>
+          </button>
 
-        <!-- Search Dropdown -->
-        @if (showSearchDropdown()) {
-          <div class="absolute top-full left-0 w-full mt-2 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[100] animate-fade-in">
-            @if (isSearching()) {
-              <div class="p-6 flex items-center justify-center gap-3">
-                <div class="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-                <span class="text-xs font-bold text-outline uppercase tracking-widest">{{ 'common.loading' | translate }}</span>
-              </div>
-            } @else if (searchResults().length > 0) {
-              <div class="py-2 max-h-[400px] overflow-y-auto custom-scrollbar">
-                @for (product of searchResults(); track product.id) {
-                  <a [routerLink]="['/' + currentLanguage() + '/products', product.id]"
-                     (click)="closeSearch()"
-                     class="px-4 py-3 hover:bg-primary/5 cursor-pointer flex items-center gap-4 transition-colors group/item no-underline">
-                    <div class="w-12 h-12 bg-surface-container rounded-xl overflow-hidden flex-shrink-0 border border-outline-variant/10 group-hover/item:border-primary/30 transition-colors">
-                      <img [src]="photoService.getPhotoUrl(product.productPhotos[0]?.url)" class="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-500">
-                    </div>
-                    <div class="flex-grow min-w-0">
-                      <p class="text-sm font-bold text-on-surface truncate group-hover/item:text-primary transition-colors">{{ product.name }}</p>
-                      <p class="text-xs text-primary font-black">{{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
-                    </div>
-                    <span class="material-symbols-outlined text-outline-variant opacity-0 group-hover/item:opacity-100 transition-opacity text-lg ltr:mr-2 rtl:ml-2">chevron_right</span>
-                  </a>
-                }
-              </div>
-            } @else if (searchQuery.length >= 2) {
-              <div class="p-8 text-center flex flex-col items-center gap-3">
-                <span class="material-symbols-outlined text-4xl text-outline-variant opacity-20">search_off</span>
-                <p class="text-xs font-bold text-on-surface-variant opacity-60 uppercase tracking-widest">{{ 'home.noProductsFound' | translate }}</p>
-              </div>
-            }
-          </div>
-        }
+          <!-- Search Results Dropdown -->
+          @if (showSearchDropdown()) {
+            <div class="absolute top-full left-0 right-0 mt-3 bg-white/95 backdrop-blur-xl rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-outline-variant/10 overflow-hidden z-[210] animate-fade-in max-h-[60vh] flex flex-col">
+              <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-primary/30 via-primary to-primary/30 opacity-50"></div>
+              @if (isSearching()) {
+                <div class="p-8 flex items-center justify-center gap-4">
+                  <div class="w-6 h-6 border-3 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                  <span class="text-xs font-black text-outline uppercase tracking-[0.2em]">{{ 'common.loading' | translate }}</span>
+                </div>
+              } @else if (searchResults().length > 0) {
+                <div class="py-4 overflow-y-auto custom-scrollbar">
+                  @for (product of searchResults(); track product.id) {
+                    <a [routerLink]="['/' + currentLanguage() + '/products', product.id]"
+                       (click)="closeSearch()"
+                       class="px-6 py-4 hover:bg-primary/5 cursor-pointer flex items-center gap-5 transition-all duration-300 no-underline group/item">
+                      <div class="w-14 h-14 bg-surface-container rounded-2xl overflow-hidden flex-shrink-0 border border-outline-variant/10 shadow-sm group-hover/item:shadow-md group-hover/item:scale-105 transition-all">
+                        <img [src]="photoService.getPhotoUrl(product.productPhotos[0]?.url)" class="w-full h-full object-cover">
+                      </div>
+                      <div class="flex-grow min-w-0">
+                        <p class="text-[14px] font-bold text-on-surface truncate group-hover/item:text-primary transition-colors">{{ product.name }}</p>
+                        <p class="text-xs text-primary font-black mt-0.5 tracking-tight">{{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
+                      </div>
+                      <span class="material-symbols-outlined text-outline-variant opacity-0 group-hover/item:opacity-100 group-hover/item:translate-x-1 rtl:group-hover/item:-translate-x-1 transition-all">arrow_forward</span>
+                    </a>
+                  }
+                </div>
+              } @else if (searchQuery.length >= 2) {
+                <div class="p-10 text-center flex flex-col items-center gap-4">
+                  <div class="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mb-2">
+                    <span class="material-symbols-outlined text-4xl text-outline-variant opacity-30">search_off</span>
+                  </div>
+                  <p class="text-xs font-black text-on-surface-variant opacity-60 uppercase tracking-[0.2em]">{{ 'home.noProductsFound' | translate }}</p>
+                </div>
+              }
+            </div>
+          }
+        </div>
       </div>
 
-      <!-- Actions (Standardized Order for Mobile, Standard RTL for Desktop) -->
-      <div class="flex items-center space-x-1 sm:space-x-2 md:space-x-4 flex-row rtl:md:flex-row-reverse">
+      <!-- Actions -->
+      <div class="flex items-center space-x-1 sm:space-x-2 md:space-x-4 order-3 shrink-0">
         <!-- Language Switcher (Desktop Only) -->
         <button (click)="toggleLanguage()" 
                 class="hidden md:flex p-2 rounded-full hover:bg-primary/5 transition-all duration-300 scale-105 active:scale-95 text-primary">
@@ -96,56 +102,6 @@
         </button>
       </div>
     </div>
-
-    <!-- Mobile Search Bar -->
-    <div class="md:hidden px-4 pb-3 relative">
-      <div class="relative w-full">
-        <input type="text" 
-               [ngModel]="searchQuery" 
-               (ngModelChange)="onSearchInput($event)"
-               (keyup.enter)="onSearch()"
-               (focus)="showSearchDropdown.set(searchQuery.length >= 2)"
-               [placeholder]="'home.search' | translate"
-               class="w-full bg-surface-container-lowest px-4 py-2 rounded-full border border-outline-variant/30 focus:border-primary focus:bg-surface outline-none transition-all font-body text-sm text-on-surface shadow-sm">
-        <button (click)="onSearch()" class="absolute top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-primary text-on-primary rounded-full ltr:right-1 rtl:left-1" [class.right-1]="currentLanguage() === 'en'" [class.left-1]="currentLanguage() === 'ar'">
-          <span class="material-symbols-outlined text-[16px] font-bold">search</span>
-        </button>
-      </div>
-
-      <!-- Mobile Search Dropdown -->
-      @if (showSearchDropdown()) {
-        <div class="absolute top-full left-4 right-4 mt-2 bg-white rounded-2xl shadow-2xl border border-outline-variant/10 overflow-hidden z-[100] animate-fade-in">
-          @if (isSearching()) {
-            <div class="p-6 flex items-center justify-center gap-3">
-              <div class="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-              <span class="text-xs font-bold text-outline uppercase tracking-widest">{{ 'common.loading' | translate }}</span>
-            </div>
-          } @else if (searchResults().length > 0) {
-            <div class="py-2 max-h-[300px] overflow-y-auto custom-scrollbar">
-              @for (product of searchResults(); track product.id) {
-                <a [routerLink]="['/' + currentLanguage() + '/products', product.id]"
-                   (click)="closeSearch(); closeMobileMenu()"
-                   class="px-4 py-3 hover:bg-primary/5 cursor-pointer flex items-center gap-4 transition-colors no-underline block">
-                  <div class="w-12 h-12 bg-surface-container rounded-xl overflow-hidden flex-shrink-0 border border-outline-variant/10">
-                    <img [src]="photoService.getPhotoUrl(product.productPhotos[0]?.url)" class="w-full h-full object-cover">
-                  </div>
-                  <div class="flex-grow min-w-0">
-                    <p class="text-sm font-bold text-on-surface truncate">{{ product.name }}</p>
-                    <p class="text-xs text-primary font-black">{{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
-                  </div>
-                  <span class="material-symbols-outlined text-outline-variant text-lg ltr:mr-2 rtl:ml-2">chevron_right</span>
-                </a>
-              }
-            </div>
-          } @else if (searchQuery.length >= 2) {
-            <div class="p-8 text-center flex flex-col items-center gap-3">
-              <span class="material-symbols-outlined text-4xl text-outline-variant opacity-20">search_off</span>
-              <p class="text-xs font-bold text-on-surface-variant opacity-60 uppercase tracking-widest">{{ 'home.noProductsFound' | translate }}</p>
-            </div>
-          }
-        </div>
-      }
-    </div>
   </nav>
 
   <!-- Mobile Menu Overlay -->
@@ -166,35 +122,107 @@
             </button>
           </div>
 
-          <div class="flex-1 p-6 space-y-4 font-headline">
-            <a [routerLink]="'/' + currentLanguage() + '/'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-on-surface hover:text-primary py-2 font-bold animate-fade-in-up" style="animation-delay: 100ms">
+          <!-- Mobile Search Bar In Drawer -->
+          <div class="px-6 pt-4 pb-2 relative z-[200]">
+            <div class="relative w-full">
+              <input type="text" 
+                     [ngModel]="searchQuery" 
+                     (ngModelChange)="onSearchInput($event)"
+                     (keyup.enter)="onSearch()"
+                     (focus)="showSearchDropdown.set(searchQuery.length >= 2)"
+                     [placeholder]="'home.search' | translate"
+                     class="w-full bg-surface-container-low px-4 py-2.5 rounded-xl border border-outline-variant/20 focus:border-primary focus:bg-surface outline-none transition-all font-body text-sm text-on-surface shadow-sm">
+              <button (click)="onSearch()" class="absolute top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-primary text-on-primary rounded-lg ltr:right-1.5 rtl:left-1.5 transition-transform active:scale-95">
+                <span class="material-symbols-outlined text-[18px] font-bold">search</span>
+              </button>
+            </div>
+
+            <!-- Mobile Search Results Dropdown -->
+            @if (showSearchDropdown()) {
+              <div class="absolute top-full left-6 right-6 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] border border-outline-variant/10 overflow-hidden z-[210] animate-fade-in max-h-[50vh] flex flex-col">
+                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-primary/30 via-primary to-primary/30 opacity-50"></div>
+                @if (isSearching()) {
+                  <div class="p-6 flex items-center justify-center gap-3">
+                    <div class="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                    <span class="text-[10px] font-black text-outline uppercase tracking-[0.2em]">{{ 'common.loading' | translate }}</span>
+                  </div>
+                } @else if (searchResults().length > 0) {
+                  <div class="py-2 overflow-y-auto custom-scrollbar">
+                    @for (product of searchResults(); track product.id) {
+                      <a [routerLink]="['/' + currentLanguage() + '/products', product.id]"
+                         (click)="closeSearch(); closeMobileMenu()"
+                         class="px-4 py-3 hover:bg-primary/5 cursor-pointer flex items-center gap-4 transition-all duration-300 no-underline group/item">
+                        <div class="w-10 h-10 bg-surface-container rounded-xl overflow-hidden flex-shrink-0 border border-outline-variant/10 shadow-sm">
+                          <img [src]="photoService.getPhotoUrl(product.productPhotos[0]?.url)" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-grow min-w-0">
+                          <p class="text-xs font-bold text-on-surface truncate">{{ product.name }}</p>
+                          <p class="text-[10px] text-primary font-black mt-0.5 tracking-tight">{{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</p>
+                        </div>
+                      </a>
+                    }
+                  </div>
+                } @else if (searchQuery.length >= 2) {
+                  <div class="p-6 text-center flex flex-col items-center gap-3">
+                    <div class="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center mb-1">
+                      <span class="material-symbols-outlined text-2xl text-outline-variant opacity-30">search_off</span>
+                    </div>
+                    <p class="text-[10px] font-black text-on-surface-variant opacity-60 uppercase tracking-[0.2em]">{{ 'home.noProductsFound' | translate }}</p>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Scrollable Nav Links -->
+          <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4 font-headline">
+            <a [routerLink]="'/' + currentLanguage() + '/'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-on-surface hover:text-primary py-2 font-bold no-underline">
               <span class="material-symbols-outlined">home</span> {{ 'nav.home' | translate }}
             </a>
-            <a [routerLink]="'/' + currentLanguage() + '/categories'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-on-surface hover:text-primary py-2 font-bold animate-fade-in-up" style="animation-delay: 150ms">
-              <span class="material-symbols-outlined">grid_view</span> {{ 'nav.categories' | translate }}
-            </a>
-            <a [routerLink]="'/' + currentLanguage() + '/products'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-on-surface hover:text-primary py-2 font-bold animate-fade-in-up" style="animation-delay: 200ms">
+            
+            <!-- Mobile Categories Section (Recursive) -->
+            <div class="space-y-2">
+              <button (click)="toggleCategory('mobile-root', $event)" class="flex items-center justify-between w-full text-on-surface hover:text-primary py-2 font-bold">
+                <div class="flex items-center gap-4">
+                  <span class="material-symbols-outlined">grid_view</span> {{ 'nav.categories' | translate }}
+                </div>
+                <span class="material-symbols-outlined transition-transform duration-300" [class.rotate-90]="isExpanded('mobile-root')">chevron_right</span>
+              </button>
+
+              @if (isExpanded('mobile-root')) {
+                <div class="ltr:pl-8 rtl:pr-8 space-y-2 animate-fade-in">
+                  <a [routerLink]="['/' + currentLanguage() + '/products']" (click)="closeMobileMenu()" class="block py-2 text-primary font-black text-sm no-underline border-b border-primary/10 mb-2">
+                    {{ 'home.allCategories' | translate }}
+                  </a>
+                  <ng-container *ngTemplateOutlet="mobileCategoryList; context: { $implicit: categoryTree(), level: 0 }"></ng-container>
+                </div>
+              }
+            </div>
+
+            <a [routerLink]="'/' + currentLanguage() + '/products'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-on-surface hover:text-primary py-2 font-bold no-underline">
               <span class="material-symbols-outlined">inventory_2</span> {{ 'nav.products' | translate }}
             </a>
-            <a [routerLink]="'/' + currentLanguage() + '/wishes'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-on-surface hover:text-primary py-2 font-bold animate-fade-in-up" style="animation-delay: 250ms">
+            <a [routerLink]="'/' + currentLanguage() + '/wishes'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-on-surface hover:text-primary py-2 font-bold no-underline">
               <span class="material-symbols-outlined">favorite</span> {{ 'dashboard.wishlist' | translate }}
             </a>
-            <hr class="border-outline-variant animate-fade-in-up" style="animation-delay: 300ms">
+            
+            <hr class="border-outline-variant">
+            
             @if (isLoggedIn()) {
-              <a [routerLink]="'/' + currentLanguage() + '/orders'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-on-surface hover:text-primary py-2 font-bold animate-fade-in-up" style="animation-delay: 350ms">
+              <a [routerLink]="'/' + currentLanguage() + '/orders'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-on-surface hover:text-primary py-2 font-bold no-underline">
                 <span class="material-symbols-outlined">receipt_long</span> {{ 'orders.title' | translate }}
               </a>
-              <button (click)="logout(); closeMobileMenu()" class="flex items-center gap-4 text-error py-2 font-bold w-full text-left animate-fade-in-up" style="animation-delay: 400ms">
+              <button (click)="logout(); closeMobileMenu()" class="flex items-center gap-4 text-error py-2 font-bold w-full text-left">
                 <span class="material-symbols-outlined">logout</span> {{ 'auth.logout' | translate }}
               </button>
             } @else {
-              <a [routerLink]="'/' + currentLanguage() + '/auth/login'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-primary py-2 font-bold animate-fade-in-up" style="animation-delay: 350ms">
+              <a [routerLink]="'/' + currentLanguage() + '/auth/login'" (click)="closeMobileMenu()" class="flex items-center gap-4 text-primary py-2 font-bold no-underline">
                 <span class="material-symbols-outlined">login</span> {{ 'auth.login' | translate }}
               </a>
             }
           </div>
 
-          <div class="p-6 bg-surface-container-low">
+          <div class="p-6 bg-surface-container-low mt-auto">
             <button (click)="toggleLanguage(); closeMobileMenu()" class="flex items-center justify-center gap-3 w-full py-3 bg-surface-container-lowest border border-outline-variant rounded-xl font-bold text-sm">
               <span class="material-symbols-outlined text-lg">language</span>
               {{ currentLanguage() === 'en' ? 'العربية' : 'English' }}
@@ -205,67 +233,69 @@
     </div>
   }
 
+  <!-- Recursive Mobile Category Template -->
+  <ng-template #mobileCategoryList let-items let-level="level">
+    @for (cat of items; track cat.id) {
+      <div class="flex flex-col">
+        <div class="flex items-center justify-between w-full py-2">
+          <a [routerLink]="['/' + currentLanguage() + '/products']" [queryParams]="{ categoryId: cat.id }" (click)="closeMobileMenu()"
+             class="flex-1 text-[14px] font-bold text-on-surface-variant hover:text-primary no-underline transition-colors"
+             [style.padding-inline-start.px]="level * 16">
+            {{ cat.name }}
+          </a>
+          @if (cat.children?.length) {
+            <button (click)="toggleCategory(cat.id, $event)" class="p-1 text-on-surface-variant/40 hover:text-primary transition-all">
+              <span class="material-symbols-outlined text-lg transition-transform duration-300" [class.rotate-90]="isExpanded(cat.id)">chevron_right</span>
+            </button>
+          }
+        </div>
+        @if (isExpanded(cat.id) && cat.children?.length) {
+          <div class="animate-fade-in border-l rtl:border-l-0 rtl:border-r border-outline-variant/20 ml-2 rtl:mr-2 rtl:ml-0">
+            <ng-container *ngTemplateOutlet="mobileCategoryList; context: { $implicit: cat.children, level: level + 1 }"></ng-container>
+          </div>
+        }
+      </div>
+    }
+  </ng-template>
+
   <!-- Cart Component Shell -->
   <app-cart></app-cart>
   
   <!-- Main Execution Context -->
-  <main class="pt-[104px] md:pt-16 min-h-[calc(100vh-400px)]">
+  <main class="pt-[80px] md:pt-24 min-h-[calc(100vh-400px)]">
     <router-outlet></router-outlet>
   </main>
   
   <!-- Premium 4-Column Footer -->
-  <footer class="w-full py-16 px-6 border-t border-outline-variant bg-surface-container-low transition-colors duration-300 mt-20">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-12 max-w-7xl mx-auto rtl:text-right">
-      <!-- Brand & Vision -->
+  <footer class="w-full py-16 px-6 border-t border-outline-variant bg-surface-container-low mt-20">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 rtl:text-right">
       <div class="space-y-4">
         <div class="text-primary font-black text-2xl font-headline tracking-tighter">MyShop</div>
         <p class="text-on-surface-variant font-body text-xs uppercase tracking-widest leading-loose">
           {{ 'footer.shopDescription' | translate }}
         </p>
-        <div class="flex gap-4 pt-4">
-          <span class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform">brand_awareness</span>
-          <span class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform">public</span>
-        </div>
       </div>
-
-      <!-- Discovery Paths -->
       <div class="space-y-6">
         <h4 class="font-headline font-bold text-sm uppercase tracking-tight">{{ 'footer.quickLinks' | translate }}</h4>
-        <ul class="flex flex-col gap-3 font-label text-xs uppercase tracking-widest">
-          <li><a [routerLink]="'/' + currentLanguage() + '/products'" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'nav.products' | translate }}</a></li>
-          <li><a [routerLink]="'/' + currentLanguage() + '/categories'" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'nav.categories' | translate }}</a></li>
-          <li><a [routerLink]="'/' + currentLanguage() + '/'" fragment="deals" class="text-on-surface-variant hover:text-primary transition-colors">{{ 'nav.deals' | translate }}</a></li>
+        <ul class="flex flex-col gap-3 font-label text-xs uppercase tracking-widest list-none p-0">
+          <li><a [routerLink]="'/' + currentLanguage() + '/products'" class="text-on-surface-variant hover:text-primary transition-colors no-underline">{{ 'nav.products' | translate }}</a></li>
+          <li><a [routerLink]="'/' + currentLanguage() + '/categories'" class="text-on-surface-variant hover:text-primary transition-colors no-underline">{{ 'nav.categories' | translate }}</a></li>
         </ul>
       </div>
-
-      <!-- Contact Information -->
       <div class="space-y-6">
         <h4 class="font-headline font-bold text-sm uppercase tracking-tight">{{ 'footer.contact' | translate }}</h4>
-        <ul class="flex flex-col gap-4 font-label text-[10px] uppercase tracking-widest">
-          <li class="flex items-center gap-3 text-on-surface-variant group cursor-pointer hover:text-primary transition-colors">
-            <span class="material-symbols-outlined text-lg opacity-40 group-hover:opacity-100 transition-opacity">mail</span>
-            <span class="break-all">{{ 'footer.email' | translate }}</span>
-          </li>
-          <li class="flex items-center gap-3 text-on-surface-variant group cursor-pointer hover:text-primary transition-colors">
-            <span class="material-symbols-outlined text-lg opacity-40 group-hover:opacity-100 transition-opacity">call</span>
-            <span>{{ 'footer.phone' | translate }}</span>
+        <ul class="flex flex-col gap-4 font-label text-[10px] uppercase tracking-widest list-none p-0">
+          <li class="flex items-center gap-3 text-on-surface-variant group">
+            <span class="material-symbols-outlined text-lg">mail</span>
+            <span>{{ 'footer.email' | translate }}</span>
           </li>
         </ul>
       </div>
-
-
     </div>
-
-    <!-- Final Footnote -->
-    <div class="max-w-7xl mx-auto mt-16 pt-8 border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-6">
+    <div class="max-w-7xl mx-auto mt-16 pt-8 border-t border-outline-variant text-center">
       <p class="font-label text-xs uppercase tracking-widest text-on-surface-variant">
         © 2026 MyShop. {{ 'footer.allRightsReserved' | translate }}
       </p>
-      <div class="flex gap-6 grayscale opacity-60">
-        <span class="material-symbols-outlined text-xl">credit_card</span>
-        <span class="material-symbols-outlined text-xl">account_balance_wallet</span>
-      </div>
     </div>
   </footer>
 </div>
-

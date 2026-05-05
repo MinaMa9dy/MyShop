@@ -29,7 +29,7 @@ import { CartItem } from '../../core/models/cart.model';
         <div class="flex items-center gap-3 sm:gap-4">
            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary relative">
               <span class="material-symbols-outlined text-xl sm:text-2xl">shopping_bag</span>
-              <span class="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-primary text-on-primary text-[8px] sm:text-[10px] font-black rounded-full flex items-center justify-center">{{ totalItems() }}</span>
+              <span class="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-primary text-on-primary text-[8px] sm:text-[10px] font-black rounded-full flex items-center justify-center">{{ total() }}</span>
            </div>
            <div>
               <h2 class="font-headline font-black text-lg sm:text-xl text-on-surface tracking-tight">{{ 'CART.SHOPPING_CART' | translate }}</h2>
@@ -160,7 +160,7 @@ export class CartComponent {
 
   items = this.cartService.items;
   isOpen = this.cartService.isOpen;
-  totalItems = this.cartService.totalItems;
+  total = this.cartService.total;
   totalPrice = this.cartService.totalPrice;
   appliedCoupon = this.cartService.appliedCoupon;
   originalTotalPrice = this.cartService.originalTotalPrice;
@@ -213,3 +213,4 @@ export class CartComponent {
 
   getItemDiscountedPrice(item: CartItem): number { return this.cartService.getItemDiscountedValue(item); }
 }
+

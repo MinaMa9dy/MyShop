@@ -18,7 +18,7 @@ import {
 } from '../models/auth.model';
 import { TokenService } from './token.service';
 import { CartService } from './cart.service';
-
+import { Result } from '../models/result.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -42,15 +42,15 @@ export class AuthService {
   public loginSuccess = new BehaviorSubject<boolean>(false);
   
   // Track ongoing refresh request to prevent multiple concurrent calls
-  private refreshTokenInProgress$: Observable<AuthenticationResponseDto> | null = null;
+  private refreshTokenInProgress$: Observable<Result<AuthenticationResponseDto>> | null = null;
   
-  login(credentials: LoginDto): Observable<AuthenticationResponseDto> {
-    return this.http.post<AuthenticationResponseDto>(`${this.apiUrl}/login`, credentials)
+  login(credentials: LoginDto): Observable<Result<AuthenticationResponseDto>> {
+    return this.http.post<Result<AuthenticationResponseDto>>(`${this.apiUrl}/login`, credentials)
       .pipe(
         tap(response => {
           console.log('Login response:', response);
-          if (response && response.accessToken) {
-            this.tokenService.setTokens(response.accessToken, response.refreshToken || '');
+          if (response.success && response.data?.accessToken) {
+            this.tokenService.setTokens(response.data.accessToken, response.data.refreshToken || '');
             this.isLoggedInSignal.set(true);
             this.loadCurrentUser();
             // Trigger cart sync
@@ -62,13 +62,13 @@ export class AuthService {
       );
   }
   
-  register(user: RegisterDto): Observable<AuthenticationResponseDto> {
-    return this.http.post<AuthenticationResponseDto>(`${this.apiUrl}/register`, user)
+  register(user: RegisterDto): Observable<Result<AuthenticationResponseDto>> {
+    return this.http.post<Result<AuthenticationResponseDto>>(`${this.apiUrl}/register`, user)
       .pipe(
         tap(response => {
           console.log('Register response:', response);
-          if (response && response.accessToken) {
-            this.tokenService.setTokens(response.accessToken, response.refreshToken || '');
+          if (response.success && response.data?.accessToken) {
+            this.tokenService.setTokens(response.data.accessToken, response.data.refreshToken || '');
             this.isLoggedInSignal.set(true);
             this.loadCurrentUser();
             // Trigger cart sync
@@ -80,7 +80,7 @@ export class AuthService {
       );
   }
   
-  refreshToken(): Observable<AuthenticationResponseDto> {
+  refreshToken(): Observable<Result<AuthenticationResponseDto>> {
     if (this.refreshTokenInProgress$) {
       console.log('AuthService - Refresh already in progress, returning existing observable');
       return this.refreshTokenInProgress$;
@@ -101,13 +101,13 @@ export class AuthService {
     
     console.log('AuthService - Initiating token refresh');
     
-    this.refreshTokenInProgress$ = this.http.post<AuthenticationResponseDto>(`${this.apiUrl}/refresh`, tokenModel)
+    this.refreshTokenInProgress$ = this.http.post<Result<AuthenticationResponseDto>>(`${this.apiUrl}/refresh`, tokenModel)
       .pipe(
         tap(response => {
           console.log('AuthService - Refresh token response received');
-          if (response && response.accessToken) {
-            const newRefreshToken = response.refreshToken || refreshToken;
-            this.tokenService.setTokens(response.accessToken, newRefreshToken);
+          if (response.success && response.data?.accessToken) {
+            const newRefreshToken = response.data.refreshToken || refreshToken;
+            this.tokenService.setTokens(response.data.accessToken, newRefreshToken);
             console.log('AuthService - Tokens updated successfully');
           }
         }),
@@ -125,32 +125,31 @@ export class AuthService {
     return this.refreshTokenInProgress$;
   }
   
-  confirmEmail(dto: ConfirmEmailDto): Observable<string> {
-    return this.http.get(`${this.apiUrl}/ConfirmEmail`, {
-      params: { userId: dto.userId, token: dto.token },
-      responseType: 'text'
+  confirmEmail(dto: ConfirmEmailDto): Observable<Result<string>> {
+    return this.http.get<Result<string>>(`${this.apiUrl}/ConfirmEmail`, {
+      params: { userId: dto.userId, token: dto.token }
     });
   }
 
-  resendEmailConfirmation(dto: ResendEmailConfirmationDto): Observable<string> {
-    return this.http.post(`${this.apiUrl}/ResendEmailConfirmation`, dto, { responseType: 'text' });
+  resendEmailConfirmation(dto: ResendEmailConfirmationDto): Observable<Result<string>> {
+    return this.http.post<Result<string>>(`${this.apiUrl}/ResendEmailConfirmation`, dto);
   }
 
-  forgotPassword(dto: ForgotPasswordDto): Observable<string> {
-    return this.http.post(`${this.apiUrl}/ForgotPassword`, dto, { responseType: 'text' });
+  forgotPassword(dto: ForgotPasswordDto): Observable<Result<string>> {
+    return this.http.post<Result<string>>(`${this.apiUrl}/ForgotPassword`, dto);
   }
 
-  resetPassword(dto: ResetPasswordDto): Observable<string> {
-    return this.http.post(`${this.apiUrl}/ResetPassword`, dto, { responseType: 'text' });
+  resetPassword(dto: ResetPasswordDto): Observable<Result<string>> {
+    return this.http.post<Result<string>>(`${this.apiUrl}/ResetPassword`, dto);
   }
 
-  googleLogin(dto: GoogleLoginDto): Observable<AuthenticationResponseDto> {
-    return this.http.post<AuthenticationResponseDto>(`${this.apiUrl}/google-login`, dto)
+  googleLogin(dto: GoogleLoginDto): Observable<Result<AuthenticationResponseDto>> {
+    return this.http.post<Result<AuthenticationResponseDto>>(`${this.apiUrl}/google-login`, dto)
       .pipe(
         tap(response => {
           console.log('Google login response:', response);
-          if (response && response.accessToken) {
-            this.tokenService.setTokens(response.accessToken, response.refreshToken || '');
+          if (response.success && response.data?.accessToken) {
+            this.tokenService.setTokens(response.data.accessToken, response.data.refreshToken || '');
             this.isLoggedInSignal.set(true);
             this.loadCurrentUser();
             // Trigger cart sync

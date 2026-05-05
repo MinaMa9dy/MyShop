@@ -220,8 +220,8 @@ export class CouponUserComponent implements OnInit, OnDestroy {
       })
     ).subscribe({
       next: (res: any) => { 
-        if (res.isSuccess && res.data) {
-          this.users.set(res.data.items || []);
+        if (res.success && res.data) {
+          this.users.set(res.data || []);
         } else if (res.items) {
           this.users.set(res.items);
         }
@@ -240,9 +240,9 @@ export class CouponUserComponent implements OnInit, OnDestroy {
       assignedRes: this.couponService.getCouponUsers(couponId) 
     }).subscribe({
       next: (resp: any) => {
-        if (resp.usersRes.isSuccess && resp.usersRes.data) {
-          this.users.set(resp.usersRes.data.items || []);
-          this.totalCustomers.set(resp.usersRes.data.totalItems || 0);
+        if (resp.usersRes.success && resp.usersRes.data) {
+          this.users.set(resp.usersRes.data || []);
+          this.totalCustomers.set(resp.usersRes.meta?.total || 0);
         } else if (resp.usersRes.items) {
           this.users.set(resp.usersRes.items);
           this.totalCustomers.set(resp.usersRes.items.length);
@@ -251,7 +251,7 @@ export class CouponUserComponent implements OnInit, OnDestroy {
         let assignedIds: string[] = [];
         const limitsMap = new Map<string, number | null>();
 
-        if (resp.assignedRes.isSuccess && resp.assignedRes.data) {
+        if (resp.assignedRes.success && resp.assignedRes.data) {
           this.totalAssigned.set(resp.assignedRes.data.length);
           assignedIds = resp.assignedRes.data.map((u: any) => {
             if (u.usageLimit !== undefined) {
@@ -309,7 +309,7 @@ export class CouponUserComponent implements OnInit, OnDestroy {
       usageLimit: this.bulkLimit() ?? undefined 
     }).subscribe({
       next: (res) => {
-        if (res.isSuccess) {
+        if (res.success) {
           this.success.set('Global distribution complete.');
           setTimeout(() => this.router.navigate(['/', this.currentLang, 'admin', 'coupons']), 1000);
         } else {
@@ -360,7 +360,7 @@ export class CouponUserComponent implements OnInit, OnDestroy {
 
     forkJoin(requests).subscribe({
       next: (responses) => {
-        const failed = responses.some((r: any) => !r.isSuccess);
+        const failed = responses.some((r: any) => !r.success);
         if (!failed) {
           this.success.set('Permissions updated.');
           setTimeout(() => this.router.navigate(['/', this.currentLang, 'admin', 'coupons']), 1000);
@@ -373,3 +373,4 @@ export class CouponUserComponent implements OnInit, OnDestroy {
     });
   }
 }
+

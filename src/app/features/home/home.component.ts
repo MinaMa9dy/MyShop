@@ -271,8 +271,8 @@ export class HomeComponent implements OnInit {
   private loadFeaturedProducts(): void {
     this.productService.getHotProducts(8).subscribe({
       next: (result) => {
-        if (result.isSuccess && result.data) {
-          this.featuredProducts.set(result.data.items.map((p: any) => this.normalizeProduct(p)));
+        if (result.success && result.data) {
+          this.featuredProducts.set(result.data.map((p: any) => this.normalizeProduct(p)));
         }
       },
       error: (error) => {
@@ -304,7 +304,7 @@ export class HomeComponent implements OnInit {
     
     this.wishService.getWishes().subscribe({
       next: (res) => {
-        if (res.isSuccess && res.data) {
+        if (res.success && res.data) {
           const ids = new Set<string>();
           res.data.forEach(w => {
             if (w.productId) ids.add(w.productId);
@@ -415,15 +415,16 @@ export class HomeComponent implements OnInit {
       name: p.name || p.Name,
       description: p.description || p.Description,
       price: p.price || p.Price,
-      newPrice: p.newPrice || p.NewPrice,
-      oldPrice: p.oldPrice || p.OldPrice,
+      newPrice: p.newPrice || p.NewPrice || p.productVariants?.[0]?.newPrice || p.productVariants?.[0]?.NewPrice || 0,
+      oldPrice: p.oldPrice || p.OldPrice || p.productVariants?.[0]?.oldPrice || p.productVariants?.[0]?.OldPrice || 0,
       categoryId: p.categoryId || p.CategoryId,
       categoryName: p.categoryName || p.CategoryName,
       supplierId: p.supplierId || p.SupplierId,
-      shownQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.shownQuantity ?? p.ShownQuantity) ?? 1,
-      stockQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.shownQuantity ?? p.ShownQuantity) ?? 1,
+      shownQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.productVariants?.[0]?.stockQuantity ?? p.productVariants?.[0]?.StockQuantity) ?? 0,
+      stockQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.productVariants?.[0]?.stockQuantity ?? p.productVariants?.[0]?.StockQuantity) ?? 0,
       quantityInStock: p.quantityInStock || p.QuantityInStock,
       productPhotos: p.productPhotos || p.ProductPhotos || p.productphotos || [],
+      productVariants: p.productVariants || p.ProductVariants || p.productvariants || [],
       haveSale: p.haveSale ?? p.HaveSale ?? false,
       isFasting: p.isFasting ?? p.IsFasting ?? false,
       popularity: p.popularity || p.Popularity || 0,
@@ -431,3 +432,4 @@ export class HomeComponent implements OnInit {
     };
   }
 }
+

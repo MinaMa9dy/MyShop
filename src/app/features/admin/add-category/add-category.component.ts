@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CategoryService } from '../../../core/services/category.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { AddCategoryDto, Category } from '../../../core/models/category.model';
@@ -24,7 +24,7 @@ import { AddCategoryDto, Category } from '../../../core/models/category.model';
              {{ 'admin.addCategory.title' | translate }}
            </h1>
            <p class="font-body text-on-surface-variant opacity-70">
-             {{ 'admin.addProduct.subtitle' | translate }}
+             {{ 'admin.addCategory.subtitle' | translate }}
            </p>
         </div>
       </header>
@@ -39,7 +39,7 @@ import { AddCategoryDto, Category } from '../../../core/models/category.model';
                      [placeholder]="'admin.addCategory.namePlaceholder' | translate"
                      class="w-full bg-surface-container-low px-6 py-5 rounded-2xl border-2 border-transparent focus:border-primary/20 outline-none font-body text-sm text-on-surface transition-all">
               @if (categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched) {
-                <p class="text-[10px] font-black text-error uppercase px-2">Taxonomy Label Required</p>
+                <p class="text-[10px] font-black text-error uppercase px-2">{{ 'admin.addCategory.nameRequired' | translate }}</p>
               }
             </div>
 
@@ -83,13 +83,13 @@ import { AddCategoryDto, Category } from '../../../core/models/category.model';
                  @if (submitting()) {
                    <span class="w-6 h-6 border-4 border-on-primary/30 border-t-white rounded-full animate-spin"></span>
                  } @else {
-                   <span>Establish Category</span>
+                   <span>{{ 'admin.addCategory.button' | translate }}</span>
                    <span class="material-symbols-outlined group-hover:translate-y-1 transition-transform">schema</span>
                  }
               </button>
               <a [routerLink]="['/' + currentLang + '/categories']"
                  class="flex-1 py-6 bg-surface-container rounded-[32px] font-headline font-bold text-xs uppercase tracking-widest text-outline hover:bg-surface-container-high transition-all text-center flex items-center justify-center">
-                 Cancel
+                 {{ 'admin.addCategory.cancel' | translate }}
               </a>
             </div>
           </form>
@@ -104,6 +104,7 @@ export class AddCategoryComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private languageService = inject(LanguageService);
   private router = inject(Router);
+  private translate = inject(TranslateService);
 
   categoryForm: FormGroup = this.fb.group({
     name: ['', [Validators.required]],
@@ -123,7 +124,7 @@ export class AddCategoryComponent implements OnInit {
   loadCategories(): void {
     this.categoryService.getAll().subscribe({
       next: (cats) => this.categories.set(cats),
-      error: () => this.error.set('Failed to synchronize taxon data.')
+      error: () => this.error.set(this.translate.instant('admin.addCategory.error'))
     });
   }
 
@@ -139,11 +140,11 @@ export class AddCategoryComponent implements OnInit {
 
     this.categoryService.create(categoryData).subscribe({
       next: () => {
-        this.submitting.set(false); this.success.set('Taxonomy established successfully.');
+        this.submitting.set(false); this.success.set(this.translate.instant('admin.addCategory.success'));
         this.categoryForm.reset();
         setTimeout(() => this.router.navigate(['/', this.currentLang, 'categories']), 1000);
       },
-      error: (err) => { this.submitting.set(false); this.error.set(err.error?.message || 'Creation failed.'); }
+      error: (err) => { this.submitting.set(false); this.error.set(err.error?.message || this.translate.instant('admin.addCategory.error')); }
     });
   }
 }

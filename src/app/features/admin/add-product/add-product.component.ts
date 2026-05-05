@@ -401,7 +401,7 @@ export class AddProductComponent implements OnInit {
 
     this.productService.create(productData).subscribe({
       next: (result) => {
-        if (result.isSuccess && result.data) {
+        if (result.success && result.data) {
           this.submitting.set(false); 
           this.success.set(this.translate.instant('admin.addProduct.entityIntegrated'));
           this.selectedFiles.set([]); 
@@ -438,7 +438,7 @@ export class AddProductComponent implements OnInit {
 
     this.productService.update(productData.id, productData).subscribe({
       next: (result) => {
-        if (result.isSuccess) {
+        if (result.success) {
           this.submitting.set(false); 
           this.success.set(this.translate.instant('admin.addProduct.modificationVerified'));
           setTimeout(() => this.router.navigate([`/${this.currentLang}/products/${this.productId()}`]), 1000);
@@ -451,3 +451,4 @@ export class AddProductComponent implements OnInit {
     });
   }
 }
+

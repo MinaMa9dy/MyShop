@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Result, PageResult } from '../models/result.model';
+import { Result } from '../models/result.model';
 import { 
   Product, 
   AddProductDto, 
@@ -21,7 +21,7 @@ export class ProductService {
   private apiUrl = `${environment.apiUrl}/Products`;
   
   // Core CRUD
-  getAll(filter: ProductFilter = {}): Observable<Result<PageResult<Product>>> {
+  getAll(filter: ProductFilter = {}): Observable<Result<Product[]>> {
     let params = new HttpParams();
     
     if (filter.pageNumber) params = params.set('PageNumber', filter.pageNumber.toString());
@@ -33,26 +33,31 @@ export class ProductService {
     if (filter.haveSale !== undefined) params = params.set('HaveSale', filter.haveSale.toString());
     if (filter.isFasting !== undefined) params = params.set('IsFasting', filter.isFasting.toString());
       
-    return this.http.get<Result<PageResult<Product>>>(this.apiUrl, { params });
+    return this.http.get<Result<Product[]>>(this.apiUrl, { params });
   }
   
   getById(id: string): Observable<Result<Product>> {
     return this.http.get<Result<Product>>(`${this.apiUrl}/${id}`);
   }
   
-  getHotProducts(n: number = 8): Observable<Result<PageResult<Product>>> {
+  getHotProducts(n: number = 8): Observable<Result<Product[]>> {
     let params = new HttpParams().set('numberOfProducts', n.toString());
-    return this.http.get<Result<PageResult<Product>>>(`${this.apiUrl}/hot`, { params });
+    return this.http.get<Result<Product[]>>(`${this.apiUrl}/hot`, { params });
   }
 
-  getProductsBySeller(sellerId: string, filter: ProductFilter = {}): Observable<Result<PageResult<Product>>> {
+  getRelatedProducts(id: string, n: number = 4): Observable<Result<Product[]>> {
+    let params = new HttpParams().set('n', n.toString());
+    return this.http.get<Result<Product[]>>(`${this.apiUrl}/${id}/related`, { params });
+  }
+
+  getProductsBySeller(sellerId: string, filter: ProductFilter = {}): Observable<Result<Product[]>> {
     let params = new HttpParams();
     if (filter.pageNumber) params = params.set('PageNumber', filter.pageNumber.toString());
     if (filter.pageSize) params = params.set('PageSize', filter.pageSize.toString());
     if (filter.searchTerm) params = params.set('SearchTerm', filter.searchTerm);
     if (filter.categoryId) params = params.set('CategoryId', filter.categoryId);
 
-    return this.http.get<Result<PageResult<Product>>>(`${this.apiUrl}/seller/${sellerId}`, { params });
+    return this.http.get<Result<Product[]>>(`${this.apiUrl}/seller/${sellerId}`, { params });
   }
   
   create(product: AddProductDto): Observable<Result<Product>> {
@@ -101,8 +106,8 @@ export class ProductService {
     return this.http.get<Result<any[]>>(`${this.apiUrl}/Attributes`);
   }
   
-  getCities(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/Cities`);
+  getCities(): Observable<Result<string[]>> {
+    return this.http.get<Result<string[]>>(`${this.apiUrl}/Cities`);
   }
 
   private toFormData(obj: any): FormData {
@@ -136,3 +141,4 @@ export class ProductService {
     return formData;
   }
 }
+

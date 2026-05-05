@@ -1,188 +1,195 @@
 <main class="min-h-screen bg-surface" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
-  <!-- Catalog Hero / Quick Filter Header -->
+
+  <!-- ══ Hero Header ══ -->
   <header class="bg-surface-container-low pt-24 pb-12 border-b border-outline-variant/30">
     <div class="max-w-7xl mx-auto px-6">
-      <div class="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 sm:gap-8 text-center md:text-start">
+      <div class="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 text-center md:text-start">
         <div>
           <h1 class="font-headline text-3xl sm:text-5xl font-black tracking-tighter text-on-surface mb-2">
             {{ 'home.featuredProducts' | translate }}
           </h1>
-          <p class="font-body text-xs sm:text-base text-on-surface-variant opacity-70">
+          <p class="font-body text-sm text-on-surface-variant opacity-70">
             {{ 'home.subtitle' | translate }}
           </p>
         </div>
-
         @if (canAddProduct) {
           <button [routerLink]="['/' + currentLang + '/admin/products/add']"
-                  class="flex items-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 bg-primary text-on-primary rounded-xl sm:rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl font-headline font-bold text-sm sm:text-base">
-            <span class="material-symbols-outlined text-xl sm:text-2xl">add_circle</span>
+                  class="flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl font-headline font-bold text-sm">
+            <span class="material-symbols-outlined">add_circle</span>
             {{ 'admin.addProduct.addProduct' | translate }}
           </button>
         }
       </div>
-
-
     </div>
   </header>
 
-  <div class="max-w-7xl mx-auto px-6 py-12">
-    <div class="flex flex-col lg:flex-row gap-12">
-      
-      <!-- Sidebar Filters -->
-      <!-- Desktop Sidebar -->
-      <aside class="hidden lg:block lg:w-72 flex-shrink-0">
-        <div class="sticky top-24">
-          <ng-container *ngTemplateOutlet="filterContent"></ng-container>
+  <!-- ══ Main Layout ══ -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+    <div class="flex flex-col lg:flex-row gap-8">
+
+      <!-- ─── Desktop Sidebar ─── -->
+      <aside class="hidden lg:flex flex-col gap-6 w-72 shrink-0">
+        <div class="sticky top-24 flex flex-col gap-6">
+
+          <!-- Category Tree Card -->
+          <div class="bg-white rounded-3xl border border-outline-variant/10 shadow-sm overflow-hidden">
+            <div class="flex items-center gap-3 px-5 pt-5 pb-3 border-b border-outline-variant/10">
+              <span class="material-symbols-outlined text-[20px] text-primary">category</span>
+              <h2 class="font-headline font-black text-[13px] uppercase tracking-widest text-on-surface">
+                {{ 'home.categories' | translate }}
+              </h2>
+            </div>
+            <div class="p-3">
+              <app-category-tree
+                [categories]="categories()"
+                [selectedId]="selectedCategory"
+                (categorySelected)="selectCategory($event)">
+              </app-category-tree>
+            </div>
+          </div>
+
+          <!-- Price Range Card -->
+          <div class="bg-white rounded-3xl border border-outline-variant/10 shadow-sm p-5">
+            <h3 class="font-headline font-black text-[13px] uppercase tracking-widest text-on-surface mb-4">
+              {{ 'home.priceRange' | translate }}
+            </h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="flex flex-col gap-1">
+                <span class="text-[10px] uppercase font-bold text-outline-variant">{{ 'home.minPrice' | translate }}</span>
+                <input type="number" [(ngModel)]="minPrice" (ngModelChange)="onFilterChange()" placeholder="0"
+                       class="w-full bg-surface-container-low px-3 py-3 rounded-xl border border-outline-variant/20 focus:border-primary outline-none text-sm transition-all">
+              </div>
+              <div class="flex flex-col gap-1">
+                <span class="text-[10px] uppercase font-bold text-outline-variant">{{ 'home.maxPrice' | translate }}</span>
+                <input type="number" [(ngModel)]="maxPrice" (ngModelChange)="onFilterChange()" placeholder="∞"
+                       class="w-full bg-surface-container-low px-3 py-3 rounded-xl border border-outline-variant/20 focus:border-primary outline-none text-sm transition-all">
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Toggles Card -->
+          <div class="bg-white rounded-3xl border border-outline-variant/10 shadow-sm p-5 flex flex-col gap-2">
+            <label class="flex items-center gap-3 px-4 py-3.5 rounded-xl cursor-pointer transition-colors"
+                   [class]="onSaleOnly ? 'bg-primary/8 text-primary' : 'hover:bg-surface-container-low text-on-surface-variant'">
+              <span class="material-symbols-outlined text-[20px]">sell</span>
+              <span class="font-semibold text-sm flex-1">{{ 'home.onSaleOnly' | translate }}</span>
+              <input type="checkbox" [(ngModel)]="onSaleOnly" (ngModelChange)="onFilterChange()" class="hidden">
+              <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all"
+                   [class]="onSaleOnly ? 'bg-primary border-primary' : 'border-outline-variant'">
+                @if (onSaleOnly) {
+                  <span class="material-symbols-outlined text-white text-[14px]">check</span>
+                }
+              </div>
+            </label>
+            <label class="flex items-center gap-3 px-4 py-3.5 rounded-xl cursor-pointer transition-colors"
+                   [class]="isFastingOnly ? 'bg-primary/8 text-primary' : 'hover:bg-surface-container-low text-on-surface-variant'">
+              <span class="material-symbols-outlined text-[20px]">eco</span>
+              <span class="font-semibold text-sm flex-1">{{ 'product.fasting' | translate }}</span>
+              <input type="checkbox" [(ngModel)]="isFastingOnly" (ngModelChange)="onFilterChange()" class="hidden">
+              <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all"
+                   [class]="isFastingOnly ? 'bg-primary border-primary' : 'border-outline-variant'">
+                @if (isFastingOnly) {
+                  <span class="material-symbols-outlined text-white text-[14px]">check</span>
+                }
+              </div>
+            </label>
+            <button (click)="clearFilters()" class="mt-2 w-full py-3 rounded-xl text-[11px] font-black uppercase tracking-widest text-error hover:bg-error/5 transition-all flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-[16px]">filter_alt_off</span>
+              {{ 'home.clear' | translate }}
+            </button>
+          </div>
         </div>
       </aside>
 
-      <!-- Main Product Area -->
-      <section class="flex-grow">
-        <!-- Results Info & Mobile Filter Toggle -->
-        <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-6">
-          <div class="flex items-center justify-between w-full sm:w-auto gap-4">
-             <button (click)="isMobileFiltersOpen.set(true)" 
-                     class="lg:hidden flex items-center gap-2 bg-surface-container px-6 py-3 rounded-2xl font-bold text-sm text-on-surface-variant border border-outline-variant/10">
-                <span class="material-symbols-outlined text-lg">filter_list</span>
-                {{ 'home.categories' | translate }}
-             </button>
-             <p class="text-on-surface-variant font-body text-sm">
-                {{ 'home.showingProducts' | translate: { count: products().length } }}
-             </p>
-          </div>
-           <p class="font-body text-sm text-on-surface-variant opacity-60">
-             {{ 'home.showingProducts' | translate:{'count': products().length} }}
-           </p>
+      <!-- ─── Product Grid ─── -->
+      <section class="flex-grow min-w-0">
+
+        <!-- Top bar: mobile filter btn + result count -->
+        <div class="flex items-center justify-between mb-6">
+          <button (click)="isMobileFiltersOpen.set(true)"
+                  class="lg:hidden flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-outline-variant/20 shadow-sm font-bold text-sm text-on-surface-variant">
+            <span class="material-symbols-outlined text-lg">tune</span>
+            {{ 'home.categories' | translate }}
+            @if (selectedCategory) {
+              <span class="w-2 h-2 bg-primary rounded-full"></span>
+            }
+          </button>
+          <p class="text-sm text-on-surface-variant font-body ltr:ml-auto rtl:mr-auto">
+            {{ 'home.showingProducts' | translate:{ count: products().length } }}
+          </p>
         </div>
 
+        <!-- Skeleton / Empty / Grid -->
         @if (loading()) {
-          <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+          <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
             @for (i of [1,2,3,4,5,6]; track i) {
-              <div class="bg-surface-container-lowest rounded-3xl overflow-hidden animate-pulse-soft border border-outline-variant/10">
-                <div class="aspect-[4/5] skeleton rounded-3xl"></div>
-                <div class="p-6 space-y-4">
-                  <div class="h-6 w-3/4 skeleton rounded-lg opacity-20"></div>
-                  <div class="h-8 w-1/2 skeleton rounded-lg opacity-20"></div>
+              <div class="rounded-3xl overflow-hidden animate-pulse bg-surface-container border border-outline-variant/10">
+                <div class="aspect-[4/5] bg-surface-container-high"></div>
+                <div class="p-4 space-y-3">
+                  <div class="h-4 w-3/4 bg-surface-container-high rounded-lg"></div>
+                  <div class="h-6 w-1/2 bg-surface-container-high rounded-lg"></div>
                 </div>
               </div>
             }
           </div>
         } @else if (products().length === 0) {
-          <div class="text-center py-40 bg-surface-container-lowest rounded-3xl border-2 border-dashed border-outline-variant/30">
-            <span class="material-symbols-outlined text-6xl text-outline-variant mb-4">search_off</span>
-            <p class="font-headline font-bold text-on-surface-variant">{{ 'common.noItemsFound' | translate }}</p>
-            <button (click)="clearFilters()" class="mt-6 text-primary font-black uppercase text-xs tracking-widest hover:underline">{{ 'common.resetFilters' | translate }}</button>
+          <div class="text-center py-40 bg-white rounded-3xl border-2 border-dashed border-outline-variant/30">
+            <span class="material-symbols-outlined text-6xl text-outline-variant opacity-30">search_off</span>
+            <p class="font-headline font-bold text-on-surface-variant mt-4">{{ 'common.noItemsFound' | translate }}</p>
+            <button (click)="clearFilters()" class="mt-4 text-primary font-black text-xs uppercase tracking-widest hover:underline">
+              {{ 'common.resetFilters' | translate }}
+            </button>
           </div>
         } @else {
-          <!-- Grid -->
-          <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-            @for (product of products(); track product.id; let i = $index) {
-              <div class="group animate-fade-in-up relative bg-surface-container-lowest rounded-3xl overflow-hidden border border-outline-variant/10 hover:border-primary/30 transition-[transform,shadow,border-color] duration-500 hover:shadow-2xl"
-                   style="will-change: transform, opacity; transform: translateZ(0); backface-visibility: hidden; contain: layout;">
-                <!-- Image Container -->
-                <div class="relative aspect-[4/5] overflow-hidden bg-surface-container" [routerLink]="['/' + currentLang + '/products', product.id]">
+          <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+            @for (product of products(); track product.id) {
+              <div class="group relative bg-white rounded-3xl overflow-hidden border border-outline-variant/10 hover:border-primary/20 transition-all duration-500 hover:shadow-xl">
+                <div class="relative aspect-[4/5] overflow-hidden bg-surface-container cursor-pointer" [routerLink]="['/' + currentLang + '/products', product.id]">
                   @if (getMainPhotoUrl(product)) {
-                    <img [src]="getMainPhotoUrl(product)"
-                         [alt]="product.name"
-                         loading="lazy"
-                         decoding="async"
-                         [attr.fetchpriority]="i < 4 ? 'high' : 'auto'"
-                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                         style="will-change: transform;">
+                    <img [src]="getMainPhotoUrl(product)" [alt]="product.name" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                   } @else {
-                    <div class="w-full h-full flex items-center justify-center text-outline-variant">
-                      <span class="material-symbols-outlined text-6xl opacity-20">inventory_2</span>
+                    <div class="w-full h-full flex items-center justify-center"><span class="material-symbols-outlined text-6xl text-outline-variant opacity-20">inventory_2</span></div>
+                  }
+                  <!-- Wishlist -->
+                  <button (click)="toggleWishlist(product, $event)"
+                          class="absolute top-3 ltr:right-3 rtl:left-3 w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-md transition-all z-10 shadow-sm"
+                          [class]="wishlistIds().has(product.id) ? 'bg-error text-on-error' : 'bg-white/80 text-on-surface hover:bg-white'">
+                    <span class="material-symbols-outlined text-lg" [class.fill-current]="wishlistIds().has(product.id)">favorite</span>
+                  </button>
+                  <!-- Badges -->
+                  @if (product.haveSale || product.oldPrice > product.newPrice) {
+                    <span class="absolute top-3 ltr:left-3 rtl:right-3 bg-error text-on-error text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full">{{ 'product.onSale' | translate }}</span>
+                  }
+                </div>
+                <div class="p-4">
+                  <h3 class="font-headline font-bold text-sm text-on-surface line-clamp-1 group-hover:text-primary transition-colors cursor-pointer mb-1" [routerLink]="['/' + currentLang + '/products', product.id]">{{ product.name }}</h3>
+                  <div class="flex items-baseline gap-2 mb-3">
+                    <span class="text-base font-black text-on-surface">{{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+                    @if (product.oldPrice > product.newPrice) {
+                      <span class="text-xs text-outline-variant line-through">{{ product.oldPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+                    }
+                  </div>
+                  @if (product.stockQuantity > 0) {
+                    <button (click)="addToCart(product, $event)"
+                            class="w-full py-2.5 bg-primary text-on-primary rounded-xl font-bold text-xs uppercase tracking-wide flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-95 transition-all">
+                      <span class="material-symbols-outlined text-base">shopping_cart</span>
+                      {{ 'product.initializeAcquisition' | translate }}
+                    </button>
+                  } @else {
+                    <button disabled class="w-full py-2.5 bg-surface-container text-outline-variant rounded-xl font-bold text-xs uppercase tracking-wide opacity-50 cursor-not-allowed">
+                      {{ 'product.outOfStock' | translate }}
+                    </button>
+                  }
+                  @if (canEditProduct(product)) {
+                    <div class="flex gap-2 mt-2">
+                      <button (click)="editProduct(product, $event)" class="flex-1 py-2 rounded-xl bg-surface-container hover:bg-primary/10 hover:text-primary transition-all text-xs font-bold flex items-center justify-center gap-1">
+                        <span class="material-symbols-outlined text-sm">edit</span> {{ 'dashboard.editProfile' | translate }}
+                      </button>
+                      <button (click)="deleteProduct(product, $event)" class="flex-1 py-2 rounded-xl bg-surface-container hover:bg-error/10 hover:text-error transition-all text-xs font-bold flex items-center justify-center gap-1">
+                        <span class="material-symbols-outlined text-sm">delete</span>
+                      </button>
                     </div>
                   }
-
-                  <!-- Wishlist Action -->
-                  <button (click)="toggleWishlist(product, $event)"
-                          [disabled]="processingId() === product.id"
-                          class="absolute top-2 right-2 md:top-6 md:right-6 w-8 h-8 md:w-12 md:h-12 rounded-full md:backdrop-blur-md flex items-center justify-center transition-[transform,background-color] duration-300 z-10"
-                          [class]="wishlistIds().has(product.id) ? 'bg-error text-on-error scale-110 shadow-lg' : 'bg-white/80 text-on-surface hover:bg-white'">
-                    <span class="material-symbols-outlined text-lg md:text-2xl flex items-center justify-center leading-none" [class.fill-current]="wishlistIds().has(product.id)">favorite</span>
-                  </button>
-
-                  <!-- Status Badges -->
-                  <div class="absolute top-2 left-2 md:top-6 md:left-6 flex flex-col items-start gap-1 md:gap-2 z-10">
-                    @if (product.haveSale || (product.oldPrice > product.newPrice)) {
-                      <span class="bg-error text-on-error text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2 py-1 md:px-3 md:py-1.5 rounded-full shadow-lg">{{ 'product.onSale' | translate }}</span>
-                    }
-                    @if (product.isFasting) {
-                      <span class="bg-primary text-on-primary text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2 py-1 md:px-3 md:py-1.5 rounded-full shadow-lg">{{ 'product.fasting' | translate }}</span>
-                    }
-                  </div>
-
-
-                </div>
-
-                <!-- Content Area -->
-                <div class="p-3 md:p-6">
-                  <div class="flex items-start justify-between gap-2 md:gap-4 mb-1 md:mb-2">
-                    <h3 class="font-headline font-extrabold text-xs md:text-lg text-on-surface line-clamp-1 group-hover:text-primary transition-colors cursor-pointer"
-                        [routerLink]="['/' + currentLang + '/products', product.id]">
-                      {{ product.name }}
-                    </h3>
-                  </div>
-
-                  <p class="text-[10px] md:text-sm text-on-surface-variant line-clamp-2 mb-3 opacity-70 min-h-[30px] md:min-h-[40px]">
-                    {{ product.description }}
-                  </p>
-                  
-                  <div class="flex items-center justify-between mb-2 md:mb-4">
-                    <div class="flex items-baseline gap-2 md:gap-3">
-                      <span class="text-sm md:text-2xl font-black text-on-surface tracking-tighter">
-                        {{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
-                      </span>
-                      @if (product.oldPrice > product.newPrice) {
-                        <span class="text-[8px] md:text-sm font-body text-outline-variant line-through opacity-60">
-                           {{ product.oldPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
-                        </span>
-                      }
-                    </div>
-                    <div class="flex items-center gap-1.5 px-2 py-1 bg-surface-container rounded-lg border border-outline-variant/10"
-                         [title]="'product.configurationQuantity' | translate">
-                      <span class="material-symbols-outlined text-xs md:text-sm text-primary">inventory_2</span>
-                      <span class="text-[10px] md:text-xs font-bold text-on-surface-variant">
-                        {{ product.stockQuantity }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div class="space-y-4 mt-auto pt-6 border-t border-outline-variant/10">
-                    <div class="flex items-center justify-between">
-                      <span class="text-[10px] font-black uppercase tracking-widest text-outline group-hover:text-on-surface transition-colors">{{ product.categoryName || ('product.general' | translate) }}</span>
-                    </div>
-                    
-                    <div class="flex flex-col w-full gap-2">
-                       @if (product.stockQuantity > 0) {
-                         <button (click)="addToCart(product, $event)"
-                                 class="w-full py-3 bg-primary text-on-primary rounded-xl flex items-center justify-center shadow-lg hover:scale-[1.02] active:scale-95 transition-all gap-2 group/btn">
-                           <span class="material-symbols-outlined text-sm group-hover/btn:rotate-12 transition-transform">shopping_cart</span>
-                           <span class="font-headline font-bold text-[10px] uppercase tracking-widest">{{ 'product.initializeAcquisition' | translate }}</span>
-                         </button>
-                       } @else {
-                         <button disabled
-                                 class="w-full py-3 bg-surface-container text-outline-variant rounded-xl flex items-center justify-center gap-2 opacity-50">
-                           <span class="material-symbols-outlined text-sm">inventory_2</span>
-                           <span class="font-headline font-bold text-[10px] uppercase tracking-widest">{{ 'product.outOfStock' | translate }}</span>
-                         </button>
-                       }
-                       
-                       @if (canEditProduct(product)) {
-                          <div class="flex gap-2">
-                             <button (click)="editProduct(product, $event)" class="flex-1 py-2 rounded-xl bg-surface-container hover:bg-primary-container hover:text-primary transition-all flex items-center justify-center gap-2">
-                               <span class="material-symbols-outlined text-xs">edit</span>
-                               <span class="text-[8px] font-bold uppercase">{{ 'dashboard.editProfile' | translate }}</span>
-                             </button>
-                             <button (click)="deleteProduct(product, $event)" class="flex-1 py-2 rounded-xl bg-surface-container hover:bg-error/10 hover:text-error transition-all flex items-center justify-center gap-2">
-                               <span class="material-symbols-outlined text-xs">delete</span>
-                               <span class="text-[8px] font-bold uppercase">{{ 'dashboard.decommission' | translate }}</span>
-                             </button>
-                          </div>
-                       }
-                    </div>
-                  </div>
                 </div>
               </div>
             }
@@ -190,34 +197,22 @@
 
           <!-- Pagination -->
           @if (totalPages() > 1) {
-            <div class="mt-20 flex flex-col items-center gap-8">
-              <div class="w-24 h-1 bg-outline-variant/20 rounded-full"></div>
-              
-              <div class="flex items-center gap-2">
-                <button (click)="goToPage(currentPage() - 1)"
-                        [disabled]="currentPage() === 1"
-                        class="w-12 h-12 rounded-2xl border border-outline-variant/30 flex items-center justify-center hover:bg-surface-container disabled:opacity-20 transition-all">
-                  <span class="material-symbols-outlined">{{ currentLang === 'ar' ? 'chevron_right' : 'chevron_left' }}</span>
+            <div class="mt-16 flex items-center justify-center gap-2">
+              <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
+                      class="w-10 h-10 rounded-xl border border-outline-variant/30 flex items-center justify-center hover:bg-surface-container disabled:opacity-20 transition-all">
+                <span class="material-symbols-outlined text-lg">{{ currentLang === 'ar' ? 'chevron_right' : 'chevron_left' }}</span>
+              </button>
+              @for (page of getPages(); track page) {
+                <button (click)="goToPage(page)"
+                        class="w-10 h-10 rounded-xl font-bold text-sm transition-all"
+                        [class]="page === currentPage() ? 'bg-primary text-on-primary shadow-md' : 'hover:bg-surface-container text-on-surface-variant'">
+                  {{ page }}
                 </button>
-
-                @for (page of getPages(); track page) {
-                  <button (click)="goToPage(page)"
-                          [class]="page === currentPage() ? 'bg-primary text-on-primary' : 'hover:bg-surface-container text-on-surface-variant'"
-                          class="w-12 h-12 rounded-2xl font-headline font-bold text-sm transition-all">
-                    {{ page }}
-                  </button>
-                }
-
-                <button (click)="goToPage(currentPage() + 1)"
-                        [disabled]="currentPage() === totalPages()"
-                        class="w-12 h-12 rounded-2xl border border-outline-variant/30 flex items-center justify-center hover:bg-surface-container disabled:opacity-20 transition-all">
-                  <span class="material-symbols-outlined">{{ currentLang === 'ar' ? 'chevron_left' : 'chevron_right' }}</span>
-                </button>
-              </div>
-
-              <span class="text-[10px] font-black uppercase tracking-[0.2em] text-outline opacity-40">
-                {{ 'product.paginationPhase' | translate:{'current': currentPage(), 'total': totalPages()} }}
-              </span>
+              }
+              <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
+                      class="w-10 h-10 rounded-xl border border-outline-variant/30 flex items-center justify-center hover:bg-surface-container disabled:opacity-20 transition-all">
+                <span class="material-symbols-outlined text-lg">{{ currentLang === 'ar' ? 'chevron_left' : 'chevron_right' }}</span>
+              </button>
             </div>
           }
         }
@@ -226,114 +221,99 @@
   </div>
 </main>
 
-<!-- Mobile Filter Drawer -->
+<!-- ══ Mobile Filter Drawer ══ -->
 @if (isMobileFiltersOpen()) {
-  <div class="lg:hidden fixed inset-0 z-[100]" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
+  <div class="lg:hidden fixed inset-0 z-[100]">
     <!-- Backdrop -->
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" (click)="isMobileFiltersOpen.set(false)"></div>
-    
-    <!-- Drawer -->
-    <div [class]="currentLang === 'ar' ? 'left-0 animate-slide-in-left' : 'right-0 animate-slide-in-right'"
-         class="absolute inset-y-0 w-[85%] max-w-sm bg-surface-container-lowest p-8 flex flex-col shadow-2xl border-x border-outline-variant/10">
-       <div class="flex items-center justify-between mb-8">
-          <h2 class="font-headline text-3xl font-black text-on-surface">{{ 'home.categories' | translate }}</h2>
-          <button (click)="isMobileFiltersOpen.set(false)" 
-                  class="w-12 h-12 flex items-center justify-center bg-surface-container rounded-2xl hover:bg-surface-container-high transition-colors text-on-surface">
-             <span class="material-symbols-outlined">close</span>
-          </button>
-       </div>
-       
-       <div class="flex-grow overflow-y-auto custom-scrollbar pr-4">
-          <ng-container *ngTemplateOutlet="filterContent"></ng-container>
-       </div>
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="isMobileFiltersOpen.set(false)"></div>
 
-       <div class="pt-8 mt-4 border-t border-outline-variant/10">
-          <button (click)="isMobileFiltersOpen.set(false)"
-                  class="w-full py-5 bg-primary text-on-primary rounded-2xl font-headline font-bold shadow-xl shadow-primary/20">
-             {{ 'common.resetFilters' | translate }}
-          </button>
-       </div>
+    <!-- Drawer panel -->
+    <div class="absolute inset-y-0 w-[88%] max-w-sm flex flex-col bg-surface-container-lowest shadow-2xl"
+         [class.ltr:left-0]="currentLang !== 'ar'"
+         [class.rtl:right-0]="currentLang === 'ar'"
+         [class.right-0]="currentLang !== 'ar'"
+         [class.left-0]="currentLang === 'ar'"
+         [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
+
+      <!-- Drawer Header -->
+      <div class="flex items-center justify-between px-6 py-5 border-b border-outline-variant/10 shrink-0">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-[22px] text-primary">tune</span>
+          <h2 class="font-headline font-black text-lg text-on-surface uppercase tracking-tight">
+            {{ 'home.categories' | translate }}
+          </h2>
+        </div>
+        <button (click)="isMobileFiltersOpen.set(false)" class="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <!-- Drawer Scrollable Body -->
+      <div class="flex-1 overflow-y-auto px-4 py-5 space-y-6">
+
+        <!-- Category Tree -->
+        <div class="bg-white rounded-2xl border border-outline-variant/10 overflow-hidden">
+          <div class="px-4 py-3 border-b border-outline-variant/10">
+            <p class="text-[11px] font-black uppercase tracking-widest text-outline">{{ 'home.categories' | translate }}</p>
+          </div>
+          <div class="p-2" style="--tree-max-height: none">
+            <app-category-tree
+              [categories]="categories()"
+              [selectedId]="selectedCategory"
+              (categorySelected)="selectCategory($event); isMobileFiltersOpen.set(false)">
+            </app-category-tree>
+          </div>
+        </div>
+
+        <!-- Price Range -->
+        <div class="bg-white rounded-2xl border border-outline-variant/10 p-4">
+          <p class="text-[11px] font-black uppercase tracking-widest text-outline mb-4">{{ 'home.priceRange' | translate }}</p>
+          <div class="grid grid-cols-2 gap-3">
+            <input type="number" [(ngModel)]="minPrice" (ngModelChange)="onFilterChange()" [placeholder]="'home.minPrice' | translate"
+                   class="bg-surface-container-low px-3 py-3 rounded-xl border border-outline-variant/20 focus:border-primary outline-none text-sm">
+            <input type="number" [(ngModel)]="maxPrice" (ngModelChange)="onFilterChange()" [placeholder]="'home.maxPrice' | translate"
+                   class="bg-surface-container-low px-3 py-3 rounded-xl border border-outline-variant/20 focus:border-primary outline-none text-sm">
+          </div>
+        </div>
+
+        <!-- Quick Toggles -->
+        <div class="bg-white rounded-2xl border border-outline-variant/10 p-4 space-y-2">
+          <p class="text-[11px] font-black uppercase tracking-widest text-outline mb-3">{{ 'home.onSaleOnly' | translate }}</p>
+          <label class="flex items-center gap-3 px-4 py-3.5 rounded-xl cursor-pointer transition-colors"
+                 [class]="onSaleOnly ? 'bg-primary/8 text-primary' : 'hover:bg-surface-container-low text-on-surface-variant'">
+            <span class="material-symbols-outlined text-[20px]">sell</span>
+            <span class="font-semibold text-sm flex-1">{{ 'home.onSaleOnly' | translate }}</span>
+            <input type="checkbox" [(ngModel)]="onSaleOnly" (ngModelChange)="onFilterChange()" class="hidden">
+            <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center"
+                 [class]="onSaleOnly ? 'bg-primary border-primary' : 'border-outline-variant'">
+              @if (onSaleOnly) { <span class="material-symbols-outlined text-white text-[14px]">check</span> }
+            </div>
+          </label>
+          <label class="flex items-center gap-3 px-4 py-3.5 rounded-xl cursor-pointer transition-colors"
+                 [class]="isFastingOnly ? 'bg-primary/8 text-primary' : 'hover:bg-surface-container-low text-on-surface-variant'">
+            <span class="material-symbols-outlined text-[20px]">eco</span>
+            <span class="font-semibold text-sm flex-1">{{ 'product.fasting' | translate }}</span>
+            <input type="checkbox" [(ngModel)]="isFastingOnly" (ngModelChange)="onFilterChange()" class="hidden">
+            <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center"
+                 [class]="isFastingOnly ? 'bg-primary border-primary' : 'border-outline-variant'">
+              @if (isFastingOnly) { <span class="material-symbols-outlined text-white text-[14px]">check</span> }
+            </div>
+          </label>
+        </div>
+
+      </div>
+
+      <!-- Drawer Footer -->
+      <div class="px-4 py-4 border-t border-outline-variant/10 bg-surface-container-lowest shrink-0 grid grid-cols-2 gap-3">
+        <button (click)="clearFilters(); isMobileFiltersOpen.set(false)"
+                class="py-3.5 rounded-2xl border border-outline-variant/20 font-bold text-sm text-on-surface-variant hover:bg-surface-container transition-all">
+          {{ 'home.clear' | translate }}
+        </button>
+        <button (click)="isMobileFiltersOpen.set(false)"
+                class="py-3.5 rounded-2xl bg-primary text-on-primary font-black text-sm shadow-lg hover:bg-primary/90 active:scale-95 transition-all">
+          {{ 'common.catalog' | translate }}
+        </button>
+      </div>
     </div>
   </div>
 }
-
-<!-- Reusable Filter Template -->
-<ng-template #filterContent>
-  <div class="space-y-10">
-    <!-- Category Filter -->
-    <div>
-      <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-outline mb-6 flex items-center gap-2">
-        <span class="material-symbols-outlined text-sm">filter_list</span>
-        {{ 'home.categories' | translate }}
-      </h3>
-      <div class="flex flex-col gap-2">
-        <button (click)="selectedCategory = ''; onFilterChange()"
-                [class]="selectedCategory === '' ? 'bg-primary/10 text-primary border-primary/20' : 'bg-transparent text-on-surface-variant border-transparent hover:bg-surface-container-low'"
-                class="flex items-center justify-between px-4 py-4 rounded-2xl border transition-all text-start group">
-          <span class="font-body font-bold text-sm">{{ 'home.allCategories' | translate }}</span>
-          <span class="material-symbols-outlined text-lg opacity-40 group-hover:opacity-100 transition-transform group-hover:translate-x-1">chevron_right</span>
-        </button>
-        
-        @for (category of categories(); track category.id) {
-          <button (click)="selectedCategory = category.id; onFilterChange()"
-                  [class]="selectedCategory === category.id ? 'bg-primary/10 text-primary border-primary/20' : 'bg-transparent text-on-surface-variant border-transparent hover:bg-surface-container-low'"
-                  class="flex items-center justify-between px-4 py-4 rounded-2xl border transition-all text-start group">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center group-hover:bg-surface-container-high transition-colors">
-                <span class="material-symbols-outlined text-lg">{{ getCategoryIcon(category.name) }}</span>
-              </div>
-              <span class="font-body font-bold text-sm">{{ category.name }}</span>
-            </div>
-            <span class="material-symbols-outlined text-lg opacity-40 group-hover:opacity-100 transition-transform group-hover:translate-x-1">chevron_right</span>
-          </button>
-        }
-      </div>
-    </div>
-
-    <!-- Price Range -->
-    <div>
-      <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-outline mb-6">
-        {{ 'home.priceRange' | translate }}
-      </h3>
-      <div class="grid grid-cols-2 gap-4">
-        <div class="space-y-2">
-          <span class="text-[9px] uppercase font-bold text-outline-variant px-1">{{ 'home.minPrice' | translate }}</span>
-          <input type="number" [(ngModel)]="minPrice" (ngModelChange)="onFilterChange()" placeholder="0"
-                 class="w-full bg-surface-container-low px-4 py-4 rounded-xl border border-outline-variant/30 focus:border-primary outline-none font-body text-sm transition-all">
-        </div>
-        <div class="space-y-2">
-          <span class="text-[9px] uppercase font-bold text-outline-variant px-1">{{ 'home.maxPrice' | translate }}</span>
-          <input type="number" [(ngModel)]="maxPrice" (ngModelChange)="onFilterChange()" placeholder="∞"
-                 class="w-full bg-surface-container-low px-4 py-4 rounded-xl border border-outline-variant/30 focus:border-primary outline-none font-body text-sm transition-all">
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="pt-8 border-t border-outline-variant/10 space-y-4">
-       <label class="flex items-center gap-3 p-4 bg-surface-container-low rounded-2xl cursor-pointer group hover:bg-surface-container transition-colors">
-         <input type="checkbox" [(ngModel)]="onSaleOnly" (ngModelChange)="onFilterChange()" class="hidden peer">
-         <div class="w-6 h-6 rounded-lg border-2 border-outline-variant peer-checked:border-primary peer-checked:bg-primary transition-all flex items-center justify-center">
-           <span class="material-symbols-outlined text-white text-sm scale-0 peer-checked:scale-100 transition-transform">check</span>
-         </div>
-         <span class="text-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors flex-grow">{{ 'home.onSaleOnly' | translate }}</span>
-         <span class="material-symbols-outlined text-lg opacity-20">sell</span>
-       </label>
-       
-       <label class="flex items-center gap-3 p-4 bg-surface-container-low rounded-2xl cursor-pointer group hover:bg-surface-container transition-colors">
-         <input type="checkbox" [(ngModel)]="isFastingOnly" (ngModelChange)="onFilterChange()" class="hidden peer">
-         <div class="w-6 h-6 rounded-lg border-2 border-outline-variant peer-checked:border-primary peer-checked:bg-primary transition-all flex items-center justify-center">
-           <span class="material-symbols-outlined text-white text-sm scale-0 peer-checked:scale-100 transition-transform">check</span>
-         </div>
-         <span class="text-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors flex-grow">{{ 'product.fasting' | translate }}</span>
-         <span class="material-symbols-outlined text-lg opacity-20">eco</span>
-       </label>
-       
-       <button (click)="clearFilters()" 
-               class="w-full py-4 mt-6 text-[10px] font-black uppercase tracking-widest text-error hover:bg-error/5 rounded-xl transition-all flex items-center justify-center gap-2">
-         <span class="material-symbols-outlined text-sm">filter_alt_off</span>
-         {{ 'home.clear' | translate }}
-       </button>
-    </div>
-  </div>
-</ng-template>

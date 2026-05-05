@@ -224,7 +224,7 @@ export class RegisterComponent {
     this.authService.register(registerData).subscribe({
       next: (response) => {
         this.loading.set(false);
-        if (response.requiresEmailConfirmation) {
+        if (response.data && response.data.requiresEmailConfirmation) {
           this.successMessage.set(response.message || 'Registration successful. Please check your email to confirm your account.');
           this.registerForm.reset();
         } else {

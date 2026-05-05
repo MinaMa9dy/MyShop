@@ -229,7 +229,7 @@ export class ProductVariantManagementComponent implements OnInit {
 
     req.subscribe({
       next: (res) => {
-        if (res.isSuccess && res.data) {
+        if (res.success && res.data) {
           if (this.editingVariantId()) {
             const idx = this.variants.findIndex(v => v.id === res.data!.id);
             if (idx !== -1) this.variants[idx] = res.data;
@@ -250,7 +250,7 @@ export class ProductVariantManagementComponent implements OnInit {
     this.submitting.set(true);
     this.productService.deleteVariant(this.productId, variantId).subscribe({
       next: (res) => {
-        if (res.isSuccess) {
+        if (res.success) {
           const idx = this.variants.findIndex(v => v.id === variantId);
           if (idx !== -1) this.variants.splice(idx, 1);
           this.toast.showInfo('Variant removed');
@@ -269,3 +269,4 @@ export class ProductVariantManagementComponent implements OnInit {
     this.editingVariantId.set(null);
   }
 }
+

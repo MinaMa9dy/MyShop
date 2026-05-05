@@ -403,6 +403,67 @@ import { environment } from '../../../../environments/environment';
                </div>
             </div>
           </section>
+
+          <!-- Related Products Section -->
+          @if (relatedProducts().length > 0) {
+            <section class="mt-40 animate-slide-up" style="animation-delay: 200ms">
+              <div class="flex flex-col md:flex-row justify-between items-center md:items-end gap-8 mb-16 text-center md:text-start">
+                <div class="max-w-xl mx-auto md:mx-0">
+                  <p class="font-label text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-2">{{ 'product.curatedSelection' | translate }}</p>
+                  <h2 class="font-headline text-4xl font-black text-on-surface tracking-tighter mb-4">{{ 'product.relatedProducts' | translate }}</h2>
+                  <p class="font-body text-sm text-on-surface-variant max-w-lg opacity-70">{{ 'product.relatedDesc' | translate }}</p>
+                </div>
+                <a routerLink="/products" [queryParams]="{ categoryId: product()?.categoryId }" class="flex items-center gap-2 px-8 py-4 bg-surface-container text-on-surface rounded-2xl font-headline font-bold text-sm hover:bg-primary hover:text-on-primary transition-all shadow-sm">
+                  {{ 'common.viewAll' | translate }}
+                  <span class="material-symbols-outlined">arrow_forward</span>
+                </a>
+              </div>
+
+              <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                @for (item of relatedProducts(); track item.id) {
+                  <div class="group relative bg-surface-container-lowest rounded-[32px] overflow-hidden border border-outline-variant/10 hover:border-primary/20 transition-all duration-500 hover:shadow-2xl">
+                    <div class="relative aspect-[4/5] overflow-hidden bg-surface-container-low cursor-pointer" [routerLink]="['/' + currentLang + '/products', item.id]">
+                      @if (getMainPhotoUrl(item)) {
+                        <img [src]="getMainPhotoUrl(item)" [alt]="item.name" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                      } @else {
+                        <div class="w-full h-full flex items-center justify-center">
+                          <span class="material-symbols-outlined text-5xl text-outline-variant opacity-20">inventory_2</span>
+                        </div>
+                      }
+                      
+                      <!-- Badges -->
+                      @if (item.oldPrice > item.newPrice) {
+                        <div class="absolute top-4 left-4">
+                          <span class="bg-error text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">SALE</span>
+                        </div>
+                      }
+                    </div>
+                    
+                    <div class="p-6 space-y-4">
+                      <div>
+                        <h3 class="font-headline font-bold text-sm text-on-surface line-clamp-1 group-hover:text-primary transition-colors cursor-pointer mb-1" [routerLink]="['/' + currentLang + '/products', item.id]">
+                          {{ item.name }}
+                        </h3>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ item.categoryName }}</p>
+                      </div>
+
+                      <div class="flex items-baseline gap-3">
+                        <span class="text-lg font-black text-on-surface">{{ item.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+                        @if (item.oldPrice > item.newPrice) {
+                          <span class="text-xs text-outline-variant line-through opacity-50">{{ item.oldPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+                        }
+                      </div>
+
+                      <button [routerLink]="['/' + currentLang + '/products', item.id]"
+                              class="w-full py-3.5 bg-surface-container-high text-on-surface-variant rounded-2xl font-headline font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all">
+                        {{ 'common.viewDetails' | translate }}
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </section>
+          }
         }
       </div>
     </main>
@@ -424,6 +485,8 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   product = signal<any>(null);
   selectedVariant = signal<any>(null);
   loading = signal(true);
+  relatedProducts = signal<any[]>([]);
+  loadingRelated = signal(false);
   mainImage = signal<string | null>(null);
   quantity = 1;
   
@@ -495,6 +558,12 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   getReviewerPhotoUrl(photoPath: string | undefined): string {
     return this.photoService.getPhotoUrl(photoPath, 'user');
   }
+
+  getMainPhotoUrl(product: any): string | null {
+    if (!product || !product.productPhotos || product.productPhotos.length === 0) return null;
+    const main = product.productPhotos.find((p: any) => p.isMain) || product.productPhotos[0];
+    return this.photoService.getPhotoUrl(main.url);
+  }
   
   @ViewChild('carousel') carouselElement!: ElementRef;
   currentPhotoIndex = signal(0);
@@ -551,7 +620,7 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     this.currentPhotoIndex.set(0); // Reset photo index
     this.productService.getById(id).subscribe({
       next: (result) => {
-        if (result.isSuccess && result.data) {
+        if (result.success && result.data) {
           const p = this.normalizeProduct(result.data);
           console.log('Normalized Product Data:', p);
           this.product.set(p);
@@ -576,8 +645,22 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
         this.loading.set(false);
         this.loadReviews(id);
         this.checkWishlistStatus(id);
+        this.loadRelatedProducts(id);
       },
       error: () => this.loading.set(false)
+    });
+  }
+
+  loadRelatedProducts(productId: string): void {
+    this.loadingRelated.set(true);
+    this.productService.getRelatedProducts(productId).subscribe({
+      next: (result) => {
+        if (result.success && result.data) {
+          this.relatedProducts.set(result.data.map(p => this.normalizeProduct(p)));
+        }
+        this.loadingRelated.set(false);
+      },
+      error: () => this.loadingRelated.set(false)
     });
   }
   
@@ -586,7 +669,7 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     if (!userId) return;
     this.wishService.getWishes().subscribe({
       next: (res) => {
-        if (res.isSuccess && res.data) {
+        if (res.success && res.data) {
           this.isWishlisted.set(res.data.some(w => w.productId === productId));
         }
       }
@@ -791,14 +874,14 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
       name: p.name || p.Name,
       description: p.description || p.Description,
       price: p.price || p.Price,
-      newPrice: p.newPrice || p.NewPrice,
-      oldPrice: p.oldPrice || p.OldPrice,
+      newPrice: p.newPrice || p.NewPrice || p.productVariants?.[0]?.newPrice || p.productVariants?.[0]?.NewPrice || 0,
+      oldPrice: p.oldPrice || p.OldPrice || p.productVariants?.[0]?.oldPrice || p.productVariants?.[0]?.OldPrice || 0,
       categoryId: p.categoryId || p.CategoryId,
       categoryName: p.categoryName || p.CategoryName,
       supplierId: p.supplierId || p.SupplierId,
       supplierName: p.supplierName || p.SupplierName || p.supplier || p.Supplier,
-      shownQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.shownQuantity ?? p.ShownQuantity) ?? 0,
-      stockQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.shownQuantity ?? p.ShownQuantity) ?? 0,
+      shownQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.productVariants?.[0]?.stockQuantity ?? p.productVariants?.[0]?.StockQuantity) ?? 0,
+      stockQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.productVariants?.[0]?.stockQuantity ?? p.productVariants?.[0]?.StockQuantity) ?? 0,
       quantityInStock: p.quantityInStock || p.QuantityInStock,
       productPhotos: (p.productPhotos || p.ProductPhotos || p.productphotos || []).map((ph: any) => ({
         id: ph.id || ph.Id,
@@ -825,3 +908,4 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     };
   }
 }
+

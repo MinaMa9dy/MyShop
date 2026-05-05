@@ -64,7 +64,7 @@ export class CartService {
   appliedCoupon = this._appliedCoupon.asReadonly();
 
   // Computed values
-  totalItems = computed(() => this._items().reduce((sum, item) => sum + item.quantity, 0));
+  total = computed(() => this._items().reduce((sum, item) => sum + item.quantity, 0));
   originalTotalPrice = computed(() => this._items().reduce((sum, item) => sum + (item.productPrice || 0) * item.quantity, 0));
 
   totalPrice = computed(() => {
@@ -118,7 +118,7 @@ export class CartService {
     this.validationTimeout = setTimeout(() => {
       this.couponService.validate(currentCoupon.coupon.code).subscribe({
         next: (res) => {
-          if (res.isSuccess && res.data) {
+          if (res.success && res.data) {
             this.setCoupon(res.data);
           } else {
             // Coupon no longer valid for this cart state
@@ -234,7 +234,7 @@ export class CartService {
     
     return this.http.get<any>(`${this.cartsUrl}/my-cart`).pipe(
       tap((response: any) => {
-        const rawItems = response?.data?.items || response?.items || response || [];
+        const rawItems = response?.data || response?.items || response || [];
         const items = rawItems.map((item: any) => this.mapResponseToCartItem(item));
         this._items.set(items);
         this.saveToStorage();
@@ -311,3 +311,4 @@ export class CartService {
     localStorage.removeItem('cart');
   }
 }
+

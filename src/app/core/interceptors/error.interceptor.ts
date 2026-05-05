@@ -35,7 +35,7 @@ export const errorInterceptor: HttpInterceptorFn = (
       } else if (typeof error.error === 'string') {
         // Plain string response (e.g., from StatusCode(400, "message"))
         errorMessage = error.error;
-      } else if (error.error && isResultPattern(error.error) && !error.error.isSuccess) {
+      } else if (error.error && isResultPattern(error.error) && !error.error.success) {
         // Server-side error - check for Result pattern first
         errorMessage = error.error.error?.message || 'An error occurred';
       } else if (error.error?.message) {
@@ -83,3 +83,4 @@ export const errorInterceptor: HttpInterceptorFn = (
     })
   );
 };
+

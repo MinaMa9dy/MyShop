@@ -1,26 +1,34 @@
 // Result pattern interface matching the backend
 export interface Result<T = any> {
-  isSuccess: boolean;
-  error?: ResultError;
+  success: boolean;
+  status: number;
+  message: string;
   data?: T;
+  error?: ResultError;
+  meta?: Meta;
+  timestamp: string;
 }
 
 export interface ResultError {
-  message: string;
   code: string;
+  message: string;
+  details?: { [key: string]: string[] };
 }
 
-export interface PageResult<T> {
-  items: T[];
-  totalItems: number;
+export interface Meta {
+  total: number;
   page: number;
-  pageSize: number;
+  perPage: number;
   totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+  sortBy?: string;
+  sortOrder?: string;
 }
 
 // Helper to check if response is a Result pattern
 export function isResultPattern(response: any): response is Result {
-  return response && typeof response.isSuccess === 'boolean';
+  return response && typeof response.success === 'boolean';
 }
 
 // Helper to extract error message from any response
@@ -29,27 +37,24 @@ export function extractErrorMessage(error: any): string | null {
   
   const errorData = error.error || error;
   
-  // Check for Result pattern
-  if (isResultPattern(errorData) && !errorData.isSuccess && errorData.error) {
+  // Check for new Result pattern
+  if (isResultPattern(errorData) && !errorData.success && errorData.error) {
     return errorData.error.message;
   }
   
-  // Check for Error object with message
+  // Legacy or other error structures
   if (errorData.message) {
     return errorData.message;
   }
   
-  // Check for Error object with Message (PascalCase)
   if (errorData.Message) {
     return errorData.Message;
   }
   
-  // Check for array of errors (ModelState)
   if (Array.isArray(errorData) && errorData.length > 0) {
     return typeof errorData[0] === 'string' ? errorData[0] : errorData[0]?.errorMessage || errorData[0]?.message;
   }
   
-  // Check for errors object (validation)
   if (errorData.errors && typeof errorData.errors === 'object') {
     const keys = Object.keys(errorData.errors);
     if (keys.length > 0) {
@@ -60,7 +65,6 @@ export function extractErrorMessage(error: any): string | null {
     }
   }
   
-  // Check for simple string
   if (typeof errorData === 'string') {
     return errorData;
   }

@@ -1,4 +1,4 @@
-import { PageResult } from "./result.model";
+
 
 export interface Product {
   id: string;
@@ -13,7 +13,7 @@ export interface Product {
   categoryId: string;
   categoryName: string;
   
-  // Top-level price info for catalog display
+  // Top-level price info for catalog display (Populated from variants during normalization)
   oldPrice: number;
   newPrice: number;
   stockQuantity: number;
@@ -89,3 +89,4 @@ export interface ProductFilter {
   pageNumber?: number;
   pageSize?: number;
 }
+

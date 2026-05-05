@@ -121,7 +121,7 @@ export class MyCouponsComponent implements OnInit {
     this.loading.set(true);
     this.couponService.getMyCoupons().subscribe({
       next: (res) => {
-        if (res.isSuccess && res.data) {
+        if (res.success && res.data) {
           this.coupons.set(res.data);
         } else {
           this.error.set(res.error?.message || 'Failed to load coupons.');
@@ -147,3 +147,4 @@ export class MyCouponsComponent implements OnInit {
     // Could add a toast here
   }
 }
+

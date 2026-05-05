@@ -177,7 +177,7 @@ export class OrderListComponent implements OnInit {
     
     api.subscribe({
       next: (res) => {
-        if (res.isSuccess && res.data) {
+        if (res.success && res.data) {
           this.orders.set(res.data);
         } else {
           this.error.set(res.error?.message || 'Failed to synchronize order records.');
@@ -192,7 +192,7 @@ export class OrderListComponent implements OnInit {
     if (!confirm('Are you sure you want to cancel this order?')) return;
     this.orderService.cancelOrder(id).subscribe({
       next: (res) => {
-        if (res.isSuccess) {
+        if (res.success) {
           this.loadOrders();
         } else {
           alert(res.error?.message || 'Failed to cancel order.');
@@ -235,3 +235,4 @@ export class OrderListComponent implements OnInit {
     img.src = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCrToAN7K9bxCYHNmah4SPbCguXNVlpK-DeQWeEBnHb8hhrK_YwTkoUXoEOh-RgjYVbFZj2ZzFPFjqLgEqS81zBG3mBRaFpNCTpPthaRKkjbY6cN5ywiH6wrgPH-fov4huJ80NbYSMgUyawNMMrAIHqttsqobdz8M4Yk_ERm3md8eXwLlW4PLs3aIXrOye6hD6Mc0OtdU9LpkjMLI7eeChndSjrvjUUdPvpHGIlYDvLm3UBFRbdvqH0krtaLiZxlv72URSOjaoPfUbP';
   }
 }
+

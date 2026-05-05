@@ -224,7 +224,7 @@ export class CouponListComponent implements OnInit {
     this.loading.set(true); this.error.set(null);
     this.couponService.getAll().subscribe({
       next: (res) => { 
-        if (res.isSuccess && res.data) {
+        if (res.success && res.data) {
           this.coupons.set(res.data);
         } else {
           this.error.set(res.error?.message || 'Failed to sync coupons.');
@@ -249,7 +249,7 @@ export class CouponListComponent implements OnInit {
       this.deletingId.set(id);
       this.couponService.delete(id).subscribe({
         next: (res) => {
-          if (res.isSuccess) {
+          if (res.success) {
             this.coupons.update(list => list.filter(c => c.id !== id));
           } else {
             this.error.set(res.error?.message || 'Decommission failure.');
@@ -261,3 +261,4 @@ export class CouponListComponent implements OnInit {
     }
   }
 }
+

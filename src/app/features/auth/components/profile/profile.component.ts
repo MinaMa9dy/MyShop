@@ -182,7 +182,7 @@ export class ProfileComponent implements OnInit {
     this.loading.set(true);
     this.profileService.getProfile(userId).subscribe({
       next: (res) => { 
-        if (res.isSuccess && res.data) {
+        if (res.success && res.data) {
           this.profile.set(res.data);
         }
         this.loading.set(false); 
@@ -224,3 +224,4 @@ export class ProfileComponent implements OnInit {
     return date ? new Date(date).toLocaleDateString(undefined, { year: 'numeric', month: 'long' }) : 'Alpha Era';
   }
 }
+

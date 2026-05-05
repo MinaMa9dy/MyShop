@@ -20,7 +20,8 @@ export class AttributeService {
 
   getAll(): Observable<Attribute[]> {
     return this.http.get<Result<Attribute[]>>(this.apiUrl).pipe(
-      map(res => (res.isSuccess && res.data) ? res.data : [])
+      map(res => (res.success && res.data) ? res.data : [])
     );
   }
 }
+

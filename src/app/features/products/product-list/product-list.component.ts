@@ -12,11 +12,12 @@ import { AuthService } from '../../../core/services/auth.service';
 import { PhotoService } from '../../../core/services/photo.service';
 import { WishService } from '../../../core/services/wish.service';
 import { TokenService } from '../../../core/services/token.service';
+import { CategoryTreeComponent } from '../../../shared/category-tree/category-tree.component';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, TranslatePipe],
+  imports: [CommonModule, RouterLink, FormsModule, TranslatePipe, CategoryTreeComponent],
   templateUrl: './product-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -51,6 +52,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
   // Track which product is being processed
   processingId = signal<string | null>(null);
   isMobileFiltersOpen = signal(false);
+  
+  // Accordion state for categories
+  expandedCategories = signal<Set<string>>(new Set());
 
   // Debounce search/filter changes to avoid hammering the API
   private filterChange$ = new Subject<void>();
@@ -103,9 +107,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
       pageSize: this.pageSize
     }).subscribe({
       next: (result) => {
-        if (result.isSuccess && result.data) {
-          this.products.set(result.data.items.map((p: any) => this.normalizeProduct(p)));
-          this.totalPages.set(result.data.totalPages);
+        if (result.success && result.data) {
+          this.products.set(result.data.map((p: any) => this.normalizeProduct(p)));
+          this.totalPages.set(result.meta?.totalPages ?? 0);
         }
         this.loading.set(false);
       },
@@ -117,15 +121,26 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   loadCategories(): void {
-    this.categoryService.getAll().subscribe({
-      next: (response: any) => {
-        let cats: any[] = [];
-        if (Array.isArray(response)) cats = response;
-        else if (response && Array.isArray(response.data)) cats = response.data;
-        this.categories.set(cats.map(c => this.normalizeCategory(c)));
+    this.categoryService.getTree().subscribe({
+      next: (tree) => {
+        this.categories.set(tree);
       },
-      error: (error) => console.error('Error loading categories:', error)
+      error: (error) => console.error('Error loading category tree:', error)
     });
+  }
+
+  toggleCategory(id: string, event: MouseEvent): void {
+    event.stopPropagation();
+    this.expandedCategories.update(set => {
+      const newSet = new Set(set);
+      if (newSet.has(id)) newSet.delete(id);
+      else newSet.add(id);
+      return newSet;
+    });
+  }
+
+  isExpanded(id: string): boolean {
+    return this.expandedCategories().has(id);
   }
 
   loadWishlist(): void {
@@ -134,7 +149,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
     this.wishService.getWishes().subscribe({
       next: (res) => {
-        if (res.isSuccess && res.data) {
+        if (res.success && res.data) {
           const ids = new Set<string>();
           res.data.forEach(w => { if (w.productId) ids.add(w.productId); });
           this.wishlistIds.set(ids);
@@ -183,6 +198,11 @@ export class ProductListComponent implements OnInit, OnDestroy {
         }
       });
     }
+  }
+
+  selectCategory(id: string): void {
+    this.selectedCategory = id;
+    this.onFilterChange();
   }
 
   onFilterChange(): void {
@@ -275,14 +295,13 @@ export class ProductListComponent implements OnInit, OnDestroy {
       name: p.name || p.Name,
       description: p.description || p.Description,
       price: p.price || p.Price,
-      newPrice: p.newPrice || p.NewPrice,
-      oldPrice: p.oldPrice || p.OldPrice,
+      newPrice: p.newPrice || p.NewPrice || p.productVariants?.[0]?.newPrice || p.productVariants?.[0]?.NewPrice || 0,
+      oldPrice: p.oldPrice || p.OldPrice || p.productVariants?.[0]?.oldPrice || p.productVariants?.[0]?.OldPrice || 0,
+      stockQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.productVariants?.[0]?.stockQuantity ?? p.productVariants?.[0]?.StockQuantity) ?? 0,
       categoryId: p.categoryId || p.CategoryId,
       categoryName: p.categoryName || p.CategoryName,
       supplierId: p.supplierId || p.SupplierId,
       supplierName: p.supplierName || p.SupplierName || p.supplier || p.Supplier,
-      shownQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.shownQuantity ?? p.ShownQuantity) ?? 1,
-      stockQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.shownQuantity ?? p.ShownQuantity) ?? 1,
       quantityInStock: p.quantityInStock || p.QuantityInStock,
       productPhotos: (p.productPhotos || p.ProductPhotos || p.productphotos || []).map((ph: any) => ({
         id: ph.id || ph.Id,
@@ -325,3 +344,4 @@ export class ProductListComponent implements OnInit, OnDestroy {
     else document.body.classList.remove('overflow-hidden');
   }
 }
+

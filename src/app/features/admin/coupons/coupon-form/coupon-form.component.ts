@@ -193,7 +193,7 @@ export class CouponFormComponent implements OnInit {
     this.loading.set(true);
     this.couponService.getById(id).subscribe({
       next: (res) => {
-        if (res.isSuccess && res.data) {
+        if (res.success && res.data) {
           const coupon = res.data;
           let formattedDate = coupon.expirationDate ? coupon.expirationDate.toString().slice(0, 16) : '';
           this.couponForm.patchValue({ 
@@ -218,7 +218,7 @@ export class CouponFormComponent implements OnInit {
     const api = this.isEditMode() && this.couponId() ? this.couponService.update(this.couponId()!, submissionData) : this.couponService.create(submissionData);
     api.subscribe({
       next: (res) => {
-        if (res.isSuccess) {
+        if (res.success) {
           this.router.navigate(['/', this.currentLang, 'admin', 'coupons']);
         } else {
           this.submitting.set(false);
@@ -229,3 +229,4 @@ export class CouponFormComponent implements OnInit {
     });
   }
 }
+

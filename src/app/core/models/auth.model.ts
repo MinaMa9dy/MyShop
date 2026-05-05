@@ -68,7 +68,7 @@ export interface User {
 }
 
 export interface AuthResult {
-  isSuccess: boolean;
+  success: boolean;
   error?: string;
   data?: AuthenticationResponseDto;
 }
@@ -87,3 +87,4 @@ export interface UserProfile {
   emailConfirmed?: boolean;
   phoneNumberConfirmed?: boolean;
 }
+
