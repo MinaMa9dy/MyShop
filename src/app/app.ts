@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit, OnDestroy, Renderer2, computed, effect, HostListener, ElementRef } from '@angular/core';
-import { RouterOutlet, RouterLink, Router, Event as RouterEvent, NavigationEnd } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, Event as RouterEvent, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
@@ -25,7 +25,7 @@ import { Category } from './core/models/category.model';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, RouterLink, TranslateModule, FormsModule, CartComponent, ToastComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, TranslateModule, FormsModule, CartComponent, ToastComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

@@ -97,16 +97,7 @@ import { environment } from '../../../environments/environment';
                <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.itemsInBuffer' | translate }}</p>
            </div>
 
-           <div class="bg-surface-container-lowest p-6 md:p-10 rounded-[48px] shadow-2xl border border-outline-variant/10 group hover:border-error/30 transition-all sm:col-span-2 lg:col-span-1">
-              <div class="flex justify-between items-start mb-8">
-                  <div class="w-14 h-14 bg-error/10 rounded-2xl flex items-center justify-center text-error group-hover:scale-110 transition-transform">
-                     <span class="material-symbols-outlined text-3xl">favorite</span>
-                  </div>
-                  <span class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.curationLog' | translate }}</span>
-               </div>
-               <p class="font-headline text-5xl font-black text-on-surface mb-2">{{ stats().wishlist }}</p>
-               <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.wishlist' | translate }} {{ 'dashboard.target' | translate }}</p>
-           </div>
+
         </div>
 
         <div class="grid grid-cols-1 gap-12">
@@ -114,10 +105,10 @@ import { environment } from '../../../environments/environment';
            <div class="space-y-12">
               <div class="bg-surface-container-lowest rounded-[48px] shadow-2xl border border-outline-variant/10 overflow-hidden">
                  <!-- Tab Navigation -->
-                 <nav class="flex overflow-x-auto scrollbar-hide border-b border-outline-variant/10">
+                 <nav class="flex items-center justify-center overflow-x-auto scrollbar-hide border-b border-outline-variant/10">
                     <button *ngFor="let tab of tabs" 
                             (click)="activeTab.set(tab.id)"
-                            [class]="'flex-shrink-0 px-8 py-8 font-headline font-black text-xs uppercase tracking-widest transition-all ' + (activeTab() === tab.id ? 'text-primary bg-primary/5 border-b-4 border-primary' : 'text-outline hover:text-on-surface')">
+                            [class]="'flex-1 px-8 py-8 font-headline font-black text-xs uppercase tracking-widest transition-all ' + (activeTab() === tab.id ? 'text-primary bg-primary/5 border-b-4 border-primary' : 'text-outline hover:text-on-surface')">
                        {{ tab.label | translate }}
                     </button>
                  </nav>
@@ -176,17 +167,17 @@ import { environment } from '../../../environments/environment';
                        </div>
                     </div>
 
-                    <!-- Wishlist/Orders Simplified view -->
-                    <div *ngIf="activeTab() === 'orders' || activeTab() === 'wishlist'" class="py-20 text-center space-y-8 animate-fade-in">
+                    <!-- Orders Simplified view -->
+                    <div *ngIf="activeTab() === 'orders'" class="py-20 text-center space-y-8 animate-fade-in">
                         <div class="w-32 h-32 rounded-[40px] bg-surface-container-low flex items-center justify-center text-outline-variant mx-auto mb-8 relative">
-                           <span class="material-symbols-outlined text-6xl opacity-30">{{ activeTab() === 'orders' ? 'inventory_2' : 'favorite' }}</span>
+                           <span class="material-symbols-outlined text-6xl opacity-30">inventory_2</span>
                            <div class="absolute inset-0 border-2 border-dashed border-outline-variant/30 rounded-[40px]"></div>
                         </div>
-                        <h3 class="font-headline text-3xl font-black text-on-surface">{{ (activeTab() === 'orders' ? 'dashboard.yourOrders' : 'dashboard.yourWishlist') | translate }}</h3>
-                        <p class="font-body text-on-surface-variant max-w-xs mx-auto opacity-70">{{ (activeTab() === 'orders' ? 'dashboard.ordersDescription' : 'dashboard.wishlistDescription') | translate }}</p>
-                         <a [routerLink]="activeTab() === 'orders' ? '/' + currentLang() + '/orders' : '/' + currentLang() + '/wishes'" 
+                        <h3 class="font-headline text-3xl font-black text-on-surface">{{ 'dashboard.yourOrders' | translate }}</h3>
+                        <p class="font-body text-on-surface-variant max-w-xs mx-auto opacity-70">{{ 'dashboard.ordersDescription' | translate }}</p>
+                         <a [routerLink]="'/' + currentLang() + '/orders'" 
                             class="inline-block py-5 px-12 bg-on-surface text-surface rounded-[32px] font-headline font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all">
-                            {{ (activeTab() === 'orders' ? 'dashboard.viewOrders' : 'dashboard.viewWishlist') | translate }}
+                            {{ 'dashboard.viewOrders' | translate }}
                          </a>
                     </div>
                  </div>
@@ -210,16 +201,15 @@ export class DashboardComponent implements OnInit {
   
   user = signal<User | null>(null);
   profile = signal<UserProfile | null>(null);
-  activeTab = signal<'overview' | 'orders' | 'wishlist' | 'account'>('overview');
+  activeTab = signal<'overview' | 'orders' | 'account'>('overview');
   stats = signal({ totalOrders: 0, cartItems: 0, wishlist: 0 });
   photoUploading = signal(false);
   carttotal = this.cartService.total;
   userEmail = computed(() => this.tokenService.getEmail());
   
-  tabs: {id: 'overview' | 'orders' | 'wishlist' | 'account', label: string}[] = [
+  tabs: {id: 'overview' | 'orders' | 'account', label: string}[] = [
     { id: 'overview', label: 'dashboard.overview' },
     { id: 'orders', label: 'dashboard.orders' },
-    { id: 'wishlist', label: 'dashboard.wishlist' },
     { id: 'account', label: 'dashboard.account' }
   ];
 

@@ -21,6 +21,11 @@
     line-height: 1;
     font-size: 24px;
     vertical-align: middle;
+    transition: font-variation-settings 0.3s ease;
+
+    &.filled {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
   }
 
   .glass-nav {

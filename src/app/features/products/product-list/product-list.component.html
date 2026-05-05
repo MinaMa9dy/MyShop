@@ -104,17 +104,29 @@
       <!-- ─── Product Grid ─── -->
       <section class="flex-grow min-w-0">
 
-        <!-- Top bar: mobile filter btn + result count -->
-        <div class="flex items-center justify-between mb-6">
+        <!-- Top bar: Search + mobile filter btn + result count -->
+        <div class="flex flex-row items-center justify-between gap-2 mb-6">
+          <!-- Search Bar (In-Page) -->
+          <div class="flex-grow relative group">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant text-lg transition-colors group-focus-within:text-primary">search</span>
+            <input type="text" 
+                   [(ngModel)]="searchTerm" 
+                   (ngModelChange)="onFilterChange()"
+                   [placeholder]="'home.search' | translate"
+                   class="w-full bg-white px-10 py-2.5 rounded-2xl border border-outline-variant/20 focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all font-body text-sm text-on-surface shadow-sm hover:border-outline-variant/40">
+          </div>
+
+          <!-- Mobile Filter Button -->
           <button (click)="isMobileFiltersOpen.set(true)"
-                  class="lg:hidden flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-outline-variant/20 shadow-sm font-bold text-sm text-on-surface-variant">
-            <span class="material-symbols-outlined text-lg">tune</span>
-            {{ 'home.categories' | translate }}
+                  class="lg:hidden flex items-center justify-center p-2.5 rounded-2xl bg-white border border-outline-variant/20 shadow-sm text-primary transition-all active:scale-95 shrink-0">
+            <span class="material-symbols-outlined text-xl">tune</span>
             @if (selectedCategory) {
-              <span class="w-2 h-2 bg-primary rounded-full"></span>
+              <span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full ring-2 ring-white"></span>
             }
           </button>
-          <p class="text-sm text-on-surface-variant font-body ltr:ml-auto rtl:mr-auto">
+
+          <!-- Result Count (Desktop Only) -->
+          <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/50 hidden md:block min-w-fit">
             {{ 'home.showingProducts' | translate:{ count: products().length } }}
           </p>
         </div>
