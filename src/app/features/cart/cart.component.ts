@@ -14,12 +14,12 @@ import { CartItem } from '../../core/models/cart.model';
   template: `
     <!-- Overlay -->
     <div *ngIf="isOpen()" 
-         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] transition-opacity duration-500 animate-fade-in" 
+         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] transition-opacity duration-500 animate-fade-in" 
          (click)="closeCart()"></div>
 
     <!-- Sidebar -->
     <aside [class]="isOpen() ? 'translate-x-0' : (isRtl() ? '-translate-x-full' : 'translate-x-full')"
-           class="fixed top-0 bottom-0 z-40 w-3/4 bg-surface shadow-2xl transition-transform duration-500 ease-in-out flex flex-col overflow-hidden pb-[90px] md:pb-0"
+           class="fixed top-0 bottom-0 z-[120] w-3/4 max-w-[400px] bg-surface shadow-2xl transition-transform duration-500 ease-in-out flex flex-col overflow-hidden"
            [class.left-0]="isRtl()"
            [class.right-0]="!isRtl()"
            [dir]="isRtl() ? 'rtl' : 'ltr'">
