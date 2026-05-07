@@ -19,7 +19,7 @@ import { CartItem } from '../../core/models/cart.model';
 
     <!-- Sidebar -->
     <aside [class]="isOpen() ? 'translate-x-0' : (isRtl() ? '-translate-x-full' : 'translate-x-full')"
-           class="fixed top-0 bottom-0 z-[101] w-3/4 bg-surface shadow-2xl transition-transform duration-500 ease-in-out flex flex-col overflow-hidden"
+           class="fixed top-0 bottom-0 z-40 w-3/4 bg-surface shadow-2xl transition-transform duration-500 ease-in-out flex flex-col overflow-hidden pb-[90px] md:pb-0"
            [class.left-0]="isRtl()"
            [class.right-0]="!isRtl()"
            [dir]="isRtl() ? 'rtl' : 'ltr'">

@@ -284,12 +284,12 @@
 
 <!-- ══ Mobile Filter Drawer ══ -->
 @if (isMobileFiltersOpen()) {
-  <div class="lg:hidden fixed inset-0 z-[100]">
+  <div class="lg:hidden fixed inset-0 z-40">
     <!-- Backdrop -->
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="isMobileFiltersOpen.set(false)"></div>
 
     <!-- Drawer panel -->
-    <div class="absolute inset-y-0 w-[88%] max-w-sm flex flex-col bg-surface-container-lowest shadow-2xl"
+    <div class="absolute inset-y-0 w-[88%] max-w-sm flex flex-col bg-surface-container-lowest shadow-2xl pb-[90px]"
          [class.ltr:left-0]="currentLang !== 'ar'"
          [class.rtl:right-0]="currentLang === 'ar'"
          [class.right-0]="currentLang !== 'ar'"
@@ -310,7 +310,7 @@
       </div>
 
       <!-- Drawer Scrollable Body -->
-      <div class="flex-1 overflow-y-auto px-4 py-5 space-y-6">
+      <div class="flex-1 overflow-y-auto px-4 py-5 space-y-6 pb-24">
 
         <!-- Category Tree -->
         <div class="bg-white rounded-2xl border border-outline-variant/10 overflow-hidden">
