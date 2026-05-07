@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -16,7 +16,7 @@ import { TokenService } from '../../core/services/token.service';
   standalone: true,
   imports: [CommonModule, RouterLink, TranslatePipe],
   template: `
-    <main class="home-page min-h-screen bg-surface">
+    <div class="home-page bg-surface">
       <!-- Premium Hero Section -->
       <section class="relative px-6 py-10 md:py-20 max-w-7xl mx-auto overflow-hidden">
         <div class="relative rounded-2xl md:rounded-3xl overflow-hidden min-h-[400px] md:min-h-[550px] flex items-center p-8 md:p-16 bg-gradient-to-br from-primary to-primary-container text-on-primary">
@@ -49,37 +49,33 @@ import { TokenService } from '../../core/services/token.service';
         </div>
       </section>
 
-      <!-- Bento-Style Categories -->
-      <section class="categories px-6 py-12 max-w-7xl mx-auto">
-        <div class="mb-12 text-center md:text-start">
-          <h2 class="font-headline text-4xl md:text-5xl font-black tracking-tighter text-on-surface">
+      <!-- Dynamic Categories Slider -->
+      <section class="categories py-10 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between mb-8 px-6">
+          <h2 class="font-headline text-2xl md:text-3xl font-black tracking-tight text-on-surface">
             {{ 'home.categories' | translate }}
           </h2>
+          <a [routerLink]="['/' + currentLang + '/categories']" class="text-primary font-black text-xs uppercase tracking-widest hover:underline">{{ 'common.viewAll' | translate }}</a>
         </div>
 
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="flex items-start gap-4 overflow-x-auto scrollbar-hide px-6 pb-4">
           @for (category of categories(); track category.id) {
             <a [routerLink]="['/' + currentLang + '/products']" 
                [queryParams]="{categoryId: category.id}"
-               class="group cursor-pointer aspect-square rounded-2xl bg-surface-container-low flex flex-col items-center justify-center p-6 hover:bg-white hover:shadow-2xl transition-[transform,background-color,shadow] duration-500 relative overflow-hidden text-center"
-               style="will-change: transform; transform: translateZ(0); backface-visibility: hidden;">
+               class="flex-shrink-0 w-24 group cursor-pointer no-underline flex flex-col items-center gap-3">
               
-              <div class="w-20 h-20 rounded-full bg-primary/5 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-500">
-                <span class="material-symbols-outlined text-4xl text-primary">{{ getCategoryIcon(category.name) }}</span>
+              <div class="w-20 h-20 rounded-[32px] bg-surface-container-low flex items-center justify-center group-hover:bg-primary/5 transition-all duration-500 border border-outline-variant/5 group-hover:border-primary/20 group-hover:shadow-xl group-hover:-translate-y-1">
+                <span class="material-symbols-outlined text-3xl text-primary transition-transform duration-500 group-hover:scale-110">{{ getCategoryIcon(category.name) }}</span>
               </div>
               
-              <span class="font-headline font-bold text-lg text-on-surface">{{ category.name }}</span>
-              <!-- Removed products count -->
-              
-              <!-- Subtle inner glow on hover -->
-              <div class="absolute inset-0 border-2 border-primary/0 group-hover:border-primary/5 rounded-2xl transition-all pointer-events-none"></div>
+              <span class="font-headline font-black text-[10px] text-on-surface text-center uppercase tracking-widest opacity-70 group-hover:opacity-100 group-hover:text-primary transition-all">{{ category.name }}</span>
             </a>
           }
         </div>
       </section>
 
       <!-- Premium Featured Products Grid -->
-      <section class="featured-products px-6 py-12 max-w-7xl mx-auto mb-20 text-center md:text-start">
+      <section class="featured-products px-6 py-12 max-w-7xl mx-auto mb-6 md:mb-20 text-center md:text-start">
         <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6 text-center md:text-start">
           <h2 class="font-headline text-3xl font-extrabold tracking-tight text-on-surface">
             {{ 'home.featuredProducts' | translate }}
@@ -100,9 +96,9 @@ import { TokenService } from '../../core/services/token.service';
           </div>
         </div>
 
-        @if (featuredProducts().length > 0) {
-          <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
-            @for (product of featuredProducts(); track product.id; let i = $index) {
+        @if (displayedProducts().length > 0) {
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-10">
+            @for (product of displayedProducts(); track product.id; let i = $index) {
               <div class="group animate-fade-in-up relative bg-surface-container-lowest rounded-2xl overflow-hidden transition-[transform,shadow,border-color] duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-transparent hover:border-outline-variant/30 flex flex-col"
                    style="will-change: transform, opacity; transform: translateZ(0); backface-visibility: hidden; contain: layout;">
                 
@@ -119,14 +115,14 @@ import { TokenService } from '../../core/services/token.service';
                   </a>
                   
                   <!-- Quality Badges -->
-                  <div class="absolute top-2 left-2 md:top-4 md:left-4 flex flex-col items-start gap-1.5 pointer-events-none z-10">
+                  <div class="absolute top-2 left-2 md:top-4 md:left-4 flex flex-col items-start gap-1 pointer-events-none z-10">
                     @if (product.haveSale) {
-                      <span class="bg-error/90 md:backdrop-blur-md text-on-error text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg md:rounded-xl shadow-lg ring-1 ring-white/20">
+                      <span class="bg-error/90 md:backdrop-blur-md text-on-error text-[7px] md:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 md:px-2.5 md:py-1 rounded-lg md:rounded-xl shadow-lg ring-1 ring-white/20">
                         {{ 'product.sale' | translate }}
                       </span>
                     }
                     @if (product.isFasting) {
-                      <span class="bg-primary/90 md:backdrop-blur-md text-on-primary text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg md:rounded-xl shadow-lg ring-1 ring-white/20">
+                      <span class="bg-primary/90 md:backdrop-blur-md text-on-primary text-[7px] md:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 md:px-2.5 md:py-1 rounded-lg md:rounded-xl shadow-lg ring-1 ring-white/20">
                         {{ 'product.fasting' | translate }}
                       </span>
                     }
@@ -151,47 +147,61 @@ import { TokenService } from '../../core/services/token.service';
 
                 <!-- Product Content Info -->
                 <div class="p-3 md:p-6 flex flex-col flex-grow text-start">
-                  <div class="flex justify-between items-start mb-1 md:mb-3">
-                    <a [routerLink]="['/' + currentLang + '/products', product.id]" class="hover:text-primary transition-colors">
-                      <h3 class="font-headline font-bold text-xs md:text-lg leading-tight line-clamp-1 truncate block max-w-[120px] md:max-w-[180px]">
+                  <div class="flex items-start justify-between gap-3 mb-2">
+                    <a [routerLink]="['/' + currentLang + '/products', product.id]" class="group/title">
+                      <h3 class="font-headline font-black text-sm md:text-xl leading-tight line-clamp-2 group-hover/title:text-primary transition-colors">
                         {{ product.name }}
                       </h3>
                     </a>
+                    <div class="flex items-center gap-1 bg-surface-container px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg shrink-0">
+                      <div class="flex items-center gap-0.5">
+                        <span class="material-symbols-outlined text-[12px] md:text-[14px] text-amber-500 fill-current">star</span>
+                        <span class="text-[10px] md:text-[11px] font-black text-on-surface">{{ product.averageRating | number:'1.1-1' }}</span>
+                      </div>
+                      <span class="w-0.5 h-3 bg-outline-variant/20 hidden md:block"></span>
+                      <span class="text-[8px] md:text-[9px] font-bold text-outline-variant">({{ product.reviewCount }})</span>
+                    </div>
                   </div>
                   
-                  <p class="text-[10px] md:text-sm text-on-surface-variant line-clamp-2 mb-4 opacity-70 min-h-[30px] md:min-h-[40px]">
-                    {{ product.description }}
-                  </p>
+                  <div class="mb-4">
+                    <span class="text-[10px] font-black uppercase tracking-[0.2em] text-primary/50">{{ product.categoryName }}</span>
+                    @if (product.description) {
+                      <p class="text-[11px] md:text-sm text-on-surface-variant/70 line-clamp-2 leading-relaxed mt-1">
+                        {{ product.description }}
+                      </p>
+                    }
+                  </div>
 
-                  <div class="space-y-4 mt-auto pt-6 border-t border-outline-variant/10">
-                    <div class="flex items-center justify-between">
-                      <div class="flex flex-col">
-                        <span class="text-lg md:text-2xl font-black text-primary font-headline">{{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+                  <div class="space-y-4 mt-auto">
+                    <div class="flex items-center justify-between pt-4 border-t border-outline-variant/10 gap-2">
+                      <div class="flex flex-col items-start min-w-0">
                         @if (product.oldPrice > product.newPrice) {
-                          <span class="text-[8px] md:text-xs text-outline line-through">{{ product.oldPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+                          <span class="text-[9px] md:text-xs font-black text-outline-variant line-through opacity-40 tracking-tighter truncate">
+                            {{ product.oldPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
+                          </span>
                         }
+                        <span class="text-[16px] md:text-2xl font-black text-on-surface font-headline tracking-tighter truncate">
+                          {{ product.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
+                        </span>
                       </div>
                       
-                      <div class="flex flex-col items-end gap-1">
-                        <span class="text-[10px] font-black uppercase tracking-widest text-outline opacity-40">{{ product.categoryName }}</span>
-                        <div class="flex items-center gap-1 text-on-surface-variant opacity-60" [title]="'product.configurationQuantity' | translate">
-                          <span class="material-symbols-outlined text-xs">inventory_2</span>
-                          <span class="text-[10px] font-bold">{{ product.stockQuantity }}</span>
-                        </div>
+                      <div class="flex items-center gap-1 md:gap-2 bg-surface-container-low px-2 md:px-3 py-1.5 md:py-2 rounded-xl md:rounded-2xl border border-outline-variant/5 shrink-0">
+                        <span class="material-symbols-outlined text-sm md:text-lg text-outline-variant opacity-40">inventory_2</span>
+                        <span class="text-[10px] md:text-[11px] font-black text-on-surface-variant">{{ product.stockQuantity }}</span>
                       </div>
                     </div>
                     
                     @if (product.stockQuantity > 0) {
                       <button (click)="addToCart(product, $event)"
-                              class="w-full py-3 bg-primary text-on-primary rounded-xl font-headline font-bold text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group/btn">
-                        <span class="material-symbols-outlined text-sm group-hover/btn:rotate-12 transition-transform">shopping_bag</span>
-                        {{ 'product.initializeAcquisition' | translate }}
+                              class="w-full py-3 md:py-4 bg-primary text-on-primary rounded-xl md:rounded-[20px] font-headline font-black text-[9px] md:text-[11px] uppercase tracking-[0.1em] shadow-[0_15px_30px_rgba(var(--primary-rgb),0.2)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group/btn">
+                        <span>{{ 'product.initializeAcquisition' | translate }}</span>
+                        <span class="material-symbols-outlined text-base md:text-lg group-hover/btn:rotate-12 transition-transform">shopping_bag</span>
                       </button>
                     } @else {
                       <button disabled
-                              class="w-full py-3 bg-surface-container text-outline-variant rounded-xl font-headline font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 opacity-50">
-                        <span class="material-symbols-outlined text-sm">inventory_2</span>
-                        {{ 'product.outOfStock' | translate }}
+                              class="w-full py-4 bg-surface-container text-outline-variant rounded-[20px] font-headline font-black text-[10px] md:text-[11px] uppercase tracking-[0.1em] flex items-center justify-center gap-3 opacity-50 grayscale">
+                        <span>{{ 'product.outOfStock' | translate }}</span>
+                        <span class="material-symbols-outlined text-lg">inventory_2</span>
                       </button>
                     }
                   </div>
@@ -206,11 +216,11 @@ import { TokenService } from '../../core/services/token.service';
           </div>
         }
       </section>
-    </main>
+    </div>
   `,
   styles: []
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private languageService = inject(LanguageService);
@@ -227,6 +237,17 @@ export class HomeComponent implements OnInit {
   featuredProducts = signal<any[]>([]);
   categories = signal<any[]>([]);
   
+  // Dynamic grid configuration
+  columns = signal<number>(2);
+  displayedProducts = computed(() => {
+    const products = this.featuredProducts();
+    const cols = this.columns();
+    // Calculate count to fill 3 or 4 rows perfectly
+    const targetRows = cols === 4 ? 3 : 4; 
+    const count = cols * targetRows;
+    return products.slice(0, count);
+  });
+
   // Track wishlist items
   wishlistIds = signal<Set<string>>(new Set());
   // Track which product is being processed
@@ -262,14 +283,33 @@ export class HomeComponent implements OnInit {
   }
 
 
+  private resizeListener?: () => void;
+
   ngOnInit(): void {
+    this.updateColumns();
+    this.resizeListener = () => this.updateColumns();
+    window.addEventListener('resize', this.resizeListener);
     this.loadFeaturedProducts();
     this.loadCategories();
     this.loadWishlist();
   }
+
+  ngOnDestroy(): void {
+    if (this.resizeListener) {
+      window.removeEventListener('resize', this.resizeListener);
+    }
+  }
+
+  private updateColumns(): void {
+    const width = window.innerWidth;
+    if (width >= 1024) this.columns.set(4);      // Desktop: 4 columns
+    else if (width >= 768) this.columns.set(3);  // Tablet: 3 columns
+    else this.columns.set(2);                    // Mobile: 2 columns
+  }
   
   private loadFeaturedProducts(): void {
-    this.productService.getHotProducts(8).subscribe({
+    // Load more products to have enough for any screen size (up to 4 rows of 4 = 16)
+    this.productService.getHotProducts(16).subscribe({
       next: (result) => {
         if (result.success && result.data) {
           this.featuredProducts.set(result.data.map((p: any) => this.normalizeProduct(p)));
@@ -427,9 +467,29 @@ export class HomeComponent implements OnInit {
       productVariants: p.productVariants || p.ProductVariants || p.productvariants || [],
       haveSale: p.haveSale ?? p.HaveSale ?? false,
       isFasting: p.isFasting ?? p.IsFasting ?? false,
-      popularity: p.popularity || p.Popularity || 0,
-      reviewCount: p.reviewCount || p.ReviewCount || 0
+      reviewCount: p.reviewCount || p.ReviewCount || 0,
+      averageRating: p.averageRating || p.AverageRating || 0,
+      attributeSummary: this.getAttributeSummary(p.productVariants || p.ProductVariants || p.productvariants || [])
     };
+  }
+
+  private getAttributeSummary(variants: any[]): { name: string, values: string[] }[] {
+    const groups: Record<string, Set<string>> = {};
+    variants.forEach((v: any) => {
+      const attrs = v.attributes || v.Attributes || [];
+      attrs.forEach((a: any) => {
+        const name = a.attributeName || a.AttributeName;
+        const value = a.value || a.Value;
+        if (name && value) {
+          if (!groups[name]) groups[name] = new Set();
+          groups[name].add(value);
+        }
+      });
+    });
+    return Object.keys(groups).map(name => ({
+      name,
+      values: Array.from(groups[name])
+    }));
   }
 }
 

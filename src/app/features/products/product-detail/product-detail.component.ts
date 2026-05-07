@@ -440,11 +440,19 @@ import { environment } from '../../../../environments/environment';
                     </div>
                     
                     <div class="p-6 space-y-4">
+                      <div class="flex items-center gap-1.5">
+                        <div class="flex items-center gap-0.5">
+                          <span class="material-symbols-outlined text-[14px] text-amber-500 fill-current">star</span>
+                          <span class="text-[11px] font-black text-on-surface">{{ item.averageRating | number:'1.1-1' }}</span>
+                        </div>
+                        <span class="w-1 h-1 rounded-full bg-outline-variant/30"></span>
+                        <span class="text-[9px] font-bold text-outline-variant">({{ item.reviewCount }})</span>
+                      </div>
                       <div>
                         <h3 class="font-headline font-bold text-sm text-on-surface line-clamp-1 group-hover:text-primary transition-colors cursor-pointer mb-1" [routerLink]="['/' + currentLang + '/products', item.id]">
                           {{ item.name }}
                         </h3>
-                        <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ item.categoryName }}</p>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-outline mb-2">{{ item.categoryName }}</p>
                       </div>
 
                       <div class="flex items-baseline gap-3">
@@ -903,9 +911,29 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
       })),
       haveSale: p.haveSale ?? p.HaveSale ?? false,
       isFasting: p.isFasting ?? p.IsFasting ?? false,
-      popularity: p.popularity || p.Popularity || 0,
-      reviewCount: p.reviewCount || p.ReviewCount || 0
+      reviewCount: p.reviewCount || p.ReviewCount || 0,
+      averageRating: p.averageRating || p.AverageRating || 0,
+      attributeSummary: this.getAttributeSummary(p.productVariants || p.ProductVariants || p.productvariants || [])
     };
+  }
+
+  private getAttributeSummary(variants: any[]): { name: string, values: string[] }[] {
+    const groups: Record<string, Set<string>> = {};
+    variants.forEach((v: any) => {
+      const attrs = v.attributes || v.Attributes || [];
+      attrs.forEach((a: any) => {
+        const name = a.attributeName || a.AttributeName;
+        const value = a.value || a.Value;
+        if (name && value) {
+          if (!groups[name]) groups[name] = new Set();
+          groups[name].add(value);
+        }
+      });
+    });
+    return Object.keys(groups).map(name => ({
+      name,
+      values: Array.from(groups[name])
+    }));
   }
 }
 

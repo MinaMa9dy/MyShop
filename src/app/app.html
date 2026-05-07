@@ -5,7 +5,7 @@
   <!-- Premium Navigation Shell -->
   <nav class="fixed top-0 w-full z-50 bg-white/95 border-b border-outline-variant/10 backdrop-blur-md">
     <div class="flex justify-between items-center px-4 md:px-6 py-3 md:py-4 w-full max-w-7xl mx-auto relative h-16 md:h-20">
-      <!-- Language Switcher (Mobile/Tablet Side) -->
+      <!-- Language Switcher -->
       <button (click)="toggleLanguage()" 
               class="p-2 rounded-full hover:bg-primary/5 transition-all duration-300 active:scale-95 text-primary">
         <span class="material-symbols-outlined font-black">language</span>
@@ -19,7 +19,44 @@
         </a>
       </div>
 
-      <!-- Placeholder for symmetry -->
+      <!-- Desktop Actions (Cart & Profile) -->
+      <div class="hidden md:flex items-center gap-2 lg:gap-4">
+        <!-- Wishlist Button -->
+        <a [routerLink]="'/' + currentLanguage() + '/wishes'"
+           class="p-2.5 rounded-full hover:bg-primary/5 transition-all duration-300 active:scale-95 text-on-surface-variant hover:text-primary relative group no-underline">
+          <span class="material-symbols-outlined text-[28px] group-hover:filled">favorite</span>
+          @if (wishItemCount() > 0) {
+            <span class="absolute top-1.5 right-1.5 w-5 h-5 bg-primary text-white text-[11px] font-bold flex items-center justify-center rounded-full border-2 border-white transition-all duration-300">
+              {{ wishItemCount() }}
+            </span>
+          }
+        </a>
+
+        <!-- Cart Button -->
+        <button (click)="toggleCart()" 
+                class="p-2.5 rounded-full hover:bg-primary/5 transition-all duration-300 active:scale-95 text-on-surface-variant hover:text-primary relative group">
+          <span class="material-symbols-outlined text-[28px] group-hover:filled">shopping_cart</span>
+          @if (cartItemCount() > 0) {
+            <span class="absolute top-1.5 right-1.5 w-5 h-5 bg-primary text-white text-[11px] font-bold flex items-center justify-center rounded-full border-2 border-white transition-all duration-300">
+              {{ cartItemCount() }}
+            </span>
+          }
+        </button>
+
+        <!-- Profile Button -->
+        <a [routerLink]="isLoggedIn() ? '/' + currentLanguage() + '/dashboard' : '/' + currentLanguage() + '/auth/login'"
+           class="p-1 rounded-full hover:bg-primary/5 transition-all duration-300 active:scale-95 flex items-center gap-2 group no-underline">
+          <div class="w-10 h-10 rounded-full bg-surface-container border-2 border-transparent group-hover:border-primary/20 transition-all overflow-hidden flex items-center justify-center">
+            @if (isLoggedIn() && userPhotoUrl()) {
+              <img [src]="userPhotoUrl()" [alt]="userInitials()" class="w-full h-full object-cover">
+            } @else {
+              <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[28px]">person</span>
+            }
+          </div>
+        </a>
+      </div>
+
+      <!-- Mobile Spacer for symmetry -->
       <div class="w-10 md:hidden"></div>
     </div>
   </nav>
@@ -69,42 +106,57 @@
   </footer>
 
   <!-- Mobile Bottom Navigation Bar (Nectar Design) -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 w-full bg-white border-t border-outline-variant/20 shadow-[0_-10px_40px_rgba(0,0,0,0.08)] z-[100] safe-area-pb rounded-t-3xl">
-    <div class="flex items-center justify-between h-[84px] px-6">
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 w-full bg-white border-t border-outline-variant/20 shadow-[0_-10px_40px_rgba(0,0,0,0.08)] z-[100] safe-area-pb rounded-t-[32px] overflow-hidden">
+    <div class="flex items-center justify-between h-[84px] px-2">
       
       <!-- Shop / Home -->
-      <a [routerLink]="'/' + currentLanguage() + '/'" routerLinkActive="text-primary active" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary transition-all duration-300 no-underline gap-1.5 group">
-        <span class="material-symbols-outlined text-[26px] group-[.active]:filled transition-transform duration-300 group-[.active]:-translate-y-1 group-[.active]:scale-110">storefront</span>
-        <span class="text-[10px] font-bold tracking-wide">{{ 'nav.home' | translate }}</span>
+      <a [routerLink]="'/' + currentLanguage() + '/'" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant transition-all duration-300 no-underline gap-1 group relative">
+        <div class="relative w-12 h-10 flex items-center justify-center">
+          <div class="absolute inset-0 bg-blue-500/10 rounded-2xl scale-0 group-[.active]:scale-100 transition-transform duration-500 ease-out"></div>
+          <span class="material-symbols-outlined text-[26px] group-[.active]:text-blue-600 group-[.active]:filled transition-all duration-300 group-[.active]:scale-110">storefront</span>
+        </div>
+        <span class="text-[10px] font-black tracking-wide group-[.active]:text-blue-600">{{ 'nav.home' | translate }}</span>
       </a>
       
       <!-- Explore -->
-      <a [routerLink]="'/' + currentLanguage() + '/products'" routerLinkActive="text-primary active" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary transition-all duration-300 no-underline gap-1.5 group">
-        <span class="material-symbols-outlined text-[26px] group-[.active]:filled transition-transform duration-300 group-[.active]:-translate-y-1 group-[.active]:scale-110">search</span>
-        <span class="text-[10px] font-bold tracking-wide">{{ 'nav.products' | translate }}</span>
+      <a [routerLink]="'/' + currentLanguage() + '/products'" routerLinkActive="active" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant transition-all duration-300 no-underline gap-1 group relative">
+        <div class="relative w-12 h-10 flex items-center justify-center">
+          <div class="absolute inset-0 bg-indigo-500/10 rounded-2xl scale-0 group-[.active]:scale-100 transition-transform duration-500 ease-out"></div>
+          <span class="material-symbols-outlined text-[26px] group-[.active]:text-indigo-600 group-[.active]:filled transition-all duration-300 group-[.active]:scale-110">search</span>
+        </div>
+        <span class="text-[10px] font-black tracking-wide group-[.active]:text-indigo-600">{{ 'nav.products' | translate }}</span>
       </a>
       
       <!-- Cart -->
-      <button (click)="toggleCart()" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary transition-all duration-300 no-underline gap-1.5 group relative">
-        <div class="relative transition-transform duration-300 group-hover:-translate-y-1">
-          <span class="material-symbols-outlined text-[26px]">shopping_cart</span>
-          @if (cartItemCount() > 0) {
-            <span class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">{{ cartItemCount() }}</span>
-          }
+      <button (click)="toggleCart()" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-amber-600 transition-all duration-300 no-underline gap-1 group relative">
+        <div class="relative w-12 h-10 flex items-center justify-center">
+          <div class="absolute inset-0 bg-amber-500/10 rounded-2xl scale-0 group-hover:scale-100 transition-transform duration-500 ease-out"></div>
+          <div class="relative">
+            <span class="material-symbols-outlined text-[26px] group-hover:filled">shopping_cart</span>
+            @if (cartItemCount() > 0) {
+              <span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-600 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-sm">{{ cartItemCount() }}</span>
+            }
+          </div>
         </div>
-        <span class="text-[10px] font-bold tracking-wide">{{ 'cart.cart' | translate }}</span>
+        <span class="text-[10px] font-black tracking-wide">{{ 'cart.cart' | translate }}</span>
       </button>
       
       <!-- Favourite -->
-      <a [routerLink]="'/' + currentLanguage() + '/wishes'" routerLinkActive="text-primary active" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary transition-all duration-300 no-underline gap-1.5 group">
-        <span class="material-symbols-outlined text-[26px] group-[.active]:filled transition-transform duration-300 group-[.active]:-translate-y-1 group-[.active]:scale-110">favorite</span>
-        <span class="text-[10px] font-bold tracking-wide">{{ 'dashboard.wishlist' | translate }}</span>
+      <a [routerLink]="'/' + currentLanguage() + '/wishes'" routerLinkActive="active" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant transition-all duration-300 no-underline gap-1 group relative">
+        <div class="relative w-12 h-10 flex items-center justify-center">
+          <div class="absolute inset-0 bg-pink-500/10 rounded-2xl scale-0 group-[.active]:scale-100 transition-transform duration-500 ease-out"></div>
+          <span class="material-symbols-outlined text-[26px] group-[.active]:text-pink-600 group-[.active]:filled transition-all duration-300 group-[.active]:scale-110">favorite</span>
+        </div>
+        <span class="text-[10px] font-black tracking-wide group-[.active]:text-pink-600">{{ 'dashboard.wishlist' | translate }}</span>
       </a>
       
       <!-- Account -->
-      <a [routerLink]="isLoggedIn() ? '/' + currentLanguage() + '/dashboard' : '/' + currentLanguage() + '/auth/login'" routerLinkActive="text-primary active" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary transition-all duration-300 no-underline gap-1.5 group">
-        <span class="material-symbols-outlined text-[26px] group-[.active]:filled transition-transform duration-300 group-[.active]:-translate-y-1 group-[.active]:scale-110">person</span>
-        <span class="text-[10px] font-bold tracking-wide">{{ 'dashboard.account' | translate }}</span>
+      <a [routerLink]="isLoggedIn() ? '/' + currentLanguage() + '/dashboard' : '/' + currentLanguage() + '/auth/login'" routerLinkActive="active" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant transition-all duration-300 no-underline gap-1 group relative">
+        <div class="relative w-12 h-10 flex items-center justify-center">
+          <div class="absolute inset-0 bg-emerald-500/10 rounded-2xl scale-0 group-[.active]:scale-100 transition-transform duration-500 ease-out"></div>
+          <span class="material-symbols-outlined text-[26px] group-[.active]:text-emerald-600 group-[.active]:filled transition-all duration-300 group-[.active]:scale-110">person</span>
+        </div>
+        <span class="text-[10px] font-black tracking-wide group-[.active]:text-emerald-600">{{ 'dashboard.account' | translate }}</span>
       </a>
       
     </div>

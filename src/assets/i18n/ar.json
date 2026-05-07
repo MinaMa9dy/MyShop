@@ -22,7 +22,7 @@
     "shopNow": "تسوق الآن",
     "createAccount": "إنشاء حساب",
     "categories": "الفئات",
-    "featuredProducts": "منتجات مميزة",
+    "featuredProducts": "الأكثر مبيعاً",
     "viewAll": "عرض جميع المنتجات ←",
     "browseByDept": "تصفح حسب القسم",
     "noProducts": "لا توجد فئات متاحة",
@@ -40,6 +40,7 @@
     "pageInfo": "صفحة {{current}} من {{total}}"
   },
   "auth": {
+    "fullName": "الاسم بالكامل",
     "login": "تسجيل الدخول",
     "welcomeBack": "مرحباً بعودتك",
     "register": "إنشاء حساب",
@@ -227,6 +228,7 @@
     "account": "الحساب",
     "yourOrders": "طلباتي",
     "ordersDescription": "تتبع واستعرض جميع مشترياتك السابقة.",
+    "viewOrders": "عرض الطلبات",
     "viewAllOrders": "كل الطلبات",
     "yourWishlist": "قائمة أمنياتي",
     "wishlistDescription": "المنتجات التي حفظتها للمؤجل.",

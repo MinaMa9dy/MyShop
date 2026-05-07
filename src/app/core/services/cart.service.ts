@@ -234,7 +234,20 @@ export class CartService {
     
     return this.http.get<any>(`${this.cartsUrl}/my-cart`).pipe(
       tap((response: any) => {
-        const rawItems = response?.data || response?.items || response || [];
+        // Robust response parsing: handle Result<CartDto> or Result<CartItem[]> or raw array
+        const data = response?.data || response;
+        let rawItems = [];
+        
+        if (Array.isArray(data)) {
+          rawItems = data;
+        } else if (data && Array.isArray(data.items)) {
+          rawItems = data.items;
+        } else if (data && Array.isArray(data.cartItems)) {
+          rawItems = data.cartItems;
+        } else if (response && Array.isArray(response.items)) {
+          rawItems = response.items;
+        }
+
         const items = rawItems.map((item: any) => this.mapResponseToCartItem(item));
         this._items.set(items);
         this.saveToStorage();
@@ -244,18 +257,29 @@ export class CartService {
   }
 
   private mapResponseToCartItem(item: any): CartItem {
+    // Handle nested variant/product objects often found in complex backend DTOs
+    const v = item.productVariant || item.ProductVariant || item.variant || item.Variant || {};
+    const p = v.product || v.Product || item.product || item.Product || {};
+    
+    // Support multiple naming conventions and deep nesting
+    const variantId = item.productVariantId || item.ProductVariantId || v.id || v.Id || item.variantId || item.VariantId;
+    const price = item.price || item.Price || item.unitPrice || item.UnitPrice || v.price || v.Price || v.newPrice || v.NewPrice || 0;
+    const photo = item.photoUrl || item.PhotoUrl || v.photoUrl || v.PhotoUrl || p.mainPhotoUrl || p.photoUrl || item.imageUrl || '';
+    const name = item.productName || item.ProductName || p.name || p.Name || item.name || item.Name || 'Unknown Product';
+    const quantity = item.quantity || item.Quantity || 0;
+    
     return {
-      productVariantId: item.productVariantId,
-      productName: item.productName || 'Unknown Product',
-      sku: item.sku || '',
-      price: item.price || 0,
-      photoUrl: item.photoUrl || '',
-      quantity: item.quantity,
+      productVariantId: variantId,
+      productName: name,
+      sku: item.sku || item.SKU || v.sku || v.SKU || '',
+      price: price,
+      photoUrl: photo,
+      quantity: quantity,
       
       // Aliases for compatibility with existing UI components
-      productPrice: item.price,
-      productImage: item.photoUrl ? this.photoService.getPhotoUrl(item.photoUrl) : 'assets/images/placeholder.svg',
-      variantDetails: item.sku ? `SKU: ${item.sku}` : ''
+      productPrice: price,
+      productImage: photo ? this.photoService.getPhotoUrl(photo) : 'assets/images/placeholder.svg',
+      variantDetails: item.variantDetails || item.VariantDetails || this.formatVariantDetails(v) || (item.sku || item.SKU ? `SKU: ${item.sku || item.SKU}` : '')
     };
   }
 

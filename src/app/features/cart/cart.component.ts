@@ -66,23 +66,35 @@ import { CartItem } from '../../core/models/cart.model';
                   </button>
                 </div>
 
-                <div class="flex flex-col gap-1">
-                  <div class="flex flex-col">
-                    <span class="text-[8px] sm:text-[10px] text-outline font-black uppercase tracking-widest opacity-60">{{ 'CART.UNIT_PRICE' | translate }}</span>
-                    <span class="font-headline font-black text-primary text-xs sm:text-base whitespace-nowrap">
-                      {{ getItemDiscountedPrice(item) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
-                    </span>
-                    @if (isItemDiscounted(item.productVariantId)) {
-                      <span class="text-[8px] sm:text-[10px] text-outline line-through opacity-50 whitespace-nowrap">
-                        {{ item.productPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
-                      </span>
-                    }
+                <!-- Price and Calculation -->
+                <div class="space-y-1.5 pt-2">
+                  <div class="flex items-center justify-between">
+                    <div class="flex flex-col">
+                      <span class="text-[10px] font-black uppercase tracking-widest text-outline/50">{{ 'CART.UNIT_PRICE' | translate }}</span>
+                      <div class="flex items-center gap-2">
+                        <span class="font-headline font-black text-primary text-sm sm:text-lg">
+                          {{ getItemDiscountedPrice(item) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
+                        </span>
+                        @if (isItemDiscounted(item.productVariantId)) {
+                          <span class="text-[10px] sm:text-xs text-outline/40 line-through font-bold">
+                            {{ item.productPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
+                          </span>
+                        }
+                      </div>
+                    </div>
+                    
+                    <div class="text-end">
+                      <span class="text-[10px] font-black uppercase tracking-widest text-outline/50">{{ 'CART.TOTAL' | translate }}</span>
+                      <p class="font-headline font-black text-on-surface text-sm sm:text-lg">
+                        {{ (item.quantity * getItemDiscountedPrice(item)) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
+                      </p>
+                    </div>
                   </div>
-                  <div class="pt-1 border-t border-outline-variant/10">
-                    <p class="text-[7px] sm:text-[9px] font-black uppercase tracking-tight text-outline">
-                      {{ item.quantity }} × {{ getItemDiscountedPrice(item) | currency:'EGP':'symbol':'1.0-0':'en-EG' }} = 
-                      <span class="text-on-surface">{{ (item.quantity * getItemDiscountedPrice(item)) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
-                    </p>
+
+                  <div class="flex items-center gap-2 py-1.5 px-3 bg-surface-container-low rounded-lg w-fit">
+                    <span class="text-[10px] font-bold text-outline">{{ item.quantity }}</span>
+                    <span class="text-[10px] text-outline/30">×</span>
+                    <span class="text-[10px] font-bold text-outline">{{ getItemDiscountedPrice(item) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
                   </div>
                 </div>
 

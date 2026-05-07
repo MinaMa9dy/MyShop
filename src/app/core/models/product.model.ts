@@ -12,6 +12,7 @@ export interface Product {
   supplierName: string;
   categoryId: string;
   categoryName: string;
+  averageRating: number;
   
   // Top-level price info for catalog display (Populated from variants during normalization)
   oldPrice: number;
@@ -20,6 +21,7 @@ export interface Product {
 
   productPhotos: ProductPhoto[];
   productVariants: ProductVariant[];
+  attributeSummary?: { name: string, values: string[] }[];
 }
 
 export interface ProductPhoto {

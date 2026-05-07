@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
@@ -52,9 +52,9 @@ import { Wish } from '../../../core/models/wish.model';
              <button (click)="continueShopping()" class="px-10 py-5 bg-primary text-on-primary rounded-2xl font-headline font-bold shadow-[0_15px_30px_rgba(var(--primary-rgb),0.3)] hover:scale-105 active:scale-95 transition-all">{{ 'WISH.browseProducts' | translate }}</button>
           </div>
         } @else {
-          <div class="grid grid-cols-2 gap-6 md:gap-10">
-            @for (wish of wishes(); track wish.productId) {
-              <div class="group relative bg-surface-container-lowest rounded-[40px] overflow-hidden border border-outline-variant/10 hover:border-primary/20 transition-all duration-700 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] flex flex-col h-full animate-fade-in">
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-10">
+            @for (wish of displayedWishes(); track wish.productId) {
+              <div class="group relative bg-surface-container-lowest rounded-3xl sm:rounded-[40px] overflow-hidden border border-outline-variant/10 hover:border-primary/20 transition-all duration-700 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] flex flex-col h-full animate-fade-in">
                 
                 <!-- Image Section -->
                 <div class="relative aspect-[4/5] bg-surface-container-low overflow-hidden cursor-pointer" (click)="goToProduct(wish.productId!)">
@@ -67,83 +67,60 @@ import { Wish } from '../../../core/models/wish.model';
                      </div>
                    }
 
-                   <!-- Overlays & Badges -->
-                   <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                   <!-- Sale Badge -->
-                   @if (wish.product?.haveSale || ((wish.product?.oldPrice ?? 0) > (wish.product?.newPrice ?? 0))) {
-                     <div class="absolute top-6 left-6 z-10">
-                       <span class="bg-error text-on-error text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-2xl shadow-2xl animate-pulse-soft">
-                         {{ 'product.onSale' | translate }}
-                       </span>
-                     </div>
-                   }
-
-                   <!-- Removal Button -->
+                   <!-- Remove from Wishlist Button -->
                    <button (click)="removeFromWish(wish, $event)"
-                           [disabled]="removingId() === wish.productId"
-                           class="absolute top-6 right-6 w-12 h-12 rounded-2xl backdrop-blur-xl bg-white/90 text-on-surface hover:bg-error hover:text-on-error transition-all duration-300 z-20 shadow-xl flex items-center justify-center group/del">
+                           class="absolute top-4 right-4 w-10 h-10 rounded-2xl bg-white/90 backdrop-blur-md text-error flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all z-20 group/remove">
                      @if (removingId() === wish.productId) {
-                       <span class="w-5 h-5 border-2 border-on-surface/30 border-t-primary rounded-full animate-spin"></span>
+                       <div class="w-5 h-5 border-2 border-error/20 border-t-error rounded-full animate-spin"></div>
                      } @else {
-                       <span class="material-symbols-outlined text-xl group-hover/del:rotate-90 transition-transform">close</span>
+                       <span class="material-symbols-outlined text-xl transition-transform group-hover/remove:rotate-12">delete</span>
                      }
                    </button>
-
-                   <!-- Quick Action -->
-                   <div class="absolute inset-x-6 bottom-6 translate-y-20 group-hover:translate-y-0 transition-all duration-500 ease-out z-20">
-                     <button (click)="addToCart(wish, $event)"
-                             [disabled]="addingId() === wish.productId"
-                             class="w-full py-5 bg-on-surface text-surface rounded-[24px] font-headline font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-primary hover:text-on-primary shadow-2xl transition-all">
-                        @if (addingId() === wish.productId) {
-                          <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                        } @else {
-                          <span>{{ 'WISH.acquire' | translate }}</span>
-                          <span class="material-symbols-outlined text-lg">shopping_bag</span>
-                        }
-                     </button>
-                   </div>
                 </div>
 
                 <!-- Info Section -->
-                <div class="p-8 flex flex-col flex-grow bg-surface-container-lowest relative z-10">
-                   <div class="flex-grow space-y-3 mb-8">
-                      <div class="flex items-center gap-3">
-                         <span class="w-1.5 h-1.5 rounded-full bg-primary/40"></span>
-                         <p class="text-[10px] font-black uppercase tracking-[0.3em] text-outline opacity-60 text-start">{{ wish.product?.categoryName || 'General' }}</p>
-                      </div>
-                      <h3 class="font-headline font-black text-xl text-on-surface line-clamp-2 hover:text-primary transition-colors cursor-pointer text-start leading-tight" (click)="goToProduct(wish.productId!)">
-                        {{ wish.product?.name }}
-                      </h3>
-                   </div>
-
-                   <div class="pt-8 border-t border-outline-variant/10 flex items-end justify-between gap-4">
-                      <div class="flex flex-col items-start gap-1">
-                        @if (wish.product?.haveSale && wish.product?.oldPrice && (wish.product?.oldPrice ?? 0) > (wish.product?.newPrice ?? 0)) {
-                          <span class="text-[10px] font-black text-outline-variant line-through opacity-50 tracking-tighter">
-                             {{ wish.product?.oldPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
-                          </span>
-                        }
-                        <span class="font-headline font-black text-2xl text-on-surface tracking-tighter flex items-center gap-1">
-                           {{ (wish.product?.newPrice ?? 0) | currency:'EGP':'symbol':'1.0-0':'en-EG' }}
-                        </span>
-                      </div>
-
-                      <button (click)="goToProduct(wish.productId!)" class="w-12 h-12 rounded-2xl bg-surface-container-high text-on-surface hover:bg-primary hover:text-on-primary transition-all flex items-center justify-center group/view shadow-sm">
-                         <span class="material-symbols-outlined transform group-hover/view:scale-110 group-hover/view:rotate-12 transition-transform">arrow_outward</span>
-                      </button>
-                   </div>
+                <div class="p-4 sm:p-6 flex flex-col items-center justify-center bg-white">
+                   <h3 class="font-headline font-black text-sm sm:text-lg text-on-surface line-clamp-1 hover:text-primary transition-colors cursor-pointer text-center leading-tight" (click)="goToProduct(wish.productId!)">
+                     {{ wish.product?.name }}
+                   </h3>
                 </div>
               </div>
             }
           </div>
+
+          <!-- Pagination Control -->
+          @if (totalPages() > 1) {
+            <div class="mt-20 flex items-center justify-center gap-3 animate-fade-in">
+              <button (click)="goToPage(currentPage() - 1)" 
+                      [disabled]="currentPage() === 1"
+                      class="w-12 h-12 rounded-2xl bg-white border border-outline-variant/10 flex items-center justify-center text-on-surface hover:bg-primary hover:text-on-primary disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm">
+                <span class="material-symbols-outlined">chevron_left</span>
+              </button>
+              
+              <div class="flex items-center gap-2">
+                @for (p of [].constructor(totalPages()); track $index) {
+                  <button (click)="goToPage($index + 1)"
+                          class="w-12 h-12 rounded-2xl font-headline font-black text-sm transition-all shadow-sm"
+                          [class]="currentPage() === ($index + 1) ? 'bg-primary text-on-primary scale-110' : 'bg-white border border-outline-variant/10 text-on-surface hover:bg-surface-container'">
+                    {{ $index + 1 }}
+                  </button>
+                }
+              </div>
+
+              <button (click)="goToPage(currentPage() + 1)" 
+                      [disabled]="currentPage() === totalPages()"
+                      class="w-12 h-12 rounded-2xl bg-white border border-outline-variant/10 flex items-center justify-center text-on-surface hover:bg-primary hover:text-on-primary disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm">
+                <span class="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
+          }
         }
       </section>
     </main>
   `,
   styles: []
 })
-export class WishListComponent implements OnInit {
+export class WishListComponent implements OnInit, OnDestroy {
   private wishService = inject(WishService);
   private cartService = inject(CartService);
   private tokenService = inject(TokenService);
@@ -157,12 +134,53 @@ export class WishListComponent implements OnInit {
   removingId = signal<string | null>(null);
   addingId = signal<string | null>(null);
 
-  placeholder = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCrToAN7K9bxCYHNmah4SPbCguXNVlpK-DeQWeEBnHb8hhrK_YwTkoUXoEOh-RgjYVbFZj2ZzFPFjqLgEqS81zBG3mBRaFpNCTpPthaRKkjbY6cN5ywiH6wrgPH-fov4huJ80NbYSMgUyawNMMrAIHqttsqobdz8M4Yk_ERm3md8eXwLlW4PLs3aIXrOye6hD6Mc0OtdU9LpkjMLI7eeChndSjrvjUUdPvpHGIlYDvLm3UBFRbdvqH0krtaLiZxlv72URSOjaoPfUbP';
+  // Pagination & Grid Logic
+  currentPage = signal(1);
+  columns = signal(2);
+  pageSize = computed(() => {
+    const cols = this.columns();
+    return cols === 4 ? 12 : (cols === 3 ? 9 : 8);
+  });
+  
+  displayedWishes = computed(() => {
+    const all = this.wishes();
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return all.slice(start, start + this.pageSize());
+  });
+
+  totalPages = computed(() => Math.ceil(this.wishes().length / this.pageSize()));
+
+  private resizeListener?: () => void;
 
   get isRtl(): boolean { return this.languageService.currentLanguage() === 'ar'; }
   get currentLang(): string { return this.languageService.currentLanguage(); }
 
-  ngOnInit(): void { this.loadWishes(); }
+  ngOnInit(): void { 
+    this.updateColumns();
+    this.resizeListener = () => this.updateColumns();
+    window.addEventListener('resize', this.resizeListener);
+    this.loadWishes(); 
+  }
+
+  ngOnDestroy(): void {
+    if (this.resizeListener) {
+      window.removeEventListener('resize', this.resizeListener);
+    }
+  }
+
+  private updateColumns(): void {
+    const width = window.innerWidth;
+    if (width >= 1024) this.columns.set(4);
+    else if (width >= 768) this.columns.set(3);
+    else this.columns.set(2);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
 
   loadWishes(): void {
     const userId = this.tokenService.getUserId();
@@ -218,8 +236,31 @@ export class WishListComponent implements OnInit {
         stockQuantity: (v.stockQuantity ?? v.StockQuantity ?? v.shownQuantity ?? v.ShownQuantity) ?? 1
       })),
       haveSale: p.haveSale ?? p.HaveSale ?? false,
-      isFasting: p.isFasting ?? p.IsFasting ?? false
+      isFasting: p.isFasting ?? p.IsFasting ?? false,
+      popularity: p.popularity || p.Popularity || 0,
+      reviewCount: p.reviewCount || p.ReviewCount || 0,
+      averageRating: p.averageRating || p.AverageRating || 0,
+      attributeSummary: this.getAttributeSummary(p.productVariants || p.ProductVariants || p.productvariants || [])
     };
+  }
+
+  private getAttributeSummary(variants: any[]): { name: string, values: string[] }[] {
+    const groups: Record<string, Set<string>> = {};
+    variants.forEach((v: any) => {
+      const attrs = v.attributes || v.Attributes || [];
+      attrs.forEach((a: any) => {
+        const name = a.attributeName || a.AttributeName;
+        const value = a.value || a.Value;
+        if (name && value) {
+          if (!groups[name]) groups[name] = new Set();
+          groups[name].add(value);
+        }
+      });
+    });
+    return Object.keys(groups).map(name => ({
+      name,
+      values: Array.from(groups[name])
+    }));
   }
 
   addToCart(wish: Wish, event: Event): void {

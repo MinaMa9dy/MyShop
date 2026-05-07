@@ -44,7 +44,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   categories = signal<any[]>([]);
   loading = signal(false);
   currentPage = signal(1);
-  pageSize = 8;
+  pageSize = signal(8);
   totalPages = signal(1);
 
   // Track wishlist items
@@ -86,6 +86,15 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.loadCategories();
     this.loadWishlist();
 
+    this.updatePageSize();
+    window.addEventListener('resize', () => {
+      const oldSize = this.pageSize();
+      this.updatePageSize();
+      if (oldSize !== this.pageSize()) {
+        this.loadProducts();
+      }
+    });
+
     this.route.queryParams.subscribe(params => {
       this.selectedCategory = params['categoryId'] || '';
       this.searchTerm = params['searchTerm'] || '';
@@ -104,7 +113,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
       haveSale: this.onSaleOnly || undefined,
       isFasting: this.isFastingOnly || undefined,
       pageNumber: this.currentPage(),
-      pageSize: this.pageSize
+      pageSize: this.pageSize()
     }).subscribe({
       next: (result) => {
         if (result.success && result.data) {
@@ -319,8 +328,29 @@ export class ProductListComponent implements OnInit, OnDestroy {
       haveSale: p.haveSale ?? p.HaveSale ?? false,
       isFasting: p.isFasting ?? p.IsFasting ?? false,
       popularity: p.popularity || p.Popularity || 0,
-      reviewCount: p.reviewCount || p.ReviewCount || 0
+      reviewCount: p.reviewCount || p.ReviewCount || 0,
+      averageRating: p.averageRating || p.AverageRating || 0,
+      attributeSummary: this.getAttributeSummary(p.productVariants || p.ProductVariants || p.productvariants || [])
     };
+  }
+
+  private getAttributeSummary(variants: any[]): { name: string, values: string[] }[] {
+    const groups: Record<string, Set<string>> = {};
+    variants.forEach((v: any) => {
+      const attrs = v.attributes || v.Attributes || [];
+      attrs.forEach((a: any) => {
+        const name = a.attributeName || a.AttributeName;
+        const value = a.value || a.Value;
+        if (name && value) {
+          if (!groups[name]) groups[name] = new Set();
+          groups[name].add(value);
+        }
+      });
+    });
+    return Object.keys(groups).map(name => ({
+      name,
+      values: Array.from(groups[name])
+    }));
   }
 
   private normalizeCategory(c: any): any {
@@ -331,6 +361,15 @@ export class ProductListComponent implements OnInit, OnDestroy {
       name: c.name || c.Name,
       description: c.description || c.Description
     };
+  }
+
+  private updatePageSize(): void {
+    const width = window.innerWidth;
+    if (width >= 1024) {
+      this.pageSize.set(9); // 3 columns * 3 rows = 9
+    } else {
+      this.pageSize.set(8); // 2 columns * 4 rows = 8
+    }
   }
 
   ngOnDestroy(): void {

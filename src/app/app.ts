@@ -20,6 +20,7 @@ import { Product } from './core/models/product.model';
 import { environment } from '../environments/environment';
 import { CategoryService } from './core/services/category.service';
 import { Category } from './core/models/category.model';
+import { WishService } from './core/services/wish.service';
 
 
 
@@ -41,6 +42,7 @@ export class App implements OnInit, OnDestroy {
   private productService = inject(ProductService);
   private elementRef = inject(ElementRef);
   private categoryService = inject(CategoryService);
+  private wishService = inject(WishService);
   
   private loginSubscription?: Subscription;
   private routerSubscription?: Subscription;
@@ -51,6 +53,7 @@ export class App implements OnInit, OnDestroy {
   
   isLoggedIn = this.authService.isLoggedIn;
   cartItemCount = this.cartService.total;
+  wishItemCount = this.wishService.count;
   currentLanguage = this.languageService.currentLanguage;
   
   // Search
@@ -166,6 +169,7 @@ export class App implements OnInit, OnDestroy {
     if (this.authService.isAuthenticated() && userId) {
       this.fetchUserCart();
       this.loadUserProfile();
+      this.loadWishes();
     }
     
     this.loadCategoryTree();
@@ -174,6 +178,7 @@ export class App implements OnInit, OnDestroy {
     this.loginSubscription = this.authService.loginSuccess.subscribe(() => {
       this.fetchUserCart();
       this.loadUserProfile();
+      this.loadWishes();
     });
     
     // Scroll to top on navigation
@@ -262,6 +267,12 @@ export class App implements OnInit, OnDestroy {
       error: (err) => {
         console.error('Error loading category tree:', err);
       }
+    });
+  }
+
+  private loadWishes(): void {
+    this.wishService.getWishes().subscribe({
+      error: (err) => console.error('Error loading wishes:', err)
     });
   }
   

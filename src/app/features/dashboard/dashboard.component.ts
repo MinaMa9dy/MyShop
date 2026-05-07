@@ -74,80 +74,78 @@ import { environment } from '../../../environments/environment';
 
       <section class="max-w-7xl mx-auto px-6 -mt-16 relative z-30">
         <!-- Quantified Metrics Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-           <div class="bg-surface-container-lowest p-6 md:p-10 rounded-[48px] shadow-2xl border border-outline-variant/10 group hover:border-primary/30 transition-all">
-              <div class="flex justify-between items-start mb-8">
-                  <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                     <span class="material-symbols-outlined text-3xl">inventory_2</span>
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 mb-16">
+           <div class="bg-surface-container-lowest p-4 md:p-10 rounded-[32px] md:rounded-[48px] shadow-2xl border border-outline-variant/10 group hover:border-primary/30 transition-all">
+              <div class="flex justify-between items-start mb-4 md:mb-8">
+                  <div class="w-10 h-10 md:w-14 md:h-14 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                     <span class="material-symbols-outlined text-xl md:text-3xl">inventory_2</span>
                   </div>
-                  <span class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.historicalLog' | translate }}</span>
+                  <span class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.historicalLog' | translate }}</span>
                </div>
-               <p class="font-headline text-5xl font-black text-on-surface mb-2">{{ stats().totalOrders }}</p>
-               <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.totalOrders' | translate }}</p>
+               <p class="font-headline text-3xl md:text-5xl font-black text-on-surface mb-1 md:mb-2">{{ stats().totalOrders }}</p>
+               <p class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-outline truncate">{{ 'dashboard.totalOrders' | translate }}</p>
            </div>
 
-           <div class="bg-surface-container-lowest p-6 md:p-10 rounded-[48px] shadow-2xl border border-outline-variant/10 group hover:border-tertiary/30 transition-all">
-              <div class="flex justify-between items-start mb-8">
-                  <div class="w-14 h-14 bg-tertiary/10 rounded-2xl flex items-center justify-center text-tertiary group-hover:scale-110 transition-transform">
-                     <span class="material-symbols-outlined text-3xl">shopping_cart</span>
+           <div class="bg-surface-container-lowest p-4 md:p-10 rounded-[32px] md:rounded-[48px] shadow-2xl border border-outline-variant/10 group hover:border-tertiary/30 transition-all">
+              <div class="flex justify-between items-start mb-4 md:mb-8">
+                  <div class="w-10 h-10 md:w-14 md:h-14 bg-tertiary/10 rounded-xl md:rounded-2xl flex items-center justify-center text-tertiary group-hover:scale-110 transition-transform">
+                     <span class="material-symbols-outlined text-xl md:text-3xl">shopping_cart</span>
                   </div>
-                  <span class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.activeSequence' | translate }}</span>
+                  <span class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.activeSequence' | translate }}</span>
                </div>
-               <p class="font-headline text-5xl font-black text-on-surface mb-2">{{ carttotal() }}</p>
-               <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'dashboard.itemsInBuffer' | translate }}</p>
+               <p class="font-headline text-3xl md:text-5xl font-black text-on-surface mb-1 md:mb-2">{{ carttotal() }}</p>
+               <p class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-outline truncate">{{ 'dashboard.itemsInBuffer' | translate }}</p>
            </div>
-
-
         </div>
 
         <div class="grid grid-cols-1 gap-12">
            <!-- Main Content Area -->
            <div class="space-y-12">
-              <div class="bg-surface-container-lowest rounded-[48px] shadow-2xl border border-outline-variant/10 overflow-hidden">
+              <div class="bg-surface-container-lowest rounded-[40px] md:rounded-[48px] shadow-2xl border border-outline-variant/10 overflow-hidden">
                  <!-- Tab Navigation -->
                  <nav class="flex items-center justify-center overflow-x-auto scrollbar-hide border-b border-outline-variant/10">
                     <button *ngFor="let tab of tabs" 
                             (click)="activeTab.set(tab.id)"
-                            [class]="'flex-1 px-8 py-8 font-headline font-black text-xs uppercase tracking-widest transition-all ' + (activeTab() === tab.id ? 'text-primary bg-primary/5 border-b-4 border-primary' : 'text-outline hover:text-on-surface')">
+                            [class]="'flex-1 px-4 md:px-8 py-6 md:py-8 font-headline font-black text-[10px] md:text-xs uppercase tracking-widest transition-all ' + (activeTab() === tab.id ? 'text-primary bg-primary/5 border-b-4 border-primary' : 'text-outline hover:text-on-surface')">
                        {{ tab.label | translate }}
                     </button>
                  </nav>
 
-                 <div class="p-6 md:p-10 md:p-16">
+                 <div class="p-4 md:p-16">
                      <!-- Overview Tab Content -->
                      <div *ngIf="activeTab() === 'overview'" class="space-y-12 animate-fade-in text-start">
                         <div>
-                           <h3 class="font-headline font-black text-2xl text-on-surface mb-8 tracking-tighter">{{ 'dashboard.strategicExecution' | translate }}</h3>
-                          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                           <h3 class="font-headline font-black text-xl md:text-2xl text-on-surface mb-8 tracking-tighter">{{ 'dashboard.strategicExecution' | translate }}</h3>
+                          <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
                              <a *ngIf="canAddProduct()" [routerLink]="['/' + currentLang() + '/admin/products/add']" 
-                                class="p-8 rounded-[32px] bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-all text-center group">
-                                <span class="material-symbols-outlined text-4xl text-primary mb-4 group-hover:scale-125 transition-transform">add_box</span>
-                                <span class="block font-headline font-black text-[10px] uppercase tracking-widest text-primary">{{ 'admin.addProduct.addProduct' | translate }}</span>
+                                class="p-4 md:p-8 rounded-2xl md:rounded-[32px] bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-all text-center group">
+                                <span class="material-symbols-outlined text-2xl md:text-4xl text-primary mb-2 md:mb-4 group-hover:scale-125 transition-transform">add_box</span>
+                                <span class="block font-headline font-black text-[8px] md:text-[10px] uppercase tracking-widest text-primary truncate">{{ 'admin.addProduct.addProduct' | translate }}</span>
                              </a>
                              <a [routerLink]="'/' + currentLang() + '/products'" 
-                                class="p-8 rounded-[32px] bg-surface-container-low border border-outline-variant/10 hover:border-primary/20 transition-all text-center group">
-                                <span class="material-symbols-outlined text-4xl text-on-surface-variant mb-4 group-hover:scale-125 transition-transform">category</span>
-                                <span class="block font-headline font-black text-[10px] uppercase tracking-widest text-on-surface-variant">{{ 'dashboard.browseProducts' | translate }}</span>
+                                class="p-4 md:p-8 rounded-2xl md:rounded-[32px] bg-surface-container-low border border-outline-variant/10 hover:border-primary/20 transition-all text-center group">
+                                <span class="material-symbols-outlined text-2xl md:text-4xl text-on-surface-variant mb-2 md:mb-4 group-hover:scale-125 transition-transform">category</span>
+                                <span class="block font-headline font-black text-[8px] md:text-[10px] uppercase tracking-widest text-on-surface-variant truncate">{{ 'dashboard.browseProducts' | translate }}</span>
                              </a>
                              <a [routerLink]="'/' + currentLang() + '/orders'" 
-                                class="p-8 rounded-[32px] bg-surface-container-low border border-outline-variant/10 hover:border-primary/20 transition-all text-center group">
-                                <span class="material-symbols-outlined text-4xl text-on-surface-variant mb-4 group-hover:scale-125 transition-transform">list_alt</span>
-                                <span class="block font-headline font-black text-[10px] uppercase tracking-widest text-on-surface-variant">{{ 'dashboard.viewAllOrders' | translate }}</span>
+                                class="p-4 md:p-8 rounded-2xl md:rounded-[32px] bg-surface-container-low border border-outline-variant/10 hover:border-primary/20 transition-all text-center group">
+                                <span class="material-symbols-outlined text-2xl md:text-4xl text-on-surface-variant mb-2 md:mb-4 group-hover:scale-125 transition-transform">list_alt</span>
+                                <span class="block font-headline font-black text-[8px] md:text-[10px] uppercase tracking-widest text-on-surface-variant truncate">{{ 'dashboard.viewAllOrders' | translate }}</span>
                              </a>
                              <a *ngIf="isAdmin()" [routerLink]="['/' + currentLang() + '/admin/categories/add']" 
-                                class="p-8 rounded-[32px] bg-secondary/5 border border-secondary/20 hover:bg-secondary/10 transition-all text-center group">
-                                <span class="material-symbols-outlined text-4xl text-secondary mb-4 group-hover:scale-125 transition-transform">create_new_folder</span>
-                                <span class="block font-headline font-black text-[10px] uppercase tracking-widest text-secondary text-start">{{ 'admin.addCategory.button' | translate }}</span>
+                                class="p-4 md:p-8 rounded-2xl md:rounded-[32px] bg-secondary/5 border border-secondary/20 hover:bg-secondary/10 transition-all text-center group">
+                                <span class="material-symbols-outlined text-2xl md:text-4xl text-secondary mb-2 md:mb-4 group-hover:scale-125 transition-transform">create_new_folder</span>
+                                <span class="block font-headline font-black text-[8px] md:text-[10px] uppercase tracking-widest text-secondary truncate">{{ 'admin.addCategory.button' | translate }}</span>
                              </a>
                              <a [routerLink]="'/' + currentLang() + '/dashboard/my-coupons'" 
-                                class="p-8 rounded-[32px] bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-all text-center group">
-                                <span class="material-symbols-outlined text-4xl text-primary mb-4 group-hover:scale-125 transition-transform">confirmation_number</span>
-                                <span class="block font-headline font-black text-[10px] uppercase tracking-widest text-primary">{{ 'dashboard.myCoupons' | translate }}</span>
+                                class="p-4 md:p-8 rounded-2xl md:rounded-[32px] bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-all text-center group">
+                                <span class="material-symbols-outlined text-2xl md:text-4xl text-primary mb-2 md:mb-4 group-hover:scale-125 transition-transform">confirmation_number</span>
+                                <span class="block font-headline font-black text-[8px] md:text-[10px] uppercase tracking-widest text-primary truncate">{{ 'dashboard.myCoupons' | translate }}</span>
                              </a>
                              <a *ngIf="isAdmin()" [routerLink]="['/' + currentLang() + '/admin/coupons']" 
-                                class="p-8 rounded-[32px] bg-tertiary/5 border border-tertiary/20 hover:bg-tertiary/10 transition-all text-center group">
-                                <span class="material-symbols-outlined text-4xl text-tertiary mb-4 group-hover:scale-125 transition-transform">settings_input_component</span>
-                                <span class="block font-headline font-black text-[10px] uppercase tracking-widest text-tertiary text-start">{{ 'admin.coupons.title' | translate }}</span>
+                                class="p-4 md:p-8 rounded-2xl md:rounded-[32px] bg-tertiary/5 border border-tertiary/20 hover:bg-tertiary/10 transition-all text-center group">
+                                <span class="material-symbols-outlined text-2xl md:text-4xl text-tertiary mb-2 md:mb-4 group-hover:scale-125 transition-transform">settings_input_component</span>
+                                <span class="block font-headline font-black text-[8px] md:text-[10px] uppercase tracking-widest text-tertiary truncate">{{ 'admin.coupons.title' | translate }}</span>
                              </a>
                           </div>
                        </div>

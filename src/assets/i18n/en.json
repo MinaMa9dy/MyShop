@@ -22,7 +22,7 @@
     "shopNow": "Shop Now",
     "createAccount": "Create Account",
     "categories": "Categories",
-    "featuredProducts": "Featured Products",
+    "featuredProducts": "Best Sellers",
     "viewAll": "View All Products →",
     "browseByDept": "Browse by department",
     "noProducts": "No categories available",
@@ -40,6 +40,7 @@
     "pageInfo": "Page {{current}} of {{total}}"
   },
   "auth": {
+    "fullName": "Full Name",
     "login": "Login",
     "welcomeBack": "Welcome Back",
     "register": "Register",
