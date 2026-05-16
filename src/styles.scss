@@ -2,18 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =====================================================
+   KANTYN SAN MARK — GLOBAL DESIGN SYSTEM
+   Primary: #7B1818 (Deep Maroon)
+   Accent:  #C4962A (Gold)
+   BG:      #FAF7F2 (Warm Cream)
+===================================================== */
+
 @layer base {
+  html {
+    direction: rtl;
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-surface text-on-surface antialiased;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Tajawal', 'Cairo', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Cairo', 'Tajawal', sans-serif;
+    font-weight: 700;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* RTL scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(123, 24, 24, 0.2);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(123, 24, 24, 0.4);
   }
 }
 
 @layer components {
+  /* ── Material Symbols ── */
   .material-symbols-outlined {
     font-family: 'Material Symbols Outlined';
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -22,71 +57,164 @@
     font-size: 24px;
     vertical-align: middle;
     transition: font-variation-settings 0.3s ease;
-
     &.filled {
       font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
   }
 
-  .glass-nav {
-    @apply backdrop-blur-xl bg-white/70 dark:bg-slate-900/70;
-    -webkit-backdrop-filter: blur(20px);
-  }
-
-  .glass-tray {
-    backdrop-filter: blur(12px);
-    background: rgba(255, 255, 255, 0.7);
-  }
-
-  .form-input-container {
-    @apply relative;
-    
-    label {
-      @apply absolute start-4 top-4 text-on-surface-variant transition-all duration-300 pointer-events-none origin-left flex items-center gap-2;
-    }
-
-    input:focus ~ label,
-    input:not(:placeholder-shown) ~ label {
-      @apply -translate-y-6 scale-[0.85] text-primary;
-    }
-  }
-
+  /* ── No scrollbar ── */
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
-    &::-webkit-scrollbar {
-      display: none;
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  /* ── Kantyn Card ── */
+  .ksm-card {
+    @apply bg-surface-container-lowest rounded-2xl border border-outline-variant/20 shadow-sm;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    &:hover {
+      @apply shadow-md;
+      transform: translateY(-2px);
     }
   }
 
-  .nav-link-underline {
+  /* ── Kantyn Button Primary ── */
+  .ksm-btn-primary {
+    @apply bg-primary text-on-primary font-bold rounded-full px-6 py-3;
+    font-family: 'Cairo', sans-serif;
+    transition: all 0.3s ease;
+    &:hover { @apply bg-primary-dim; transform: translateY(-1px); }
+    &:active { transform: scale(0.97); }
+  }
+
+  /* ── Category Chip ── */
+  .ksm-category-chip {
+    @apply flex flex-col items-center gap-2 p-3 rounded-2xl bg-surface-container-lowest border border-outline-variant/20 cursor-pointer;
+    transition: all 0.3s ease;
+    &:hover {
+      @apply border-primary/30 bg-primary/5;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(123, 24, 24, 0.1);
+    }
+    &.active {
+      @apply border-primary/40 bg-primary/10;
+    }
+  }
+
+  /* ── Price Tag ── */
+  .ksm-price {
+    @apply text-primary font-black;
+    font-family: 'Cairo', sans-serif;
+  }
+
+  /* ── Section Header ── */
+  .ksm-section-header {
+    @apply flex items-center justify-between mb-4 px-4;
+    h2 {
+      @apply font-black text-on-surface;
+      font-family: 'Cairo', sans-serif;
+      font-size: 1.1rem;
+    }
+    a {
+      @apply text-primary text-sm font-bold;
+      font-family: 'Cairo', sans-serif;
+    }
+  }
+
+  /* ── Bottom Nav Item ── */
+  .ksm-nav-item {
+    @apply flex flex-col items-center justify-center gap-1 text-on-surface-variant transition-all duration-300;
+    &.active {
+      @apply text-primary;
+      .ksm-nav-icon { @apply bg-primary/10; }
+    }
+    .ksm-nav-icon {
+      @apply w-12 h-10 flex items-center justify-center rounded-2xl transition-all duration-300;
+    }
+    span.label {
+      font-size: 10px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 700;
+    }
+  }
+
+  /* ── Hero Banner ── */
+  .ksm-hero {
+    background: linear-gradient(135deg, #F5EFE6 0%, #EDE0CC 50%, #E8D5B8 100%);
+    border-radius: 1.5rem;
     position: relative;
-    &::after {
+    overflow: hidden;
+    &::before {
       content: '';
       position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: currentColor;
-      transform: scaleX(0);
-      transform-origin: right;
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      inset: 0;
+      background: radial-gradient(ellipse at 70% 50%, rgba(196, 150, 42, 0.08) 0%, transparent 70%);
     }
-    &:hover::after, &.active::after {
-      transform: scaleX(1);
-      transform-origin: left;
+  }
+
+  /* ── Product Card ── */
+  .ksm-product-card {
+    @apply bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant/15;
+    transition: all 0.3s ease;
+    &:hover {
+      box-shadow: 0 8px 24px rgba(123, 24, 24, 0.12);
+      transform: translateY(-3px);
     }
+  }
+
+  /* ── Add to Cart Button ── */
+  .ksm-add-btn {
+    @apply w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center flex-shrink-0;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(123, 24, 24, 0.3);
+    &:hover {
+      @apply bg-primary-dim;
+      transform: scale(1.1);
+    }
+    &:active { transform: scale(0.9); }
+  }
+
+  /* ── Features Card ── */
+  .ksm-feature-card {
+    @apply flex flex-col items-center gap-2 p-4 bg-surface-container-low rounded-2xl text-center;
+    .icon { @apply text-primary text-2xl; }
+    .title { @apply font-bold text-on-surface text-xs; font-family: 'Cairo', sans-serif; }
+    .desc { @apply text-on-surface-variant text-[10px]; }
+  }
+
+  /* ── Form Input ── */
+  .ksm-input {
+    @apply w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-on-surface;
+    font-family: 'Tajawal', sans-serif;
+    transition: border-color 0.3s;
+    &:focus {
+      @apply outline-none border-primary ring-2 ring-primary/10;
+    }
+  }
+
+  /* ── Auth Card ── */
+  .ksm-auth-card {
+    @apply bg-surface-container-lowest rounded-3xl border border-outline-variant/20 p-8;
+    box-shadow: 0 20px 60px rgba(123, 24, 24, 0.08);
+  }
+
+  /* ── Skeleton Loading ── */
+  .skeleton {
+    background: linear-gradient(90deg, #EDE5D8 25%, #F5EFE6 50%, #EDE5D8 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 0.75rem;
   }
 }
 
-// Premium Animations
+/* ── Animations ── */
 @keyframes fade-in-up {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes skeleton-loading {
+@keyframes shimmer {
   0% { background-position: 100% 50%; }
   100% { background-position: 0 50%; }
 }
@@ -96,24 +224,25 @@
   50% { opacity: 0.6; }
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
 .animate-fade-in-up {
   animation: fade-in-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
-
 .animate-pulse-soft {
   animation: pulse-soft 2s ease-in-out infinite;
 }
-
-.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
-}
-
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
 
-// RT support for Tailwind (using inset-s/inset-e instead of left/right)
-// Note: We used logical properties in the templates if needed
+/* Safe area for bottom nav on notched phones */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
 
+/* RTL-aware no-underline */
+a { text-decoration: none; }

@@ -1,54 +1,81 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
-  <title>MyShop</title>
+  <title>كانتين سان مارك</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="MyShop - Discover the best products at the best prices.">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="description" content="كانتين سان مارك - اطلب منتجات الكانتين بسهولة وجودة عالية. تسوق من أفضل المنتجات لدعم أنشطة الكنيسة.">
+  <link rel="icon" type="image/png" href="assets/images/logo.png">
 
-  <!-- Preconnect to reduce DNS + TLS handshake latency -->
+  <!-- Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <!-- Single merged font request (Inter + Manrope) -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+  <!-- Arabic Fonts: Cairo + Tajawal -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
 
-  <!-- Material Symbols: fixed weight 400 only (avoids downloading the full variable font range) -->
+  <!-- Material Symbols -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=block" rel="stylesheet">
 
-  <!-- Google Sign-In (deferred so it never blocks page render) -->
+  <!-- Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <app-root>
-    <!-- Premium Initial Loader (Prevents FOUC/Flicker) -->
+    <!-- Kantyn San Mark Initial Loader -->
     <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: #FAF7F2; }
       .initial-loader {
         position: fixed;
         inset: 0;
-        background: #ffffff;
+        background: #FAF7F2;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         z-index: 9999;
-        transition: opacity 0.4s ease-out;
+        transition: opacity 0.5s ease-out;
+        gap: 20px;
       }
-      .loader-logo {
-        font-family: 'Inter', sans-serif;
-        font-size: 2.5rem;
+      .loader-logo-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        animation: pulse-logo 2s ease-in-out infinite;
+      }
+      .loader-icon-circle {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        border: 3px solid #C4962A;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(123,24,24,0.18);
+      }
+      .loader-logo-text {
+        font-family: 'Cairo', sans-serif;
+        font-size: 1.4rem;
         font-weight: 900;
-        color: #0066cc; /* Using your primary blue */
-        letter-spacing: -0.05em;
-        margin-bottom: 24px;
-        animation: pulse-soft 2s infinite ease-in-out;
+        color: #7B1818;
+        text-align: center;
+        line-height: 1.2;
+      }
+      .loader-logo-sub {
+        font-family: 'Tajawal', sans-serif;
+        font-size: 0.75rem;
+        color: #8C7355;
+        letter-spacing: 0.05em;
       }
       .loader-bar {
-        width: 120px;
+        width: 100px;
         height: 3px;
-        background: rgba(0, 102, 204, 0.1);
+        background: rgba(123, 24, 24, 0.1);
         border-radius: 10px;
         overflow: hidden;
         position: relative;
@@ -58,12 +85,13 @@
         position: absolute;
         width: 40%;
         height: 100%;
-        background: #0066cc;
+        background: #7B1818;
+        border-radius: 10px;
         animation: slide-loader 1.5s infinite ease-in-out;
       }
-      @keyframes pulse-soft {
+      @keyframes pulse-logo {
         0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.7; transform: scale(0.98); }
+        50% { opacity: 0.85; transform: scale(0.97); }
       }
       @keyframes slide-loader {
         0% { left: -40%; }
@@ -71,7 +99,14 @@
       }
     </style>
     <div class="initial-loader" id="app-loader">
-      <div class="loader-logo">MyShop</div>
+      <div class="loader-logo-wrap">
+        <div class="loader-icon-circle">
+          <img src="assets/images/2.png" alt="Kantyn San Mark"
+               style="width:100%; height:100%; object-fit:contain; display:block;">
+        </div>
+        <div class="loader-logo-text">كانتين سان مارك</div>
+        <div class="loader-logo-sub">Kantyn San Mark</div>
+      </div>
       <div class="loader-bar"></div>
     </div>
   </app-root>

@@ -1,10 +1,9 @@
-import { Component, inject, signal, AfterViewInit, computed } from '@angular/core';
+import { Component, inject, signal, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { LanguageService } from '../../../../core/services/language.service';
-import { TranslatePipe } from '@ngx-translate/core';
 import { environment } from '../../../../../environments/environment';
 
 declare var google: any;
@@ -12,128 +11,159 @@ declare var google: any;
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-surface flex flex-col md:flex-row overflow-hidden" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
-      <!-- Left Branding Side -->
-      <div class="hidden md:flex md:w-1/2 bg-gradient-to-br from-primary to-primary-dim relative items-center justify-center p-12 overflow-hidden">
-        <!-- Abstract Topo Background -->
-        <div class="absolute inset-0 opacity-10 pointer-events-none" 
-             style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCrToAN7K9bxCYHNmah4SPbCguXNVlpK-DeQWeEBnHb8hhrK_YwTkoUXoEOh-RgjYVbFZj2ZzFPFjqLgEqS81zBG3mBRaFpNCTpPthaRKkjbY6cN5ywiH6wrgPH-fov4huJ80NbYSMgUyawNMMrAIHqttsqobdz8M4Yk_ERm3md8eXwLlW4PLs3aIXrOye6hD6Mc0OtdU9LpkjMLI7eeChndSjrvjUUdPvpHGIlYDvLm3UBFRbdvqH0krtaLiZxlv72URSOjaoPfUbP'); background-size: cover; background-position: center;">
-        </div>
-        
-        <div class="relative z-10 text-on-primary animate-fade-in text-center">
-            <h1 class="font-headline text-6xl font-black tracking-tighter mb-4">MyShop</h1>
-            <p class="font-body text-xl opacity-80 max-w-sm mx-auto leading-relaxed">
-              Curating architectural precision for the modern lifestyle.
-            </p>
-            <div class="mt-12 flex justify-center">
-              <span class="material-symbols-outlined text-8xl opacity-20 animate-float">shopping_bag</span>
+    <div class="min-h-screen bg-surface flex flex-col md:flex-row overflow-hidden" dir="rtl">
+
+      <!-- ── Left Branding Panel (Desktop) ── -->
+      <div class="hidden md:flex md:w-1/2 relative items-center justify-center p-12 overflow-hidden"
+           style="background: linear-gradient(150deg, #7B1818 0%, #5A1010 50%, #3D0A0A 100%);">
+        <div class="absolute top-0 right-0 w-80 h-80 rounded-full opacity-10"
+             style="background: radial-gradient(circle, #C4962A 0%, transparent 70%); transform: translate(30%,-30%);"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-10"
+             style="background: radial-gradient(circle, #C4962A 0%, transparent 70%); transform: translate(-30%,30%);"></div>
+
+        <div class="relative z-10 text-white text-center flex flex-col items-center gap-8">
+          <div class="w-24 h-24 rounded-full border-4 border-white/20 bg-white/10 flex items-center justify-center"
+               style="box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
+            <span class="material-symbols-outlined text-5xl text-white/80">church</span>
+          </div>
+          <div>
+            <h1 class="font-black text-4xl leading-tight" style="font-family:'Cairo',sans-serif;">Kantyn<br>San Mark</h1>
+            <p class="text-white/60 text-sm mt-2" style="font-family:'Tajawal',sans-serif;">كانتين سان مارك</p>
+          </div>
+          <p class="text-white/70 text-base max-w-xs text-center leading-relaxed" style="font-family:'Tajawal',sans-serif;">
+            اطلب منتجات الكانتين بسهولة وجودة عالية. نحن هنا لخدمتكم.
+          </p>
+          <div class="flex flex-col gap-3 w-full max-w-xs">
+            <div class="flex items-center gap-3 text-white/70 text-sm" style="font-family:'Tajawal',sans-serif;">
+              <span class="material-symbols-outlined text-xl" style="color:#C4962A;">verified_user</span>جودة مضمونة
             </div>
+            <div class="flex items-center gap-3 text-white/70 text-sm" style="font-family:'Tajawal',sans-serif;">
+              <span class="material-symbols-outlined text-xl" style="color:#C4962A;">local_shipping</span>توصيل سريع
+            </div>
+            <div class="flex items-center gap-3 text-white/70 text-sm" style="font-family:'Tajawal',sans-serif;">
+              <span class="material-symbols-outlined text-xl" style="color:#C4962A;">favorite</span>خدمة بمحبة
+            </div>
+          </div>
         </div>
-        
-        <!-- Bottom Attribution -->
-        <div class="absolute bottom-10 left-10 text-[10px] text-on-primary/60 uppercase tracking-widest font-black">
-          © 2026 PRECISION SERIES
+        <div class="absolute bottom-8 text-white/30 text-xs" style="font-family:'Tajawal',sans-serif;">
+          © 2026 كانتين سان مارك
         </div>
       </div>
 
-      <!-- Right Form Side -->
-      <div class="w-full md:w-1/2 flex items-center justify-center p-8 md:p-16 bg-surface-container-lowest">
-        <div class="w-full max-w-md animate-slide-up">
-          <div class="text-center md:text-start mb-10">
-            <h2 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">
-              {{ 'auth.welcomeBack' | translate }}
-            </h2>
-            <p class="text-on-surface-variant font-body">{{ 'auth.welcomeBackSubtitle' | translate }}</p>
+      <!-- ── Right Form Side ── -->
+      <div class="w-full md:w-1/2 flex items-center justify-center p-6 md:p-16 bg-surface-container-lowest">
+        <div class="w-full max-w-md">
+
+          <!-- Mobile Brand -->
+          <div class="flex flex-col items-center gap-3 mb-8 md:hidden">
+            <div class="w-16 h-16 rounded-full border-2 border-primary/20 bg-surface-container-low flex items-center justify-center"
+                 style="box-shadow: 0 4px 16px rgba(196,150,42,0.15);">
+              <span class="material-symbols-outlined text-primary text-3xl">church</span>
+            </div>
+            <div class="text-center">
+              <div class="font-black text-primary text-xl" style="font-family:'Cairo',sans-serif;">Kantyn San Mark</div>
+              <div class="text-on-surface-variant text-sm" style="font-family:'Tajawal',sans-serif;">كانتين سان مارك</div>
+            </div>
           </div>
 
+          <!-- Heading -->
+          <div class="mb-8">
+            <h2 class="font-black text-on-surface text-2xl md:text-3xl mb-1" style="font-family:'Cairo',sans-serif;">مرحباً بعودتك</h2>
+            <p class="text-on-surface-variant text-sm" style="font-family:'Tajawal',sans-serif;">سجّل دخولك للمتابعة</p>
+          </div>
+
+          <!-- Error -->
           @if (error()) {
-            <div class="bg-error/10 border border-error/20 text-error px-6 py-4 rounded-2xl mb-8 flex items-center justify-between group transition-all">
-              <div class="flex items-center gap-3 text-start">
-                <span class="material-symbols-outlined text-xl">error</span>
-                <div class="flex flex-col">
-                  <p class="text-sm font-bold">{{ error() }}</p>
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-lg">error</span>
+                <div>
+                  <p class="text-sm font-bold" style="font-family:'Tajawal',sans-serif;">{{ error() }}</p>
                   @if (showResendLink()) {
-                    <a [routerLink]="'/' + currentLang + '/auth/resend-email-confirmation'" class="text-xs underline font-black hover:opacity-80 transition-opacity">
-                      {{ 'auth.resendConfirmationLink' | translate }}
-                    </a>
+                    <a [routerLink]="'/' + currentLang + '/auth/resend-email-confirmation'"
+                       class="text-xs underline font-bold" style="font-family:'Cairo',sans-serif;">إعادة إرسال رابط التفعيل</a>
                   }
                 </div>
               </div>
-              <button (click)="clearError()" class="hover:rotate-90 transition-transform duration-300">
+              <button (click)="clearError()" class="hover:rotate-90 transition-transform">
                 <span class="material-symbols-outlined text-lg">close</span>
               </button>
             </div>
           }
 
-          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
-            <div class="form-input-container">
-               <input type="email" 
-                      id="email" 
-                      formControlName="email" 
-                      placeholder=" "
-                      class="w-full bg-surface-container-low border-b-2 border-outline-variant focus:border-primary px-4 py-4 rounded-t-xl outline-none transition-all font-body text-on-surface">
-               <label for="email">
-                 <span class="material-symbols-outlined text-lg">mail</span>
-                 {{ 'auth.email' | translate }}
-               </label>
-               @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
-                 <p class="text-[10px] text-error font-bold uppercase tracking-widest mt-2 ml-4 text-start">Invalid email focus</p>
-               }
+          <!-- Form -->
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+            <!-- Email -->
+            <div class="flex flex-col gap-1">
+              <label class="text-sm font-bold text-on-surface" for="login-email" style="font-family:'Cairo',sans-serif;">البريد الإلكتروني</label>
+              <div class="relative">
+                <span class="material-symbols-outlined absolute top-1/2 -translate-y-1/2 right-3 text-outline-variant text-[20px]">mail</span>
+                <input type="email" id="login-email" formControlName="email" placeholder="example@email.com"
+                       class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pr-10 pl-4 py-3 text-on-surface text-sm focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/10 transition-all"
+                       style="font-family:'Tajawal',sans-serif;">
+              </div>
+              @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+                <p class="text-[11px] text-error font-bold" style="font-family:'Cairo',sans-serif;">بريد إلكتروني غير صحيح</p>
+              }
             </div>
 
-            <div class="form-input-container">
-               <input type="password" 
-                      id="password" 
-                      formControlName="password" 
-                      placeholder=" "
-                      class="w-full bg-surface-container-low border-b-2 border-outline-variant focus:border-primary px-4 py-4 rounded-t-xl outline-none transition-all font-body text-on-surface">
-               <label for="password">
-                 <span class="material-symbols-outlined text-lg">lock</span>
-                 {{ 'auth.password' | translate }}
-               </label>
+            <!-- Password -->
+            <div class="flex flex-col gap-1">
+              <label class="text-sm font-bold text-on-surface" for="login-password" style="font-family:'Cairo',sans-serif;">كلمة المرور</label>
+              <div class="relative">
+                <span class="material-symbols-outlined absolute top-1/2 -translate-y-1/2 right-3 text-outline-variant text-[20px]">lock</span>
+                <input type="password" id="login-password" formControlName="password" placeholder="••••••••"
+                       class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl pr-10 pl-4 py-3 text-on-surface text-sm focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/10 transition-all"
+                       style="font-family:'Tajawal',sans-serif;">
+              </div>
             </div>
 
-            <div class="flex justify-end text-end">
-              <a [routerLink]="'/' + currentLang + '/auth/forgot-password'" 
-                 class="text-xs font-black text-primary uppercase tracking-widest hover:opacity-80 transition-opacity">
-                {{ 'auth.forgotPassword' | translate }}
-              </a>
+            <!-- Forgot -->
+            <div class="flex justify-start">
+              <a [routerLink]="'/' + currentLang + '/auth/forgot-password'"
+                 class="text-primary text-xs font-bold hover:underline" style="font-family:'Cairo',sans-serif;">نسيت كلمة المرور؟</a>
             </div>
 
-            <button type="submit" 
-                    [disabled]="loading() || loginForm.invalid"
-                    class="w-full bg-primary text-on-primary font-headline font-bold py-5 rounded-2xl shadow-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100 transition-all duration-300 flex items-center justify-center gap-3">
+            <!-- Submit -->
+            <button type="submit" [disabled]="loading() || loginForm.invalid"
+                    class="w-full bg-primary text-white font-black py-3.5 rounded-xl hover:bg-primary-dim active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 mt-2"
+                    style="font-family:'Cairo',sans-serif; box-shadow: 0 6px 20px rgba(123,24,24,0.3);">
               @if (loading()) {
                 <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                جاري التحميل...
               } @else {
-                {{ 'auth.loginButton' | translate }}
-                <span class="material-symbols-outlined">login</span>
+                <span class="material-symbols-outlined text-[20px]">login</span>
+                تسجيل الدخول
               }
             </button>
           </form>
 
-          <div class="mt-10 flex flex-col items-center gap-6">
-            <div class="flex items-center gap-4 w-full text-outline-variant">
-              <hr class="flex-grow border-outline-variant/30">
-              <span class="text-[10px] uppercase font-black tracking-widest">Global Access</span>
-              <hr class="flex-grow border-outline-variant/30">
-            </div>
+          <!-- Divider -->
+          <div class="flex items-center gap-3 my-6">
+            <hr class="flex-1 border-outline-variant/30">
+            <span class="text-xs text-on-surface-variant font-bold" style="font-family:'Cairo',sans-serif;">أو</span>
+            <hr class="flex-1 border-outline-variant/30">
+          </div>
 
-            <!-- Google Login Container -->
-            <div id="google-btn" class="w-full flex justify-center py-2 transition-all"></div>
+          <!-- Google -->
+          <div id="google-btn" class="w-full flex justify-center"></div>
 
-            <p class="text-on-surface-variant font-body text-sm mt-4 text-center">
-              {{ 'auth.noAccount' | translate }}
-              <a [routerLink]="'/' + currentLang + '/auth/register'" class="text-primary font-black hover:underline px-1">
-                {{ 'auth.registerLink' | translate }}
-              </a>
-            </p>
-            
-            <a [routerLink]="'/' + currentLang + '/'" class="text-on-surface-variant text-[10px] font-black uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-2">
-              <span class="material-symbols-outlined text-sm">arrow_back</span>
-              {{ 'common.backToProducts' | translate }}
+          <!-- Register -->
+          <p class="text-center text-sm text-on-surface-variant mt-6" style="font-family:'Tajawal',sans-serif;">
+            ليس لديك حساب؟
+            <a [routerLink]="'/' + currentLang + '/auth/register'"
+               class="text-primary font-black hover:underline mr-1" style="font-family:'Cairo',sans-serif;">سجّل الآن</a>
+          </p>
+
+          <!-- Back -->
+          <div class="flex justify-center mt-4">
+            <a [routerLink]="'/' + currentLang + '/'"
+               class="text-on-surface-variant text-xs flex items-center gap-1 hover:text-primary transition-colors"
+               style="font-family:'Cairo',sans-serif;">
+              <span class="material-symbols-outlined text-sm">arrow_forward</span>
+              العودة للرئيسية
             </a>
           </div>
         </div>
@@ -148,21 +178,15 @@ export class LoginComponent implements AfterViewInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private languageService = inject(LanguageService);
-  
+
   loading = signal(false);
   error = signal<string | null>(null);
   showResendLink = signal(false);
-  
-  // Get current language for routerLink
-  get currentLang(): string {
-    return this.languageService.currentLanguage();
-  }
-  
-  clearError(): void {
-    this.error.set(null);
-    this.showResendLink.set(false);
-  }
-  
+
+  get currentLang(): string { return this.languageService.currentLanguage(); }
+
+  clearError(): void { this.error.set(null); this.showResendLink.set(false); }
+
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]]
@@ -174,85 +198,51 @@ export class LoginComponent implements AfterViewInit {
         client_id: environment.googleClientId,
         callback: (response: any) => this.handleGoogleLogin(response)
       });
-
-      google.accounts.id.renderButton(
-        document.getElementById('google-btn'),
-        { 
-          theme: 'outline', 
-          size: 'large', 
-          shape: 'pill'
-        }
-      );
+      google.accounts.id.renderButton(document.getElementById('google-btn'), {
+        theme: 'outline', size: 'large', shape: 'pill'
+      });
     }
   }
 
   handleGoogleLogin(response: any): void {
     this.loading.set(true);
     this.error.set(null);
-
-    this.authService.googleLogin({
-      token: response.credential
-    }).subscribe({
-      next: (res) => {
-        console.log('Google login successful:', res);
+    this.authService.googleLogin({ token: response.credential }).subscribe({
+      next: () => {
         this.loading.set(false);
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/' + this.currentLang + '/';
         this.router.navigateByUrl(returnUrl);
       },
-      error: (err) => {
-        console.error('Google login failed:', err);
+      error: () => {
         this.loading.set(false);
-        this.error.set('Google sign-in failed. Please try again.');
+        this.error.set('فشل تسجيل الدخول بـ Google. حاول مرة أخرى.');
       }
     });
   }
-  
+
   onSubmit(): void {
     if (this.loginForm.invalid) return;
-    
     this.loading.set(true);
     this.error.set(null);
-    
     const { email, password } = this.loginForm.value;
-    
     this.authService.login({ email: email!, password: password! }).subscribe({
-      next: (response) => {
-        console.log('Login successful:', response);
+      next: () => {
         this.loading.set(false);
-        
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/' + this.currentLang + '/';
         this.router.navigateByUrl(returnUrl);
       },
       error: (err) => {
-        console.error('Login failed:', err);
         this.loading.set(false);
-        
-        // Let the global interceptor handle the toast notification
-        // Just show local error for this form
-        let errorMessage = 'Login failed. Please try again.';
-        // Try to extract exact error message from the backend response
         const errorData = err.error;
-        if (errorData) {
-          // If the backend returns a ResultPattern format, the error will often be in errorData directly if it's a string, or inside an Error object
-          if (typeof errorData === 'string') {
-            errorMessage = errorData;
-          } else if (errorData.message) {
-            errorMessage = errorData.message;
-          } else if (errorData.title) {
-            errorMessage = errorData.title; // for standard ProblemDetails
-          } else if (errorData.Message) {
-            errorMessage = errorData.Message;
-          } else if (Array.isArray(errorData)) {
-            errorMessage = errorData[0] || errorMessage;
-          }
-        } else if (err.message) {
-          errorMessage = err.message;
-        }
-        
-        this.error.set(errorMessage);
-        if (errorMessage.toLowerCase().includes('email is not confirmed')) {
-          this.showResendLink.set(true);
-        }
+        let msg = 'فشل تسجيل الدخول. حاول مرة أخرى.';
+        if (typeof errorData === 'string') msg = errorData;
+        else if (errorData?.message) msg = errorData.message;
+        else if (errorData?.title) msg = errorData.title;
+        else if (errorData?.Message) msg = errorData.Message;
+        else if (Array.isArray(errorData)) msg = errorData[0] || msg;
+        else if (err.message) msg = err.message;
+        this.error.set(msg);
+        if (msg.toLowerCase().includes('email is not confirmed')) this.showResendLink.set(true);
       }
     });
   }

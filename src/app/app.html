@@ -1,164 +1,242 @@
-<div class="app-container min-h-screen bg-surface" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
+<div class="app-container min-h-screen bg-surface" [dir]="'rtl'">
   <!-- Global Toast Notifications -->
   <app-toast></app-toast>
-  
-  <!-- Premium Navigation Shell -->
-  <nav class="fixed top-0 w-full z-50 bg-white/95 border-b border-outline-variant/10 backdrop-blur-md">
-    <div class="flex justify-between items-center px-4 sm:px-6 lg:px-10 py-3 md:py-4 w-full max-w-[1920px] mx-auto relative h-16 md:h-20">
-      <!-- Language Switcher -->
-      <button (click)="toggleLanguage()" 
-              class="p-2 rounded-full hover:bg-primary/5 transition-all duration-300 active:scale-95 text-primary">
-        <span class="material-symbols-outlined font-black">language</span>
-      </button>
 
-      <!-- Brand Logo (Centered) -->
-      <div class="absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
-        <a [routerLink]="'/' + currentLanguage() + '/'" 
-           class="text-2xl md:text-3xl font-black tracking-tighter text-primary font-headline">
-          MyShop
+  <!-- ══════════════════════════════════════════════
+       KANTYN SAN MARK — TOP HEADER
+  ══════════════════════════════════════════════ -->
+  <nav class="fixed top-0 w-full z-50 bg-white border-b border-outline-variant/20"
+       style="box-shadow: 0 2px 12px rgba(123,24,24,0.08);">
+    <div class="flex items-center justify-between px-4 h-16 md:h-[72px] max-w-[1400px] mx-auto">
+
+      <!-- ── Brand Logo (centered on mobile, left on desktop) ── -->
+      <a [routerLink]="'/' + currentLanguage() + '/'"
+         class="flex items-center gap-2.5 no-underline flex-shrink-0">
+        <!-- Saint Mark Portrait Circle -->
+        <div class="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden flex-shrink-0 bg-white"
+             style="border: 2.5px solid #C4962A; box-shadow: 0 2px 12px rgba(196,150,42,0.35);">
+          <img src="assets/images/2.png"
+               alt="Kantyn San Mark"
+               class="w-full h-full object-contain">
+        </div>
+        <!-- Brand Name -->
+        <div class="flex flex-col leading-none">
+          <span class="font-black text-base md:text-lg"
+                style="font-family:'Cairo',sans-serif; line-height:1.1; color:#7B1818;">Kantyn</span>
+          <span class="font-black text-base md:text-lg"
+                style="font-family:'Cairo',sans-serif; line-height:1.1; color:#C4962A;">San Mark</span>
+        </div>
+      </a>
+
+      <!-- ── Mobile Actions (hidden on desktop) ── -->
+      <div class="md:hidden flex items-center">
+        <!-- Wishlist Button -->
+        <a [routerLink]="'/' + currentLanguage() + '/wishes'"
+           class="p-2 rounded-full hover:bg-primary/5 transition-all text-on-surface-variant hover:text-primary relative no-underline">
+          <span class="material-symbols-outlined text-[26px]">favorite</span>
+          @if (wishItemCount() > 0) {
+            <span class="absolute top-1.5 left-1.5 w-5 h-5 bg-primary text-white text-[11px] font-bold flex items-center justify-center rounded-full border-2 border-white">
+              {{ wishItemCount() }}
+            </span>
+          }
         </a>
       </div>
 
-      <!-- Desktop Actions (Cart & Profile) -->
-      <div class="hidden md:flex items-center gap-2 lg:gap-4">
+
+      <!-- ── Desktop Actions ── -->
+      <div class="hidden md:flex items-center gap-2">
+
         <!-- Wishlist Button -->
         <a [routerLink]="'/' + currentLanguage() + '/wishes'"
-           class="p-2.5 rounded-full hover:bg-primary/5 transition-all duration-300 active:scale-95 text-on-surface-variant hover:text-primary relative group no-underline">
-          <span class="material-symbols-outlined text-[28px] group-hover:filled">favorite</span>
+           class="p-2.5 rounded-full hover:bg-primary/5 transition-all text-on-surface-variant hover:text-primary relative no-underline">
+          <span class="material-symbols-outlined text-[26px]">favorite</span>
           @if (wishItemCount() > 0) {
-            <span class="absolute top-1.5 right-1.5 w-5 h-5 bg-primary text-white text-[11px] font-bold flex items-center justify-center rounded-full border-2 border-white transition-all duration-300">
+            <span class="absolute top-1.5 left-1.5 w-5 h-5 bg-primary text-white text-[11px] font-bold flex items-center justify-center rounded-full border-2 border-white">
               {{ wishItemCount() }}
             </span>
           }
         </a>
 
         <!-- Cart Button -->
-        <button (click)="toggleCart()" 
-                class="p-2.5 rounded-full hover:bg-primary/5 transition-all duration-300 active:scale-95 text-on-surface-variant hover:text-primary relative group">
-          <span class="material-symbols-outlined text-[28px] group-hover:filled">shopping_cart</span>
+        <button (click)="toggleCart()"
+                class="p-2.5 rounded-full hover:bg-primary/5 transition-all text-on-surface-variant hover:text-primary relative">
+          <span class="material-symbols-outlined text-[26px]">shopping_cart</span>
           @if (cartItemCount() > 0) {
-            <span class="absolute top-1.5 right-1.5 w-5 h-5 bg-primary text-white text-[11px] font-bold flex items-center justify-center rounded-full border-2 border-white transition-all duration-300">
+            <span class="absolute top-1.5 left-1.5 w-5 h-5 bg-primary text-white text-[11px] font-bold flex items-center justify-center rounded-full border-2 border-white">
               {{ cartItemCount() }}
             </span>
           }
         </button>
 
-        <!-- Profile Button -->
+        <!-- Profile -->
         <a [routerLink]="isLoggedIn() ? '/' + currentLanguage() + '/dashboard' : '/' + currentLanguage() + '/auth/login'"
-           class="p-1 rounded-full hover:bg-primary/5 transition-all duration-300 active:scale-95 flex items-center gap-2 group no-underline">
-          <div class="w-10 h-10 rounded-full bg-surface-container border-2 border-transparent group-hover:border-primary/20 transition-all overflow-hidden flex items-center justify-center">
+           class="p-1 rounded-full hover:bg-primary/5 transition-all flex items-center gap-2 no-underline">
+          <div class="w-9 h-9 rounded-full bg-surface-container border-2 border-outline-variant/30 hover:border-primary/30 transition-all overflow-hidden flex items-center justify-center">
             @if (isLoggedIn() && userPhotoUrl()) {
               <img [src]="userPhotoUrl()" [alt]="userInitials()" class="w-full h-full object-cover">
             } @else {
-              <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[28px]">person</span>
+              <span class="material-symbols-outlined text-on-surface-variant text-[22px]">person</span>
             }
           </div>
         </a>
       </div>
 
-      <!-- Mobile Spacer for symmetry -->
-      <div class="w-10 md:hidden"></div>
     </div>
   </nav>
 
-
-
-
   <!-- Cart Component Shell -->
   <app-cart></app-cart>
-  
-  <!-- Main Execution Context -->
-  <main class="pt-[80px] md:pt-24 min-h-[calc(100vh-400px)] pb-[90px] md:pb-0">
+
+  <!-- ══════════════════════════════════════════════
+       MAIN CONTENT
+  ══════════════════════════════════════════════ -->
+  <main class="pt-16 md:pt-[72px] min-h-[calc(100vh-200px)] pb-[88px] md:pb-0">
     <router-outlet></router-outlet>
   </main>
-  
-  <!-- Premium 4-Column Footer -->
-  <footer class="hidden md:block w-full py-12 lg:py-16 px-4 sm:px-6 lg:px-10 border-t border-outline-variant bg-surface-container-low mt-20">
-    <div class="max-w-[1920px] mx-auto grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 md:gap-12 rtl:text-right">
+
+  <!-- ══════════════════════════════════════════════
+       DESKTOP FOOTER
+  ══════════════════════════════════════════════ -->
+  <footer class="hidden md:block w-full py-12 px-6 lg:px-10 border-t border-outline-variant/20 mt-16"
+          style="background: linear-gradient(135deg, #F5EFE6 0%, #EDE5D8 100%);">
+    <div class="max-w-[1400px] mx-auto grid grid-cols-3 lg:grid-cols-4 gap-10">
+      <!-- Brand -->
       <div class="space-y-4">
-        <div class="text-primary font-black text-2xl font-headline tracking-tighter">MyShop</div>
-        <p class="text-on-surface-variant font-body text-xs uppercase tracking-widest leading-loose">
-          {{ 'footer.shopDescription' | translate }}
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-white"
+               style="border: 2px solid #C4962A; box-shadow: 0 2px 8px rgba(196,150,42,0.2);">
+            <img src="assets/images/2.png" alt="Kantyn San Mark" class="w-full h-full object-contain">
+          </div>
+          <div>
+            <div class="font-black text-lg" style="font-family:'Cairo',sans-serif; color:#7B1818;">Kantyn</div>
+            <div class="font-black text-lg" style="font-family:'Cairo',sans-serif; color:#C4962A;">San Mark</div>
+          </div>
+        </div>
+        <p class="text-on-surface-variant text-sm leading-relaxed" style="font-family:'Tajawal',sans-serif;">
+          اطلب منتجات الكانتين بسهولة وجودة عالية. نحن هنا لخدمتكم ودعم أنشطة الكنيسة.
         </p>
       </div>
-      <div class="space-y-6">
-        <h4 class="font-headline font-bold text-sm uppercase tracking-tight">{{ 'footer.quickLinks' | translate }}</h4>
-        <ul class="flex flex-col gap-3 font-label text-xs uppercase tracking-widest list-none p-0">
-          <li><a [routerLink]="'/' + currentLanguage() + '/products'" class="text-on-surface-variant hover:text-primary transition-colors no-underline">{{ 'nav.products' | translate }}</a></li>
-          <li><a [routerLink]="'/' + currentLanguage() + '/categories'" class="text-on-surface-variant hover:text-primary transition-colors no-underline">{{ 'nav.categories' | translate }}</a></li>
+
+      <!-- Quick Links -->
+      <div class="space-y-4">
+        <h4 class="font-black text-on-surface" style="font-family:'Cairo',sans-serif;">روابط سريعة</h4>
+        <ul class="flex flex-col gap-3 list-none p-0">
+          <li><a [routerLink]="'/' + currentLanguage() + '/products'" class="text-on-surface-variant hover:text-primary transition-colors text-sm no-underline" style="font-family:'Tajawal',sans-serif;">المنتجات</a></li>
+          <li><a [routerLink]="'/' + currentLanguage() + '/categories'" class="text-on-surface-variant hover:text-primary transition-colors text-sm no-underline" style="font-family:'Tajawal',sans-serif;">التصنيفات</a></li>
+          <li><a [routerLink]="'/' + currentLanguage() + '/wishes'" class="text-on-surface-variant hover:text-primary transition-colors text-sm no-underline" style="font-family:'Tajawal',sans-serif;">المفضلة</a></li>
         </ul>
       </div>
-      <div class="space-y-6">
-        <h4 class="font-headline font-bold text-sm uppercase tracking-tight">{{ 'footer.contact' | translate }}</h4>
-        <ul class="flex flex-col gap-4 font-label text-[10px] uppercase tracking-widest list-none p-0">
-          <li class="flex items-center gap-3 text-on-surface-variant group">
-            <span class="material-symbols-outlined text-lg">mail</span>
-            <span>{{ 'footer.email' | translate }}</span>
+
+      <!-- Features -->
+      <div class="space-y-4">
+        <h4 class="font-black text-on-surface" style="font-family:'Cairo',sans-serif;">مميزاتنا</h4>
+        <ul class="flex flex-col gap-3 list-none p-0">
+          <li class="flex items-center gap-2 text-on-surface-variant text-sm">
+            <span class="material-symbols-outlined text-primary text-base">verified_user</span>
+            <span style="font-family:'Tajawal',sans-serif;">جودة مضمونة</span>
+          </li>
+          <li class="flex items-center gap-2 text-on-surface-variant text-sm">
+            <span class="material-symbols-outlined text-primary text-base">local_shipping</span>
+            <span style="font-family:'Tajawal',sans-serif;">توصيل سريع</span>
+          </li>
+          <li class="flex items-center gap-2 text-on-surface-variant text-sm">
+            <span class="material-symbols-outlined text-primary text-base">favorite</span>
+            <span style="font-family:'Tajawal',sans-serif;">خدمة بمحبة</span>
           </li>
         </ul>
       </div>
+
+      <!-- Church Support -->
+      <div class="space-y-4">
+        <h4 class="font-black text-on-surface" style="font-family:'Cairo',sans-serif;">من أجل الكنيسة</h4>
+        <p class="text-on-surface-variant text-sm leading-relaxed" style="font-family:'Tajawal',sans-serif;">
+          جزء من أرباحنا يذهب لدعم أنشطة كنيسة سان مارك وخدماتها الاجتماعية.
+        </p>
+        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-primary text-xl">church</span>
+        </div>
+      </div>
     </div>
-    <div class="max-w-[1920px] mx-auto mt-12 md:mt-16 pt-8 border-t border-outline-variant text-center">
-      <p class="font-label text-xs uppercase tracking-widest text-on-surface-variant">
-        © 2026 MyShop. {{ 'footer.allRightsReserved' | translate }}
+
+    <!-- Footer Bottom -->
+    <div class="max-w-[1400px] mx-auto mt-10 pt-6 border-t border-outline-variant/20 flex items-center justify-between">
+      <p class="text-on-surface-variant text-xs" style="font-family:'Tajawal',sans-serif;">
+        © 2026 كانتين سان مارك. جميع الحقوق محفوظة.
+      </p>
+      <p class="text-on-surface-variant text-xs" style="font-family:'Tajawal',sans-serif;">
+        Kantyn San Mark
       </p>
     </div>
   </footer>
 
-  <!-- Mobile Bottom Navigation Bar (Nectar Design) -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 w-full bg-white border-t border-outline-variant/20 shadow-[0_-10px_40px_rgba(0,0,0,0.08)] z-[100] safe-area-pb rounded-t-[32px] overflow-hidden">
-    <div class="flex items-center justify-between h-[84px] px-2">
-      
-      <!-- Shop / Home -->
-      <a [routerLink]="'/' + currentLanguage() + '/'" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant transition-all duration-300 no-underline gap-1 group relative">
-        <div class="relative w-12 h-10 flex items-center justify-center">
-          <div class="absolute inset-0 bg-blue-500/10 rounded-2xl scale-0 group-[.active]:scale-100 transition-transform duration-500 ease-out"></div>
-          <span class="material-symbols-outlined text-[26px] group-[.active]:text-blue-600 group-[.active]:filled transition-all duration-300 group-[.active]:scale-110">storefront</span>
+  <!-- ══════════════════════════════════════════════
+       MOBILE BOTTOM NAVIGATION BAR (5 tabs)
+  ══════════════════════════════════════════════ -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 w-full bg-white border-t border-outline-variant/20 z-[100] safe-area-pb"
+       style="box-shadow: 0 -4px 20px rgba(123,24,24,0.08);">
+    <div class="flex items-center justify-around h-[70px] px-1">
+
+      <!-- Home / الرئيسية -->
+      <a [routerLink]="'/' + currentLanguage() + '/'"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{exact: true}"
+         class="ksm-nav-item w-full h-full no-underline"
+         id="nav-home">
+        <div class="ksm-nav-icon">
+          <span class="material-symbols-outlined text-[24px]">home</span>
         </div>
-        <span class="text-[10px] font-black tracking-wide group-[.active]:text-blue-600">{{ 'nav.home' | translate }}</span>
+        <span class="label">الرئيسية</span>
       </a>
-      
-      <!-- Explore -->
-      <a [routerLink]="'/' + currentLanguage() + '/products'" routerLinkActive="active" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant transition-all duration-300 no-underline gap-1 group relative">
-        <div class="relative w-12 h-10 flex items-center justify-center">
-          <div class="absolute inset-0 bg-indigo-500/10 rounded-2xl scale-0 group-[.active]:scale-100 transition-transform duration-500 ease-out"></div>
-          <span class="material-symbols-outlined text-[26px] group-[.active]:text-indigo-600 group-[.active]:filled transition-all duration-300 group-[.active]:scale-110">search</span>
+
+      <!-- Categories / التصنيفات -->
+      <a [routerLink]="'/' + currentLanguage() + '/categories'"
+         routerLinkActive="active"
+         class="ksm-nav-item w-full h-full no-underline"
+         id="nav-categories">
+        <div class="ksm-nav-icon">
+          <span class="material-symbols-outlined text-[24px]">grid_view</span>
         </div>
-        <span class="text-[10px] font-black tracking-wide group-[.active]:text-indigo-600">{{ 'nav.products' | translate }}</span>
+        <span class="label">التصنيفات</span>
       </a>
-      
-      <!-- Cart -->
-      <button (click)="toggleCart()" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-amber-600 transition-all duration-300 no-underline gap-1 group relative">
-        <div class="relative w-12 h-10 flex items-center justify-center">
-          <div class="absolute inset-0 bg-amber-500/10 rounded-2xl scale-0 group-hover:scale-100 transition-transform duration-500 ease-out"></div>
-          <div class="relative">
-            <span class="material-symbols-outlined text-[26px] group-hover:filled">shopping_cart</span>
-            @if (cartItemCount() > 0) {
-              <span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-600 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-sm">{{ cartItemCount() }}</span>
-            }
-          </div>
+
+      <!-- Search / بحث -->
+      <a [routerLink]="'/' + currentLanguage() + '/products'"
+         routerLinkActive="active"
+         class="ksm-nav-item w-full h-full no-underline"
+         id="nav-search">
+        <div class="ksm-nav-icon">
+          <span class="material-symbols-outlined text-[24px]">search</span>
         </div>
-        <span class="text-[10px] font-black tracking-wide">{{ 'cart.cart' | translate }}</span>
+        <span class="label">بحث</span>
+      </a>
+
+      <!-- Cart / السلة -->
+      <button (click)="toggleCart()"
+              class="ksm-nav-item w-full h-full"
+              id="nav-cart">
+        <div class="ksm-nav-icon relative">
+          <span class="material-symbols-outlined text-[24px]">shopping_cart</span>
+          @if (cartItemCount() > 0) {
+            <span class="absolute -top-1 -right-1 w-4 h-4 bg-primary text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white">
+              {{ cartItemCount() }}
+            </span>
+          }
+        </div>
+        <span class="label">السلة</span>
       </button>
-      
-      <!-- Favourite -->
-      <a [routerLink]="'/' + currentLanguage() + '/wishes'" routerLinkActive="active" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant transition-all duration-300 no-underline gap-1 group relative">
-        <div class="relative w-12 h-10 flex items-center justify-center">
-          <div class="absolute inset-0 bg-pink-500/10 rounded-2xl scale-0 group-[.active]:scale-100 transition-transform duration-500 ease-out"></div>
-          <span class="material-symbols-outlined text-[26px] group-[.active]:text-pink-600 group-[.active]:filled transition-all duration-300 group-[.active]:scale-110">favorite</span>
+
+      <!-- Account / حسابي -->
+      <a [routerLink]="isLoggedIn() ? '/' + currentLanguage() + '/dashboard' : '/' + currentLanguage() + '/auth/login'"
+         routerLinkActive="active"
+         class="ksm-nav-item w-full h-full no-underline"
+         id="nav-account">
+        <div class="ksm-nav-icon">
+          <span class="material-symbols-outlined text-[24px]">person</span>
         </div>
-        <span class="text-[10px] font-black tracking-wide group-[.active]:text-pink-600">{{ 'dashboard.wishlist' | translate }}</span>
+        <span class="label">حسابي</span>
       </a>
-      
-      <!-- Account -->
-      <a [routerLink]="isLoggedIn() ? '/' + currentLanguage() + '/dashboard' : '/' + currentLanguage() + '/auth/login'" routerLinkActive="active" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant transition-all duration-300 no-underline gap-1 group relative">
-        <div class="relative w-12 h-10 flex items-center justify-center">
-          <div class="absolute inset-0 bg-emerald-500/10 rounded-2xl scale-0 group-[.active]:scale-100 transition-transform duration-500 ease-out"></div>
-          <span class="material-symbols-outlined text-[26px] group-[.active]:text-emerald-600 group-[.active]:filled transition-all duration-300 group-[.active]:scale-110">person</span>
-        </div>
-        <span class="text-[10px] font-black tracking-wide group-[.active]:text-emerald-600">{{ 'dashboard.account' | translate }}</span>
-      </a>
-      
+
     </div>
   </nav>
+
 </div>

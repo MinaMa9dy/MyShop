@@ -2,7 +2,6 @@ import { Component, inject, OnInit, signal, computed, effect, OnDestroy, ChangeD
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { ProductService } from '../../../core/services/product.service';
 import { CategoryService } from '../../../core/services/category.service';
@@ -12,12 +11,11 @@ import { AuthService } from '../../../core/services/auth.service';
 import { PhotoService } from '../../../core/services/photo.service';
 import { WishService } from '../../../core/services/wish.service';
 import { TokenService } from '../../../core/services/token.service';
-import { CategoryTreeComponent } from '../../../shared/category-tree/category-tree.component';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, TranslatePipe, CategoryTreeComponent],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './product-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -44,7 +42,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   categories = signal<any[]>([]);
   loading = signal(false);
   currentPage = signal(1);
-  pageSize = signal(8);
+  pageSize = signal(typeof window !== 'undefined' ? (window.innerWidth >= 768 ? 20 : 15) : 15);
   totalPages = signal(1);
 
   // Track wishlist items
@@ -363,13 +361,21 @@ export class ProductListComponent implements OnInit, OnDestroy {
     };
   }
 
+  // Returns a page size that is a multiple of the grid column count
+  // so rows are always complete at every breakpoint:
+  //   mobile  (<768px)  → 3 cols → 15 products (5 full rows)
+  //   md/lg   (<1280px) → 4 cols → 20 products (5 full rows)
+  //   xl+     (≥1280px) → 5 cols → 20 products (4 full rows)
+  getResponsivePageSize(): number {
+    if (typeof window === 'undefined') return 15;
+    const w = window.innerWidth;
+    if (w >= 1280) return 20;   // 5 cols × 4 rows
+    if (w >= 768)  return 20;   // 4 cols × 5 rows
+    return 15;                  // 3 cols × 5 rows
+  }
+
   private updatePageSize(): void {
-    const width = window.innerWidth;
-    if (width >= 1024) {
-      this.pageSize.set(9); // 3 columns * 3 rows = 9
-    } else {
-      this.pageSize.set(8); // 2 columns * 4 rows = 8
-    }
+    this.pageSize.set(this.getResponsivePageSize());
   }
 
   ngOnDestroy(): void {

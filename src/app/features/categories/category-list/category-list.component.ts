@@ -1,7 +1,6 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
 import { CategoryService } from '../../../core/services/category.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { TokenService } from '../../../core/services/token.service';
@@ -9,143 +8,137 @@ import { TokenService } from '../../../core/services/token.service';
 @Component({
   selector: 'app-category-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslatePipe],
+  imports: [CommonModule, RouterLink],
   template: `
-    <main class="categories-page min-h-screen bg-surface">
-      <!-- Category Hero -->
-      <section class="bg-surface-container-low py-12 md:py-20 lg:py-24 border-b border-outline-variant/30">
-        <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-10">
-          <div class="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div class="max-w-2xl text-start">
-              <h1 class="font-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-on-surface mb-4 md:mb-6">
-                {{ 'nav.categories' | translate }}
-              </h1>
+    <main class="categories-page min-h-screen bg-surface" dir="rtl">
 
-            </div>
-            
-            @if (isAdmin()) {
-              <button 
-                [routerLink]="['/' + currentLang + '/admin/categories/add']"
-                class="flex items-center gap-3 px-8 py-4 bg-primary text-on-primary rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl font-headline font-bold">
-                <span class="material-symbols-outlined">add_circle</span>
-                {{ 'admin.addCategory.button' | translate }}
-              </button>
+      <!-- ── Page Header ── -->
+      <div class="px-4 md:px-6 pt-5 pb-3 max-w-[1400px] mx-auto flex items-center justify-between">
+        <h1 class="font-black text-on-surface text-xl md:text-2xl" style="font-family:'Cairo',sans-serif;">
+          التصنيفات
+        </h1>
+        @if (isAdmin()) {
+          <a [routerLink]="['/' + currentLang + '/admin/categories/add']"
+             class="flex items-center gap-1.5 bg-primary text-white rounded-full px-4 py-2 text-sm font-bold no-underline hover:bg-primary-dim transition-all"
+             style="font-family:'Cairo',sans-serif;">
+            <span class="material-symbols-outlined text-[18px]">add</span>
+            إضافة تصنيف
+          </a>
+        }
+      </div>
+
+      <!-- ── Loading Skeleton Grid ── -->
+      @if (loading()) {
+        <div class="px-4 md:px-6 lg:px-10 pb-10 max-w-[1400px] mx-auto pt-2 md:pt-4">
+          <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+            @for (i of [1,2,3,4,5,6,7,8,9,10,11,12]; track i) {
+              <div class="flex flex-col items-center gap-2 w-full">
+                <div class="skeleton w-full aspect-square max-w-[96px] rounded-2xl mx-auto"></div>
+                <div class="skeleton h-3 w-14 rounded-lg"></div>
+              </div>
             }
           </div>
         </div>
-      </section>
+      }
 
-      <section class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-10 py-10 md:py-16">
-        @if (loading()) {
-          <div class="flex flex-col items-center justify-center py-40 gap-4">
-             <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-             <p class="font-headline font-bold text-outline uppercase tracking-widest text-xs">Syncing Catalog</p>
+      <!-- ── Empty State ── -->
+      @else if (categories().length === 0) {
+        <div class="flex flex-col items-center justify-center py-24 gap-4 text-center px-4">
+          <div class="w-20 h-20 rounded-full bg-surface-container flex items-center justify-center">
+            <span class="material-symbols-outlined text-4xl text-outline-variant">category</span>
           </div>
-        } @else if (categories().length === 0) {
-          <div class="text-center py-40 bg-surface-container-lowest rounded-3xl border-2 border-dashed border-outline-variant/30">
-             <span class="material-symbols-outlined text-6xl text-outline-variant mb-4">inventory_2</span>
-             <p class="font-headline font-bold text-on-surface-variant">No categories discovered in this sector</p>
-          </div>
-        } @else {
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 sm:gap-4 md:gap-6">
+          <p class="font-black text-on-surface" style="font-family:'Cairo',sans-serif;">لا توجد تصنيفات</p>
+        </div>
+      }
+
+      <!-- ── CATEGORIES GRID ── -->
+      @else {
+        <div class="px-4 md:px-6 lg:px-10 pb-10 max-w-[1400px] mx-auto pt-2 md:pt-4">
+          <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
             @for (category of categories(); track category.id) {
-              <a [routerLink]="['/' + currentLang + '/products']" 
+              <a [routerLink]="['/' + currentLang + '/products']"
                  [queryParams]="{categoryId: category.id}"
-                 class="group relative bg-surface-container-lowest rounded-2xl md:rounded-3xl p-4 md:p-8 border border-outline-variant/10 hover:border-primary/30 hover:shadow-[0_30px_60px_rgba(0,0,0,0.05)] transition-all duration-500 overflow-hidden flex flex-col items-center justify-center text-center">
-                
-                <!-- Background Glow -->
-                <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                
-                <div class="w-14 h-14 md:w-24 md:h-24 rounded-full bg-surface-container flex items-center justify-center mb-4 md:mb-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-on-primary transition-all duration-500 shadow-sm relative z-10">
-                   <span class="material-symbols-outlined text-3xl md:text-5xl">{{ getCategoryIcon(category.name) }}</span>
+                 class="flex flex-col items-center gap-2 no-underline group w-full">
+                <!-- Icon Box -->
+                <div class="w-full aspect-square max-w-[96px] rounded-2xl bg-surface-container-lowest border border-outline-variant/20 flex items-center justify-center
+                            group-hover:border-primary/40 group-hover:bg-primary/5 group-active:scale-95
+                            transition-all duration-300 mx-auto"
+                     style="box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                  <span class="material-symbols-outlined text-3xl md:text-4xl text-primary transition-transform duration-300 group-hover:scale-110">
+                    {{ getCategoryIcon(category.name) }}
+                  </span>
                 </div>
-
-                <div class="relative z-10 transition-transform duration-500 group-hover:-translate-y-2">
-                  <h3 class="font-headline text-lg md:text-2xl font-extrabold tracking-tight text-on-surface mb-1 md:mb-2 line-clamp-1">
-                    {{ category.name }}
-                  </h3>
-                  
-                  @if (category.description) {
-                    <p class="hidden md:block text-on-surface-variant text-sm font-body line-clamp-2 opacity-60 group-hover:opacity-100 transition-opacity">
-                      {{ category.description }}
-                    </p>
-                  }
-                  
-                  <div class="mt-2 md:mt-6 flex flex-col items-center gap-2 md:gap-3">
-                     <span class="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-outline group-hover:text-primary transition-colors">
-                        {{ category.productsCount || 0 }} {{ 'nav.products' | translate }}
-                     </span>
-                     <div class="hidden md:block w-12 h-1 bg-outline-variant/30 rounded-full overflow-hidden group-hover:w-20 transition-all duration-500">
-                        <div class="w-full h-full bg-primary -translate-x-full group-hover:translate-x-0 transition-transform duration-700"></div>
-                     </div>
-                  </div>
-                </div>
-
-                <!-- Decorative corner icon -->
-                <span class="material-symbols-outlined absolute top-4 right-4 md:top-6 md:right-6 text-outline-variant opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-4 transition-all duration-500 text-sm md:text-base">arrow_outward</span>
+                <!-- Label -->
+                <span class="text-xs md:text-sm text-center text-on-surface font-bold line-clamp-2 leading-tight group-hover:text-primary transition-colors"
+                      style="font-family:'Cairo',sans-serif;">
+                  {{ category.name }}
+                </span>
+                @if (category.productsCount) {
+                  <span class="text-[10px] text-on-surface-variant" style="font-family:'Tajawal',sans-serif;">
+                    {{ category.productsCount }} منتج
+                  </span>
+                }
               </a>
             }
           </div>
-        }
-      </section>
+        </div>
+      }
+
     </main>
   `,
-  styles: []
+  styles: [`
+    :host { display: block; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+  `]
 })
 export class CategoryListComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private languageService = inject(LanguageService);
   private tokenService = inject(TokenService);
-  
+
   categories = signal<any[]>([]);
   loading = signal(false);
-  
+
   isAdmin = computed(() => this.tokenService.hasRole('Admin'));
-  
+
   get currentLang(): string {
     return this.languageService.currentLanguage();
   }
-  
+
   getCategoryIcon(name: string): string {
-    const iconMap: { [key: string]: string } = {
-       'Electronics': 'devices',
-       'Phones': 'smartphone',
-       'Computers': 'laptop_mac',
-       'Home': 'home',
-       'Fashion': 'apparel',
-       'Beauty': 'content_cut',
-       'Sports': 'sports_basketball',
-       'Toys': 'toys',
-       'Grocery': 'shopping_basket',
-       'Health': 'health_and_safety',
-       'Automotive': 'directions_car',
-       'Books': 'menu_book'
-    };
-    return iconMap[name] || 'inventory_2';
- }
+    const n = (name || '').toLowerCase();
+    if (n.includes('مشروب') || n.includes('drink') || n.includes('beverage') || n.includes('snack') || n.includes('سناكس')) return 'local_cafe';
+    if (n.includes('معلب') || n.includes('can') || n.includes('canned')) return 'inventory_2';
+    if (n.includes('حلو') || n.includes('sweet') || n.includes('candy')) return 'cake';
+    if (n.includes('مكرون') || n.includes('pasta') || n.includes('أرز') || n.includes('rice')) return 'rice_bowl';
+    if (n.includes('منظف') || n.includes('clean') || n.includes('soap')) return 'cleaning_services';
+    if (n.includes('خضار') || n.includes('vegetable')) return 'eco';
+    if (n.includes('لحم') || n.includes('meat')) return 'kebab_dining';
+    if (n.includes('خبز') || n.includes('bread') || n.includes('bakery')) return 'breakfast_dining';
+    if (n.includes('لبان') || n.includes('لبن') || n.includes('أجبان') || n.includes('cheese') || n.includes('dairy') || n.includes('ألبان')) return 'set_meal';
+    if (n.includes('frozen') || n.includes('مجمد')) return 'ac_unit';
+    if (n.includes('بقال') || n.includes('grocery')) return 'shopping_basket';
+    return 'category';
+  }
 
   ngOnInit(): void {
     this.loadCategories();
   }
-  
+
   loadCategories(): void {
     this.loading.set(true);
-    
     this.categoryService.getAll().subscribe({
       next: (response: any) => {
         let cats: any[] = [];
-        if (Array.isArray(response)) {
-          cats = response;
-        } else if (response && Array.isArray(response.data)) {
-          cats = response.data;
-        } else if (response && response.items) {
-          cats = response.items;
-        }
+        if (Array.isArray(response)) cats = response;
+        else if (response?.data && Array.isArray(response.data)) cats = response.data;
+        else if (response?.items) cats = response.items;
         this.categories.set(cats);
         this.loading.set(false);
       },
-      error: (error) => {
-        console.error('Error loading categories:', error);
+      error: (err) => {
+        console.error('Error loading categories:', err);
         this.loading.set(false);
       }
     });
