@@ -34,7 +34,7 @@ export interface AddOrderDto {
   street: string;
   phoneNumber: string;
   comment?: string;
-  couponCode?: string;
+  couponId?: string;
 }
 
 export type CityOption = 

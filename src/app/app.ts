@@ -65,6 +65,9 @@ export class App implements OnInit, OnDestroy {
   // Categories
   categoryTree = signal<Category[]>([]);
   
+  // Route state
+  isCheckoutPage = signal(false);
+  
   onSearch(): void {
     if (this.searchQuery.trim()) {
       this.router.navigate(['/' + this.currentLanguage() + '/products'], { 
@@ -184,9 +187,13 @@ export class App implements OnInit, OnDestroy {
     // Scroll to top on navigation
     this.routerSubscription = this.router.events.pipe(
       filter((event: RouterEvent): event is NavigationEnd => event instanceof NavigationEnd)
-    ).subscribe(() => {
+    ).subscribe((event: NavigationEnd) => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       this.showSearchDropdown.set(false);
+      
+      // Check if we are on checkout page
+      const url = event.urlAfterRedirects;
+      this.isCheckoutPage.set(url.includes('/orders/confirm'));
     });
 
     // Search Autocomplete Logic with robust error handling

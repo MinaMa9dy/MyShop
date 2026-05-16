@@ -5,7 +5,8 @@
   <!-- ══════════════════════════════════════════════
        KANTYN SAN MARK — TOP HEADER
   ══════════════════════════════════════════════ -->
-  <nav class="fixed top-0 w-full z-50 bg-white border-b border-outline-variant/20"
+  <nav *ngIf="!isCheckoutPage()" 
+       class="fixed top-0 w-full z-50 bg-white border-b border-outline-variant/20"
        style="box-shadow: 0 2px 12px rgba(123,24,24,0.08);">
     <div class="flex items-center justify-between px-4 h-16 md:h-[72px] max-w-[1400px] mx-auto">
 
@@ -90,7 +91,7 @@
   <!-- ══════════════════════════════════════════════
        MAIN CONTENT
   ══════════════════════════════════════════════ -->
-  <main class="pt-16 md:pt-[72px] min-h-[calc(100vh-200px)] pb-[88px] md:pb-0">
+  <main [class.pt-16]="!isCheckoutPage()" [class.md:pt-[72px]]="!isCheckoutPage()" class="min-h-[calc(100vh-200px)] pb-[88px] md:pb-0">
     <router-outlet></router-outlet>
   </main>
 
@@ -99,7 +100,7 @@
   ══════════════════════════════════════════════ -->
   <footer class="hidden md:block w-full py-12 px-6 lg:px-10 border-t border-outline-variant/20 mt-16"
           style="background: linear-gradient(135deg, #F5EFE6 0%, #EDE5D8 100%);">
-    <div class="max-w-[1400px] mx-auto grid grid-cols-3 gap-10">
+    <div class="max-w-[1400px] mx-auto grid grid-cols-2 gap-10">
       <!-- Brand -->
       <div class="space-y-4">
         <div class="flex items-center gap-3">
@@ -128,16 +129,7 @@
       </div>
 
 
-      <!-- Church Support -->
-      <div class="space-y-4">
-        <h4 class="font-black text-on-surface" style="font-family:'Cairo',sans-serif;">من أجل الكنيسة</h4>
-        <p class="text-on-surface-variant text-sm leading-relaxed" style="font-family:'Tajawal',sans-serif;">
-          جزء من أرباحنا يذهب لدعم أنشطة كنيسة سان مارك وخدماتها الاجتماعية.
-        </p>
-        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <span class="material-symbols-outlined text-primary text-xl">church</span>
-        </div>
-      </div>
+
     </div>
 
     <!-- Footer Bottom -->
@@ -154,7 +146,8 @@
   <!-- ══════════════════════════════════════════════
        MOBILE BOTTOM NAVIGATION BAR (5 tabs)
   ══════════════════════════════════════════════ -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 w-full bg-white border-t border-outline-variant/20 z-[100] safe-area-pb"
+  <nav *ngIf="!isCheckoutPage()" 
+       class="md:hidden fixed bottom-0 left-0 right-0 w-full bg-white border-t border-outline-variant/20 z-[100] safe-area-pb"
        style="box-shadow: 0 -4px 20px rgba(123,24,24,0.08);">
     <div class="flex items-center justify-around h-[70px] px-1">
 
