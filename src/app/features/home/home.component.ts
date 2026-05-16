@@ -22,7 +22,7 @@ import { TokenService } from '../../core/services/token.service';
       ════════════════════════════════════ -->
       <section class="px-3 pt-4 pb-2 md:px-6 md:pt-6">
         <div class="rounded-2xl overflow-hidden">
-          <img src="assets/images/1.png"
+          <img src="assets/images/1.webp"
                alt="كانتين سان مارك"
                class="w-full h-auto block rounded-2xl">
         </div>
