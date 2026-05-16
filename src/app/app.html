@@ -4,7 +4,7 @@
   
   <!-- Premium Navigation Shell -->
   <nav class="fixed top-0 w-full z-50 bg-white/95 border-b border-outline-variant/10 backdrop-blur-md">
-    <div class="flex justify-between items-center px-4 md:px-6 py-3 md:py-4 w-full max-w-7xl mx-auto relative h-16 md:h-20">
+    <div class="flex justify-between items-center px-4 sm:px-6 lg:px-10 py-3 md:py-4 w-full max-w-[1920px] mx-auto relative h-16 md:h-20">
       <!-- Language Switcher -->
       <button (click)="toggleLanguage()" 
               class="p-2 rounded-full hover:bg-primary/5 transition-all duration-300 active:scale-95 text-primary">
@@ -73,8 +73,8 @@
   </main>
   
   <!-- Premium 4-Column Footer -->
-  <footer class="hidden md:block w-full py-16 px-6 border-t border-outline-variant bg-surface-container-low mt-20">
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 rtl:text-right">
+  <footer class="hidden md:block w-full py-12 lg:py-16 px-4 sm:px-6 lg:px-10 border-t border-outline-variant bg-surface-container-low mt-20">
+    <div class="max-w-[1920px] mx-auto grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 md:gap-12 rtl:text-right">
       <div class="space-y-4">
         <div class="text-primary font-black text-2xl font-headline tracking-tighter">MyShop</div>
         <p class="text-on-surface-variant font-body text-xs uppercase tracking-widest leading-loose">
@@ -98,7 +98,7 @@
         </ul>
       </div>
     </div>
-    <div class="max-w-7xl mx-auto mt-16 pt-8 border-t border-outline-variant text-center">
+    <div class="max-w-[1920px] mx-auto mt-12 md:mt-16 pt-8 border-t border-outline-variant text-center">
       <p class="font-label text-xs uppercase tracking-widest text-on-surface-variant">
         © 2026 MyShop. {{ 'footer.allRightsReserved' | translate }}
       </p>

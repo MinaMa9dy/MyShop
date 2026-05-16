@@ -19,8 +19,8 @@ import { environment } from '../../../../environments/environment';
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, TranslatePipe],
   template: `
-    <main class="min-h-screen bg-surface" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
-      <div class="max-w-7xl mx-auto px-6 py-12">
+    <main class="min-h-screen bg-surface w-full" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
+      <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-10 py-12">
         
         @if (loading()) {
           <div class="flex flex-col items-center justify-center py-40 gap-4">
@@ -419,7 +419,7 @@ import { environment } from '../../../../environments/environment';
                 </a>
               </div>
 
-              <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+              <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 lg:gap-6 xl:gap-8">
                 @for (item of relatedProducts(); track item.id) {
                   <div class="group relative bg-surface-container-lowest rounded-[32px] overflow-hidden border border-outline-variant/10 hover:border-primary/20 transition-all duration-500 hover:shadow-2xl">
                     <div class="relative aspect-[4/5] overflow-hidden bg-surface-container-low cursor-pointer" [routerLink]="['/' + currentLang + '/products', item.id]">

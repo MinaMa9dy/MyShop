@@ -18,7 +18,7 @@ import { TokenService } from '../../core/services/token.service';
   template: `
     <div class="home-page bg-surface">
       <!-- Premium Hero Section -->
-      <section class="relative px-6 py-10 md:py-20 max-w-7xl mx-auto overflow-hidden">
+      <section class="relative px-4 sm:px-6 lg:px-10 py-8 md:py-16 max-w-[1920px] mx-auto overflow-hidden">
         <div class="relative rounded-2xl md:rounded-3xl overflow-hidden min-h-[400px] md:min-h-[550px] flex items-center p-8 md:p-16 bg-gradient-to-br from-primary to-primary-container text-on-primary">
           <!-- Topographic Decorative Background -->
           <div class="absolute inset-0 opacity-20 pointer-events-none" 
@@ -49,33 +49,33 @@ import { TokenService } from '../../core/services/token.service';
         </div>
       </section>
 
-      <!-- Dynamic Categories Slider -->
-      <section class="categories py-10 max-w-7xl mx-auto">
-        <div class="flex items-center justify-between mb-8 px-6">
+      <!-- Dynamic Categories Grid -->
+      <section class="categories py-10 max-w-[1920px] mx-auto w-full">
+        <div class="flex items-center justify-between mb-8 px-4 sm:px-6 lg:px-10">
           <h2 class="font-headline text-2xl md:text-3xl font-black tracking-tight text-on-surface">
             {{ 'home.categories' | translate }}
           </h2>
           <a [routerLink]="['/' + currentLang + '/categories']" class="text-primary font-black text-xs uppercase tracking-widest hover:underline">{{ 'common.viewAll' | translate }}</a>
         </div>
 
-        <div class="flex items-start gap-4 overflow-x-auto scrollbar-hide px-6 pb-4">
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3 sm:gap-4 px-4 sm:px-6 lg:px-10">
           @for (category of categories(); track category.id) {
             <a [routerLink]="['/' + currentLang + '/products']" 
                [queryParams]="{categoryId: category.id}"
-               class="flex-shrink-0 w-24 group cursor-pointer no-underline flex flex-col items-center gap-3">
+               class="group cursor-pointer no-underline flex flex-col items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-2xl hover:bg-surface-container-low transition-all duration-300">
               
-              <div class="w-20 h-20 rounded-[32px] bg-surface-container-low flex items-center justify-center group-hover:bg-primary/5 transition-all duration-500 border border-outline-variant/5 group-hover:border-primary/20 group-hover:shadow-xl group-hover:-translate-y-1">
-                <span class="material-symbols-outlined text-3xl text-primary transition-transform duration-500 group-hover:scale-110">{{ getCategoryIcon(category.name) }}</span>
+              <div class="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 rounded-[20px] sm:rounded-[28px] bg-surface-container-low flex items-center justify-center group-hover:bg-primary/5 transition-all duration-500 border border-outline-variant/5 group-hover:border-primary/20 group-hover:shadow-xl group-hover:-translate-y-1">
+                <span class="material-symbols-outlined text-2xl sm:text-3xl text-primary transition-transform duration-500 group-hover:scale-110">{{ getCategoryIcon(category.name) }}</span>
               </div>
               
-              <span class="font-headline font-black text-[10px] text-on-surface text-center uppercase tracking-widest opacity-70 group-hover:opacity-100 group-hover:text-primary transition-all">{{ category.name }}</span>
+              <span class="font-headline font-black text-[9px] sm:text-[10px] text-on-surface text-center uppercase tracking-widest opacity-70 group-hover:opacity-100 group-hover:text-primary transition-all line-clamp-1">{{ category.name }}</span>
             </a>
           }
         </div>
       </section>
 
       <!-- Premium Featured Products Grid -->
-      <section class="featured-products px-6 py-12 max-w-7xl mx-auto mb-6 md:mb-20 text-center md:text-start">
+      <section class="featured-products px-4 sm:px-6 lg:px-10 py-12 max-w-[1920px] mx-auto w-full mb-6 md:mb-20 text-center md:text-start">
         <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6 text-center md:text-start">
           <h2 class="font-headline text-3xl font-extrabold tracking-tight text-on-surface">
             {{ 'home.featuredProducts' | translate }}
@@ -97,7 +97,7 @@ import { TokenService } from '../../core/services/token.service';
         </div>
 
         @if (displayedProducts().length > 0) {
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-10">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6 lg:gap-8">
             @for (product of displayedProducts(); track product.id; let i = $index) {
               <div class="group animate-fade-in-up relative bg-surface-container-lowest rounded-2xl overflow-hidden transition-[transform,shadow,border-color] duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-transparent hover:border-outline-variant/30 flex flex-col"
                    style="will-change: transform, opacity; transform: translateZ(0); backface-visibility: hidden; contain: layout;">
@@ -242,8 +242,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   displayedProducts = computed(() => {
     const products = this.featuredProducts();
     const cols = this.columns();
-    // Calculate count to fill 3 or 4 rows perfectly
-    const targetRows = cols === 4 ? 3 : 4; 
+    // Fill 3 rows on wide grids, 4 rows on narrower
+    const targetRows = cols >= 5 ? 3 : (cols === 4 ? 3 : 4);
     const count = cols * targetRows;
     return products.slice(0, count);
   });
@@ -302,14 +302,16 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private updateColumns(): void {
     const width = window.innerWidth;
-    if (width >= 1024) this.columns.set(4);      // Desktop: 4 columns
+    if (width >= 1536) this.columns.set(6);      // 2XL: 6 columns
+    else if (width >= 1280) this.columns.set(5); // XL: 5 columns
+    else if (width >= 1024) this.columns.set(4); // Desktop: 4 columns
     else if (width >= 768) this.columns.set(3);  // Tablet: 3 columns
     else this.columns.set(2);                    // Mobile: 2 columns
   }
   
   private loadFeaturedProducts(): void {
     // Load more products to have enough for any screen size (up to 4 rows of 4 = 16)
-    this.productService.getHotProducts(16).subscribe({
+    this.productService.getHotProducts(24).subscribe({
       next: (result) => {
         if (result.success && result.data) {
           this.featuredProducts.set(result.data.map((p: any) => this.normalizeProduct(p)));

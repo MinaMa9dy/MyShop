@@ -509,6 +509,9 @@
       "reduction": "Reduction",
       "fixed": "Fixed"
     },
+    "products": {
+      "noImage": "No Image"
+    },
     "editProduct": "Edit Product",
     "deleteProduct": "Delete Product",
     "editProductSubtitle": "Modify existing product details",
@@ -518,6 +521,7 @@
   "WISH": {
     "title": "Wishlist",
     "subtitle": "Your favorite items",
+    "items": "items",
     "empty": "Your wishlist is empty",
     "emptyDesc": "Save products you love to buy later.",
     "remove": "Remove",

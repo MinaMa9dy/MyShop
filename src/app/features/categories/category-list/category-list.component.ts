@@ -13,11 +13,11 @@ import { TokenService } from '../../../core/services/token.service';
   template: `
     <main class="categories-page min-h-screen bg-surface">
       <!-- Category Hero -->
-      <section class="bg-surface-container-low py-16 md:py-24 border-b border-outline-variant/30">
-        <div class="max-w-7xl mx-auto px-6">
+      <section class="bg-surface-container-low py-12 md:py-20 lg:py-24 border-b border-outline-variant/30">
+        <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-10">
           <div class="flex flex-col md:flex-row justify-between items-center gap-8">
             <div class="max-w-2xl text-start">
-              <h1 class="font-headline text-5xl md:text-6xl font-black tracking-tighter text-on-surface mb-6">
+              <h1 class="font-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-on-surface mb-4 md:mb-6">
                 {{ 'nav.categories' | translate }}
               </h1>
 
@@ -35,7 +35,7 @@ import { TokenService } from '../../../core/services/token.service';
         </div>
       </section>
 
-      <section class="max-w-7xl mx-auto px-6 py-20">
+      <section class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-10 py-10 md:py-16">
         @if (loading()) {
           <div class="flex flex-col items-center justify-center py-40 gap-4">
              <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
@@ -47,7 +47,7 @@ import { TokenService } from '../../../core/services/token.service';
              <p class="font-headline font-bold text-on-surface-variant">No categories discovered in this sector</p>
           </div>
         } @else {
-          <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 sm:gap-4 md:gap-6">
             @for (category of categories(); track category.id) {
               <a [routerLink]="['/' + currentLang + '/products']" 
                  [queryParams]="{categoryId: category.id}"

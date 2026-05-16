@@ -13,18 +13,18 @@ import { PhotoService } from '../../../core/services/photo.service';
   standalone: true,
   imports: [CommonModule, RouterLink, TranslatePipe],
   template: `
-    <main class="min-h-screen bg-surface pb-20" [dir]="currentLang() === 'ar' ? 'rtl' : 'ltr'">
+    <main class="min-h-screen bg-surface pb-20 w-full" [dir]="currentLang() === 'ar' ? 'rtl' : 'ltr'">
       <!-- Hero Section -->
-      <section class="bg-surface-container-low pt-24 pb-16 border-b border-outline-variant/30">
-        <div class="max-w-7xl mx-auto px-6">
+      <header class="bg-surface-container-low pt-24 pb-12 border-b border-outline-variant/30">
+        <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-10">
           <div class="max-w-2xl text-start">
-             <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-2">{{ 'orders.acquisitionHistory' | translate }}</h1>
-             <p class="font-body text-on-surface-variant opacity-70">{{ 'orders.acquisitionDesc' | translate }}</p>
+            <h1 class="font-headline text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter text-on-surface mb-2">{{ 'orders.acquisitionHistory' | translate }}</h1>
+            <p class="font-body text-sm text-on-surface-variant opacity-70">{{ 'orders.acquisitionDesc' | translate }}</p>
           </div>
         </div>
-      </section>
+      </header>
 
-      <section class="max-w-5xl mx-auto px-6 py-16">
+      <section class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-10 py-10 md:py-16">
         @if (loading()) {
           <div class="flex flex-col items-center justify-center py-40 gap-4">
             <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
@@ -46,12 +46,12 @@ import { PhotoService } from '../../../core/services/photo.service';
              <button [routerLink]="'/' + currentLang() + '/products'" class="px-10 py-5 bg-on-surface text-surface rounded-2xl font-headline font-bold shadow-xl hover:scale-105 active:scale-95 transition-all">{{ 'orders.curateCatalog' | translate }}</button>
           </div>
         } @else {
-          <div class="space-y-12">
+          <div class="space-y-6 md:space-y-10 lg:space-y-12">
             @for (order of orders(); track order.id) {
-              <div class="bg-surface-container-lowest rounded-[48px] shadow-2xl border border-outline-variant/10 overflow-hidden animate-slide-up group">
+              <div class="bg-surface-container-lowest rounded-[28px] sm:rounded-[36px] md:rounded-[48px] shadow-xl md:shadow-2xl border border-outline-variant/10 overflow-hidden animate-slide-up group">
                 
                 <!-- Order Header -->
-                <div class="p-8 md:p-10 border-b border-outline-variant/5">
+                <div class="p-4 sm:p-6 md:p-8 lg:p-10 border-b border-outline-variant/5">
                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                       <div class="flex items-center gap-6">
                          <div class="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center text-primary relative">
@@ -79,8 +79,8 @@ import { PhotoService } from '../../../core/services/photo.service';
                 </div>
 
                 <!-- Order Content -->
-                <div class="p-4 md:p-10">
-                   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+                <div class="p-4 sm:p-6 md:p-8 lg:p-10">
+                   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12">
                       <!-- Items -->
                       <div class="space-y-4">
                          <p class="text-[10px] font-black uppercase tracking-widest text-outline mb-2">{{ 'orders.unitInventory' | translate }}</p>
@@ -108,7 +108,7 @@ import { PhotoService } from '../../../core/services/photo.service';
                       <div class="space-y-8">
                          <div class="space-y-6">
                             <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ 'orderConfirm.shippingInfo' | translate }}</p>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
                                <div class="space-y-2">
                                   <span class="material-symbols-outlined text-outline-variant text-sm">person</span>
                                   <p class="text-[10px] md:text-xs font-black text-on-surface">{{ order.buyerName }}</p>
@@ -141,7 +141,7 @@ import { PhotoService } from '../../../core/services/photo.service';
 
                 <!-- Footer Action -->
                 <!-- Order Status Footer -->
-                <div class="px-10 py-6 bg-surface-container border-t border-outline-variant/5 flex justify-end">
+                <div class="px-4 sm:px-6 md:px-10 py-4 md:py-6 bg-surface-container border-t border-outline-variant/5 flex justify-end">
                    @if (order.status === 'Pending' || order.status === '1') {
                       <button (click)="cancelOrder(order.id)" class="px-6 py-3 bg-error/10 text-error rounded-xl font-headline font-black text-[10px] uppercase tracking-widest border border-error/20 hover:bg-error hover:text-white transition-all">
                          {{ 'orders.cancelAction' | translate }}
