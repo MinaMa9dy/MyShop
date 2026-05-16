@@ -68,8 +68,10 @@ import { Order } from '../../core/models/order.model';
 
             <!-- Logout -->
             <button (click)="logout()"
-                    class="flex-shrink-0 text-white/70 hover:text-white transition-colors">
-              <span class="material-symbols-outlined text-xl">logout</span>
+                    type="button"
+                    class="flex-shrink-0 relative z-50 cursor-pointer flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all border border-white/10 active:scale-95">
+              <span class="text-[10px] font-black uppercase tracking-wider" style="font-family:'Cairo',sans-serif;">خروج</span>
+              <span class="material-symbols-outlined text-lg">logout</span>
             </button>
           </div>
         </div>

@@ -18,6 +18,7 @@ import {
 } from '../models/auth.model';
 import { TokenService } from './token.service';
 import { CartService } from './cart.service';
+import { LanguageService } from './language.service';
 import { Result } from '../models/result.model';
 @Injectable({
   providedIn: 'root'
@@ -26,6 +27,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private tokenService = inject(TokenService);
   private cartService = inject(CartService);
+  private languageService = inject(LanguageService);
   private router = inject(Router);
   
   private apiUrl = `${environment.apiUrl}/Auth`;
@@ -162,15 +164,16 @@ export class AuthService {
   }
   
   logout(redirect: boolean = true): void {
+    // Clear cart data BEFORE clearing tokens so the backend request has authentication
+    this.cartService.clear();
+    
     this.tokenService.clearTokens();
     this.isLoggedInSignal.set(false);
     this.currentUserSubject.next(null);
-    // Clear cart data on logout to prevent stale data persistence
-    this.cartService.clear();
 
     if (redirect) {
-      const lang = localStorage.getItem('language') || 'en';
-      this.router.navigate([`/${lang}/auth/login`]);
+      const lang = this.languageService.currentLanguage();
+      this.router.navigateByUrl(`/${lang}/auth/login`);
     }
   }
   
