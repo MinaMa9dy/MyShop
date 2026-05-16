@@ -82,7 +82,7 @@
               }
 
               <!-- Remove from Wishlist Button -->
-              <button (click)="removeFromWish(wish)"
+              <button (click)="removeFromWish(wish); $event.stopPropagation()"
                       [disabled]="removingId() === wish.productId"
                       class="absolute top-2 sm:top-3 ltr:right-2 sm:ltr:right-3 rtl:left-2 sm:rtl:left-3 w-8 h-8 sm:w-9 sm:h-9 rounded-xl sm:rounded-2xl flex items-center justify-center backdrop-blur-xl transition-all z-20 shadow-lg bg-error text-on-error hover:scale-110 active:scale-90 disabled:opacity-50">
                 @if (removingId() === wish.productId) {
@@ -132,7 +132,7 @@
                 <!-- Add to Cart Button -->
                 <button class="w-full py-2.5 sm:py-3 bg-primary text-on-primary rounded-xl sm:rounded-2xl font-headline font-black text-[9px] sm:text-[10px] uppercase tracking-[0.1em] shadow-[0_12px_24px_rgba(var(--primary-rgb),0.2)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group/btn disabled:opacity-50 disabled:grayscale disabled:pointer-events-none"
                         [disabled]="addingId() === wish.productId || (wish.product?.stockQuantity ?? 0) <= 0"
-                        (click)="addToCart(wish)">
+                        (click)="addToCart(wish); $event.stopPropagation()">
                   @if (addingId() === wish.productId) {
                     <span class="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>
                     <span>{{ 'common.loading' | translate }}</span>
