@@ -369,7 +369,7 @@ import { environment } from '../../../../environments/environment';
                        <p class="font-headline font-bold text-outline-variant opacity-60">{{ 'product.zeroLogs' | translate }}</p>
                     </div>
                   } @else {
-                    @for (review of reviews(); track review.id) {
+                    @for (review of displayedReviews(); track review.id) {
                       <div class="bg-surface-container-lowest p-8 rounded-[40px] border border-outline-variant/10 hover:border-primary/20 transition-all group shadow-sm hover:shadow-xl">
                          <div class="flex flex-col sm:flex-row items-start justify-between gap-6">
                             <div class="flex items-center gap-5">
@@ -383,7 +383,7 @@ import { environment } from '../../../../environments/environment';
                                <div>
                                   <h4 class="font-headline font-black text-on-surface group-hover:text-primary transition-colors">{{ review.personName || 'Unidentified Civilian' }}</h4>
                                   <p class="text-[10px] font-black uppercase tracking-widest text-outline">{{ review.createdAt | date:'longDate' }}</p>
-                               </div>
+                                </div>
                             </div>
                             <div class="flex gap-1 bg-surface px-4 py-2 rounded-xl border border-outline-variant/10">
                                @for (star of [1, 2, 3, 4, 5]; track star) {
@@ -397,6 +397,28 @@ import { environment } from '../../../../environments/environment';
                               {{ review.content }}
                            </p>
                          </div>
+                      </div>
+                    }
+
+                    <!-- Reviews Pagination -->
+                    @if (reviewsTotalPages() > 1) {
+                      <div class="flex items-center justify-center gap-2 mt-12">
+                        <button (click)="goToReviewsPage(reviewsCurrentPage() - 1)" [disabled]="reviewsCurrentPage() === 1"
+                                class="w-9 h-9 rounded-full border border-outline-variant/30 flex items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary transition-all disabled:opacity-30">
+                          <span class="material-symbols-outlined text-[20px]">{{ currentLang === 'ar' ? 'chevron_right' : 'chevron_left' }}</span>
+                        </button>
+                        @for (page of [].constructor(reviewsTotalPages()); track $index) {
+                          <button (click)="goToReviewsPage($index + 1)"
+                                  class="w-9 h-9 rounded-full border text-sm font-bold transition-all"
+                                  [style.background]="($index + 1) === reviewsCurrentPage() ? '#7B1818' : 'transparent'"
+                                  [style.color]="($index + 1) === reviewsCurrentPage() ? 'white' : '#6B7280'"
+                                  [style.border-color]="($index + 1) === reviewsCurrentPage() ? '#7B1818' : '#E5E7EB'"
+                                  style="font-family:'Cairo',sans-serif;">{{ $index + 1 }}</button>
+                        }
+                        <button (click)="goToReviewsPage(reviewsCurrentPage() + 1)" [disabled]="reviewsCurrentPage() === reviewsTotalPages()"
+                                class="w-9 h-9 rounded-full border border-outline-variant/30 flex items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary transition-all disabled:opacity-30">
+                          <span class="material-symbols-outlined text-[20px]">{{ currentLang === 'ar' ? 'chevron_left' : 'chevron_right' }}</span>
+                        </button>
                       </div>
                     }
                   }
@@ -586,6 +608,21 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   isWishlisted = signal<boolean>(false);
   reviews = signal<Review[]>([]);
   loadingReviews = signal(false);
+  reviewsCurrentPage = signal(1);
+  reviewsPageSize = signal(4);
+  reviewsTotalPages = signal(1);
+  reviewsTotalCount = signal(0);
+  reviewsAverageRating = signal<string | null>(null);
+
+  displayedReviews = computed(() => this.reviews());
+
+  goToReviewsPage(page: number): void {
+    const productId = this.product()?.id;
+    if (!productId) return;
+    if (page >= 1 && page <= this.reviewsTotalPages()) {
+      this.loadReviews(productId, page, this.reviewsPageSize());
+    }
+  }
   newReviewStars = 0;
   newReviewContent = '';
   reviewSubmitting = signal(false);
@@ -603,13 +640,16 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     return v ? v.oldPrice > v.newPrice : false;
   });
   
-  totalReviewCount = computed(() => Math.max(this.product()?.reviewCount || 0, this.reviews().length));
+  totalReviewCount = computed(() => Math.max(this.product()?.reviewCount || 0, this.reviewsTotalCount()));
 
   averageRating = computed(() => {
-     const revs = this.reviews();
-     if (revs.length === 0) return this.product()?.averageRating || '0.0';
-     const sum = revs.reduce((acc, curr) => acc + curr.stars, 0);
-     return (sum / revs.length).toFixed(1);
+     const serverAvg = this.reviewsAverageRating();
+     if (serverAvg !== null) return serverAvg;
+     const prod = this.product();
+     if (prod && prod.averageRating !== undefined && prod.averageRating !== null) {
+       return Number(prod.averageRating).toFixed(1);
+     }
+     return '0.0';
   });
 
   canEditProduct = computed(() => {
@@ -810,11 +850,29 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     }
   }
   
-  loadReviews(productId: string): void {
+  loadReviews(productId: string, page: number = 1, pageSize: number = 4): void {
     this.loadingReviews.set(true);
-    this.reviewService.getReviewsByProductId(productId).subscribe({
-      next: (response: Review[]) => {
-        this.reviews.set(Array.isArray(response) ? response : (response as any).data || []);
+    this.reviewService.getReviewsByProductId(productId, page, pageSize).subscribe({
+      next: (response: any) => {
+        const data = response?.data || (Array.isArray(response) ? response : []);
+        const meta = response?.meta || response?.Meta;
+        
+        this.reviews.set(data);
+        
+        const currentPageVal = meta?.page ?? meta?.Page ?? page;
+        const totalPagesVal = meta?.totalPages ?? meta?.TotalPages ?? Math.ceil(((meta?.total ?? meta?.Total ?? data.length)) / pageSize);
+        const totalCountVal = meta?.total ?? meta?.Total ?? data.length;
+        const avgRatingVal = meta?.avgRating ?? meta?.AvgRating;
+
+        this.reviewsCurrentPage.set(currentPageVal);
+        this.reviewsTotalPages.set(totalPagesVal);
+        this.reviewsTotalCount.set(totalCountVal);
+        
+        if (avgRatingVal !== undefined && avgRatingVal !== null) {
+          this.reviewsAverageRating.set(Number(avgRatingVal).toFixed(1));
+        } else {
+          this.reviewsAverageRating.set(null);
+        }
         this.loadingReviews.set(false);
       },
       error: () => this.loadingReviews.set(false)

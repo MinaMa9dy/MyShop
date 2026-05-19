@@ -141,6 +141,23 @@ import { ProductVariantManagementComponent } from '../product-variants/product-v
                     @for (photo of allPhotos(); track photo.id) {
                       <div class="relative aspect-square rounded-[32px] overflow-hidden bg-surface-container-low border border-outline-variant/10 group">
                         <img [src]="photoService.getPhotoUrl(photo.fileName)" class="w-full h-full object-cover transition-all duration-500" [class.grayscale]="isPhotoMarkedForDeletion(photo.id)" [class.opacity-40]="isPhotoMarkedForDeletion(photo.id)">
+                        
+                        <!-- Main Photo Indicator / Set as Main Button -->
+                        @if (!isPhotoMarkedForDeletion(photo.id)) {
+                          @if (designatedMainPhotoId() === photo.id) {
+                            <div class="absolute top-4 left-4 w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-lg z-10 animate-scale-in" 
+                                 [title]="(currentLang === 'ar' ? 'صورة رئيسية' : 'Main Photo')">
+                              <span class="material-symbols-outlined text-lg font-bold">star</span>
+                            </div>
+                          } @else {
+                            <button type="button" (click)="setExistingAsMain(photo.id)"
+                                    class="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/80 text-on-surface hover:text-amber-500 hover:bg-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 shadow-lg"
+                                    [title]="(currentLang === 'ar' ? 'تعيين كصورة رئيسية' : 'Set as Main')">
+                              <span class="material-symbols-outlined text-lg">star</span>
+                            </button>
+                          }
+                        }
+
                         <button type="button" (click)="togglePhotoDeletion(photo.id)" 
                                 class="absolute top-4 right-4 w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-300 z-10 shadow-lg"
                                 [class]="isPhotoMarkedForDeletion(photo.id) ? 'bg-primary text-on-primary' : 'bg-white/80 text-on-surface hover:bg-error hover:text-on-error'">
@@ -162,8 +179,23 @@ import { ProductVariantManagementComponent } from '../product-variants/product-v
                     @for (fileObj of selectedFiles(); track fileObj.name; let i = $index) {
                       <div class="relative aspect-square rounded-[32px] overflow-hidden bg-primary/5 border-2 border-dashed border-primary/20 group animate-scale-in">
                         <img [src]="fileObj.preview" class="w-full h-full object-cover">
+                        
+                        <!-- New Photos Main Indicator / Set as Main Button -->
+                        @if (isEditMode() ? (newPhotoIsMain() && i === 0) : (i === 0)) {
+                          <div class="absolute top-4 left-4 w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-lg z-10 animate-scale-in" 
+                               [title]="(currentLang === 'ar' ? 'صورة رئيسية' : 'Main Photo')">
+                            <span class="material-symbols-outlined text-lg font-bold">star</span>
+                          </div>
+                        } @else {
+                          <button type="button" (click)="setNewAsMain(i)"
+                                  class="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/80 text-on-surface hover:text-amber-500 hover:bg-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 shadow-lg"
+                                  [title]="(currentLang === 'ar' ? 'تعيين كصورة رئيسية' : 'Set as Main')">
+                            <span class="material-symbols-outlined text-lg">star</span>
+                          </button>
+                        }
+
                         <button type="button" (click)="removeNewPhoto(i)" 
-                                class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black transition-colors">
+                                class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black transition-colors z-10">
                           <span class="material-symbols-outlined text-lg">close</span>
                         </button>
                       </div>
@@ -265,6 +297,9 @@ export class AddProductComponent implements OnInit {
   photoIdsToDelete = signal<string[]>([]);
   activeTab = signal<'basic' | 'variants'>('basic');
   
+  designatedMainPhotoId = signal<string | null>(null);
+  newPhotoIsMain = signal<boolean>(false);
+  
   get currentLang(): string { return this.languageService.currentLanguage(); }
   allPhotos = computed(() => this.originalProduct()?.productPhotos || this.originalProduct()?.productphotos || []);
 
@@ -287,6 +322,11 @@ export class AddProductComponent implements OnInit {
         }
         
         this.originalProduct.set(normalized);
+        this.newPhotoIsMain.set(false);
+        const mainPhoto = normalized.productPhotos.find((p: any) => p.isMain);
+        if (mainPhoto) {
+          this.designatedMainPhotoId.set(mainPhoto.id);
+        }
         this.productForm.patchValue({
           name: normalized.name, 
           description: normalized.description,
@@ -369,9 +409,74 @@ export class AddProductComponent implements OnInit {
     }
   }
 
-  removeNewPhoto(index: number): void { this.selectedFiles.update(curr => curr.filter((_, i) => i !== index)); }
-  togglePhotoDeletion(photoId: string): void { this.photoIdsToDelete.update(ids => ids.includes(photoId) ? ids.filter(id => id !== photoId) : [...ids, photoId]); }
+  removeNewPhoto(index: number): void { 
+    this.selectedFiles.update(curr => curr.filter((_, i) => i !== index)); 
+    if (this.selectedFiles().length === 0) {
+      this.newPhotoIsMain.set(false);
+    }
+  }
+
+  togglePhotoDeletion(photoId: string): void { 
+    this.photoIdsToDelete.update(ids => ids.includes(photoId) ? ids.filter(id => id !== photoId) : [...ids, photoId]); 
+    if (this.designatedMainPhotoId() === photoId) {
+      this.designatedMainPhotoId.set(null);
+      const remainingPhotos = this.allPhotos().filter((p: any) => p.id !== photoId && !this.isPhotoMarkedForDeletion(p.id));
+      if (remainingPhotos.length > 0) {
+        this.setExistingAsMain(remainingPhotos[0].id);
+      } else if (this.selectedFiles().length > 0) {
+        this.newPhotoIsMain.set(true);
+      }
+    }
+  }
+
   isPhotoMarkedForDeletion(photoId: string): boolean { return this.photoIdsToDelete().includes(photoId); }
+
+  setExistingAsMain(photoId: string): void {
+    const prodId = this.productId();
+    if (!prodId) return;
+
+    this.productService.setMainPhoto(prodId, photoId).subscribe({
+      next: (result) => {
+        if (result.success) {
+          this.originalProduct.update(prod => {
+            if (!prod) return prod;
+            const updatedPhotos = (prod.productPhotos || []).map((p: any) => ({
+              ...p,
+              isMain: p.id === photoId
+            }));
+            return {
+              ...prod,
+              productPhotos: updatedPhotos
+            };
+          });
+          this.designatedMainPhotoId.set(photoId);
+          this.newPhotoIsMain.set(false);
+          
+          this.success.set(this.currentLang === 'ar' ? 'تم تعيين الصورة كصورة رئيسية بنجاح' : 'Main photo updated successfully');
+          setTimeout(() => this.success.set(null), 3000);
+        } else {
+          this.error.set(result.error?.message || (this.currentLang === 'ar' ? 'خطأ في تعيين الصورة الرئيسية' : 'Error setting main photo'));
+          setTimeout(() => this.error.set(null), 3000);
+        }
+      },
+      error: () => {
+        this.error.set(this.currentLang === 'ar' ? 'خطأ في الاتصال بالخادم' : 'Server error setting main photo');
+        setTimeout(() => this.error.set(null), 3000);
+      }
+    });
+  }
+
+  setNewAsMain(index: number): void {
+    this.selectedFiles.update(curr => {
+      if (index <= 0 || index >= curr.length) return curr;
+      const items = [...curr];
+      const [selected] = items.splice(index, 1);
+      items.unshift(selected);
+      return items;
+    });
+    this.newPhotoIsMain.set(true);
+    this.designatedMainPhotoId.set(null);
+  }
 
   onSubmit(): void { if (this.isEditMode()) this.updateProduct(); else this.addProduct(); }
 
@@ -392,9 +497,6 @@ export class AddProductComponent implements OnInit {
        photos: this.selectedFiles().map(f => f.file)
     };
 
-    // Note: The backend AddProductDto might need to include price/stock 
-    // or I need to pass them as extra properties if using any.
-    // Given the previous backend check, I'll add them.
     (productData as any).price = formVal.price;
     (productData as any).stock = formVal.stock;
     (productData as any).haveSale = formVal.haveSale;
@@ -434,11 +536,33 @@ export class AddProductComponent implements OnInit {
       photoIdsToDelete: this.photoIdsToDelete()
     };
     
-
+    const remainingExistingCount = this.allPhotos().filter((p: any) => !this.isPhotoMarkedForDeletion(p.id)).length;
 
     this.productService.update(productData.id, productData).subscribe({
       next: (result) => {
         if (result.success) {
+          const updatedProduct = result.data || result;
+          const normalized = this.normalizeProduct(updatedProduct);
+          const returnedPhotos = normalized.productPhotos || [];
+          
+          if (this.newPhotoIsMain() && returnedPhotos.length > remainingExistingCount) {
+            const newMainPhoto = returnedPhotos[remainingExistingCount];
+            if (newMainPhoto) {
+              this.productService.setMainPhoto(normalized.id, newMainPhoto.id).subscribe({
+                next: () => {
+                  this.submitting.set(false);
+                  this.success.set(this.translate.instant('admin.addProduct.modificationVerified'));
+                  setTimeout(() => this.router.navigate([`/${this.currentLang}/products/${this.productId()}`]), 1000);
+                },
+                error: () => {
+                  this.submitting.set(false);
+                  this.router.navigate([`/${this.currentLang}/products/${this.productId()}`]);
+                }
+              });
+              return;
+            }
+          }
+          
           this.submitting.set(false); 
           this.success.set(this.translate.instant('admin.addProduct.modificationVerified'));
           setTimeout(() => this.router.navigate([`/${this.currentLang}/products/${this.productId()}`]), 1000);

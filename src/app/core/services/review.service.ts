@@ -15,9 +15,14 @@ export class ReviewService {
     return this.http.post<any>(this.baseUrl, review);
   }
 
-  getReviewsByProductId(productId: string): Observable<Review[]> {
-    return this.http.get<Review[]>(
-      `${this.baseUrl}/Product/${productId}`
+  getReviewsByProductId(productId: string, page: number = 1, pageSize: number = 4): Observable<any> {
+    return this.http.get<any>(
+      `${this.baseUrl}/Product/${productId}`, {
+        params: {
+          page: page.toString(),
+          pageSize: pageSize.toString()
+        }
+      }
     );
   }
 }
