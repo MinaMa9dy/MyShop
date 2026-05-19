@@ -413,59 +413,120 @@ import { environment } from '../../../../environments/environment';
                   <h2 class="font-headline text-4xl font-black text-on-surface tracking-tighter mb-4">{{ 'product.relatedProducts' | translate }}</h2>
                   <p class="font-body text-sm text-on-surface-variant max-w-lg opacity-70">{{ 'product.relatedDesc' | translate }}</p>
                 </div>
-                <a routerLink="/products" [queryParams]="{ categoryId: product()?.categoryId }" class="flex items-center gap-2 px-8 py-4 bg-surface-container text-on-surface rounded-2xl font-headline font-bold text-sm hover:bg-primary hover:text-on-primary transition-all shadow-sm">
-                  {{ 'common.viewAll' | translate }}
-                  <span class="material-symbols-outlined">arrow_forward</span>
-                </a>
+                <div class="flex items-center gap-4 justify-center md:justify-end w-full md:w-auto flex-shrink-0">
+                  <!-- Navigation Arrows for Related Products Slider -->
+                  <div class="hidden md:flex gap-2">
+                    <button (click)="scrollRelatedPrev()" class="w-12 h-12 rounded-full bg-surface-container hover:bg-primary hover:text-on-primary transition-all flex items-center justify-center shadow-sm">
+                      <span class="material-symbols-outlined text-xl">arrow_back</span>
+                    </button>
+                    <button (click)="scrollRelatedNext()" class="w-12 h-12 rounded-full bg-surface-container hover:bg-primary hover:text-on-primary transition-all flex items-center justify-center shadow-sm">
+                      <span class="material-symbols-outlined text-xl">arrow_forward</span>
+                    </button>
+                  </div>
+                  <a routerLink="/products" [queryParams]="{ categoryId: product()?.categoryId }" class="flex items-center gap-2 px-8 py-4 bg-surface-container text-on-surface rounded-2xl font-headline font-bold text-sm hover:bg-primary hover:text-on-primary transition-all shadow-sm">
+                    {{ 'common.viewAll' | translate }}
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                  </a>
+                </div>
               </div>
 
-              <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 lg:gap-6 xl:gap-8">
+              <div class="flex overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth gap-4 lg:gap-6 xl:gap-8 pb-6" #relatedCarousel>
                 @for (item of relatedProducts(); track item.id) {
-                  <div class="group relative bg-surface-container-lowest rounded-[32px] overflow-hidden border border-outline-variant/10 hover:border-primary/20 transition-all duration-500 hover:shadow-2xl">
-                    <div class="relative aspect-[4/5] overflow-hidden bg-surface-container-low cursor-pointer" [routerLink]="['/' + currentLang + '/products', item.id]">
-                      @if (getMainPhotoUrl(item)) {
-                        <img [src]="getMainPhotoUrl(item)" [alt]="item.name" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                      } @else {
-                        <div class="w-full h-full flex items-center justify-center">
-                          <span class="material-symbols-outlined text-5xl text-outline-variant opacity-20">inventory_2</span>
+                  <div class="snap-start flex-shrink-0 w-[180px] sm:w-[220px] ksm-product-card group flex flex-col relative">
+
+                    <!-- Badges -->
+                    @if (item.haveSale || item.oldPrice > item.newPrice) {
+                      <div class="absolute top-2 left-2 z-10">
+                        <span class="bg-error text-white text-[9px] font-black px-1.5 py-0.5 rounded-md"
+                              style="font-family:'Cairo',sans-serif;">خصم</span>
+                      </div>
+                    }
+                    @if (item.isFasting) {
+                      <div class="absolute top-2 left-2 mt-5 z-10">
+                        <span class="bg-primary text-white text-[9px] font-black px-1.5 py-0.5 rounded-md"
+                              style="font-family:'Cairo',sans-serif;">صيامي</span>
+                      </div>
+                    }
+
+                    <!-- Wishlist Button -->
+                    <button class="absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center shadow-md transition-all active:scale-90"
+                            [class.bg-red-50]="wishlistIds().has(item.id)"
+                            [class.bg-white]="!wishlistIds().has(item.id)"
+                            (click)="toggleWishlistForProduct(item, $event)">
+                      <span class="material-symbols-outlined text-[16px] transition-colors"
+                            [class.text-red-500]="wishlistIds().has(item.id)"
+                            [class.text-outline-variant]="!wishlistIds().has(item.id)"
+                            [style.font-variation-settings]="wishlistIds().has(item.id) ? '&quot;FILL&quot; 1' : '&quot;FILL&quot; 0'">
+                        favorite
+                      </span>
+                    </button>
+
+                    <!-- Product Image -->
+                    <a [routerLink]="'/' + currentLang + '/products/' + item.id"
+                       class="block aspect-square overflow-hidden bg-surface-container-low no-underline">
+                      <img [src]="getMainPhotoUrl(item) || 'assets/images/placeholder.svg'"
+                           [alt]="item.name"
+                           loading="lazy"
+                           class="w-full h-full object-contain p-2 transition-transform duration-500 group-hover:scale-105">
+                    </a>
+
+                    <!-- Info -->
+                    <div class="p-2 flex flex-col flex-1">
+                      <!-- Category -->
+                      @if (item.categoryName) {
+                        <div class="text-[10px] text-primary/80 mb-0.5 truncate" style="font-family:'Tajawal',sans-serif;">
+                          {{ item.categoryName }}
                         </div>
                       }
                       
-                      <!-- Badges -->
-                      @if (item.oldPrice > item.newPrice) {
-                        <div class="absolute top-4 left-4">
-                          <span class="bg-error text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">SALE</span>
-                        </div>
-                      }
-                    </div>
-                    
-                    <div class="p-6 space-y-4">
-                      <div class="flex items-center gap-1.5">
-                        <div class="flex items-center gap-0.5">
-                          <span class="material-symbols-outlined text-[14px] text-amber-500 fill-current">star</span>
-                          <span class="text-[11px] font-black text-on-surface">{{ item.averageRating | number:'1.1-1' }}</span>
-                        </div>
-                        <span class="w-1 h-1 rounded-full bg-outline-variant/30"></span>
-                        <span class="text-[9px] font-bold text-outline-variant">({{ item.reviewCount }})</span>
-                      </div>
-                      <div>
-                        <h3 class="font-headline font-bold text-sm text-on-surface line-clamp-1 group-hover:text-primary transition-colors cursor-pointer mb-1" [routerLink]="['/' + currentLang + '/products', item.id]">
+                      <!-- Title -->
+                      <a [routerLink]="'/' + currentLang + '/products/' + item.id" class="no-underline">
+                        <h3 class="text-on-surface font-bold text-[12px] md:text-sm line-clamp-2 mb-1 hover:text-primary transition-colors leading-tight"
+                            style="font-family:'Cairo',sans-serif;">
                           {{ item.name }}
                         </h3>
-                        <p class="text-[10px] font-black uppercase tracking-widest text-outline mb-2">{{ item.categoryName }}</p>
-                      </div>
+                      </a>
 
-                      <div class="flex items-baseline gap-3">
-                        <span class="text-lg font-black text-on-surface">{{ item.newPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
-                        @if (item.oldPrice > item.newPrice) {
-                          <span class="text-xs text-outline-variant line-through opacity-50">{{ item.oldPrice | currency:'EGP':'symbol':'1.0-0':'en-EG' }}</span>
+                      <!-- Rating & Supplier -->
+                      <div class="flex items-center justify-between mb-2">
+                        <!-- Rating -->
+                        <div class="flex items-center gap-0.5 text-[10px] text-on-surface-variant">
+                          <span class="material-symbols-outlined text-[12px] text-[#C4962A]" style="font-variation-settings: 'FILL' 1">star</span>
+                          <span class="font-bold text-[#7B1818]">{{ item.averageRating | number:'1.1-1' }}</span>
+                          <span>({{ item.reviewCount }})</span>
+                        </div>
+                        <!-- Supplier -->
+                        @if (item.supplierName) {
+                          <div class="text-[9px] text-outline-variant truncate max-w-[60px]" style="font-family:'Tajawal',sans-serif;" [title]="item.supplierName">
+                            {{ item.supplierName }}
+                          </div>
                         }
                       </div>
 
-                      <button [routerLink]="['/' + currentLang + '/products', item.id]"
-                              class="w-full py-3.5 bg-surface-container-high text-on-surface-variant rounded-2xl font-headline font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all">
-                        {{ 'common.viewDetails' | translate }}
-                      </button>
+                      <!-- Price + Cart -->
+                      <div class="flex items-center justify-between mt-auto pt-1 gap-1">
+                        <div class="flex flex-col min-w-0">
+                          @if (item.oldPrice > item.newPrice) {
+                            <span class="text-[9px] text-outline-variant line-through" style="font-family:'Cairo',sans-serif;">
+                              EGP {{ item.oldPrice }}
+                            </span>
+                          }
+                          <span class="text-primary font-black text-[13px] md:text-sm" style="font-family:'Cairo',sans-serif;">
+                            EGP {{ item.newPrice }}
+                          </span>
+                        </div>
+
+                        @if (item.stockQuantity > 0) {
+                          <button (click)="addToCartRelated(item, $event)"
+                                  class="ksm-add-btn flex-shrink-0">
+                            <span class="material-symbols-outlined text-[18px]">shopping_cart</span>
+                          </button>
+                        } @else {
+                          <div class="flex-shrink-0 w-9 h-9 rounded-full bg-surface-container flex items-center justify-center opacity-30">
+                            <span class="material-symbols-outlined text-[16px] text-outline-variant">remove_shopping_cart</span>
+                          </div>
+                        }
+                      </div>
                     </div>
                   </div>
                 }
@@ -500,6 +561,7 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   
   // Variant Matrix Selection State
   selectedAttributes = signal<Record<string, string>>({});
+  wishlistIds = signal<Set<string>>(new Set());
   
   attributeGroups = computed(() => {
     const p = this.product();
@@ -574,7 +636,22 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   }
   
   @ViewChild('carousel') carouselElement!: ElementRef;
+  @ViewChild('relatedCarousel') relatedCarouselElement!: ElementRef;
   currentPhotoIndex = signal(0);
+
+  scrollRelatedPrev(): void {
+    if (this.relatedCarouselElement) {
+      const direction = this.currentLang === 'ar' ? 1 : -1;
+      this.relatedCarouselElement.nativeElement.scrollBy({ left: 320 * direction, behavior: 'smooth' });
+    }
+  }
+
+  scrollRelatedNext(): void {
+    if (this.relatedCarouselElement) {
+      const direction = this.currentLang === 'ar' ? -1 : 1;
+      this.relatedCarouselElement.nativeElement.scrollBy({ left: 320 * direction, behavior: 'smooth' });
+    }
+  }
 
   scrollToPhoto(index: number): void {
     if (this.carouselElement) {
@@ -678,7 +755,10 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     this.wishService.getWishes().subscribe({
       next: (res) => {
         if (res.success && res.data) {
-          this.isWishlisted.set(res.data.some(w => w.productId === productId));
+          const ids = new Set<string>();
+          res.data.forEach(w => { if (w.productId) ids.add(w.productId); });
+          this.wishlistIds.set(ids);
+          this.isWishlisted.set(ids.has(productId));
         }
       }
     });
@@ -693,6 +773,12 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     // --- OPTIMISTIC UPDATE START ---
     const wasWishlisted = this.isWishlisted();
     this.isWishlisted.set(!wasWishlisted);
+    this.wishlistIds.update(set => {
+      const nextSet = new Set(set);
+      if (wasWishlisted) nextSet.delete(productId);
+      else nextSet.add(productId);
+      return nextSet;
+    });
     // --- OPTIMISTIC UPDATE END ---
 
     if (wasWishlisted) {
@@ -701,6 +787,11 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
         error: (err) => {
           console.error('Optimistic UI (Detail): Error removing, rolling back', err);
           this.isWishlisted.set(true);
+          this.wishlistIds.update(set => {
+            const nextSet = new Set(set);
+            nextSet.add(productId);
+            return nextSet;
+          });
         }
       });
     } else {
@@ -709,6 +800,11 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
         error: (err) => {
           console.error('Optimistic UI (Detail): Error adding, rolling back', err);
           this.isWishlisted.set(false);
+          this.wishlistIds.update(set => {
+            const nextSet = new Set(set);
+            nextSet.delete(productId);
+            return nextSet;
+          });
         }
       });
     }
@@ -834,6 +930,74 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
       };
       
       this.cartService.addToCart(targetId, this.quantity, displayData).subscribe();
+    }
+  }
+
+  addToCartRelated(product: any, event: Event): void {
+    event.preventDefault(); event.stopPropagation();
+    const userId = this.tokenService.getUserId();
+    if (!userId) {
+      this.router.navigate(['/' + this.currentLang + '/auth/login']);
+      return;
+    }
+    const variantId = product.productVariants?.[0]?.id || product.id;
+    if (product.stockQuantity <= 0) return;
+    this.cartService.addToCart(variantId, 1, product).subscribe({
+      next: () => console.log('Related added to cart'),
+      error: (err) => console.error('Cart error:', err)
+    });
+  }
+
+  toggleWishlistForProduct(product: any, event: Event): void {
+    event.preventDefault(); event.stopPropagation();
+    const userId = this.tokenService.getUserId();
+    if (!userId) { this.router.navigate(['/' + this.currentLang + '/auth/login']); return; }
+    
+    const productId = product.id;
+    const isCurrentlyInWishlist = this.wishlistIds().has(productId);
+    
+    // --- OPTIMISTIC UPDATE START ---
+    this.wishlistIds.update(set => {
+      const nextSet = new Set(set);
+      if (isCurrentlyInWishlist) nextSet.delete(productId);
+      else nextSet.add(productId);
+      return nextSet;
+    });
+    if (this.product()?.id === productId) {
+      this.isWishlisted.set(!isCurrentlyInWishlist);
+    }
+    // --- OPTIMISTIC UPDATE END ---
+
+    if (isCurrentlyInWishlist) {
+      this.wishService.removeWish(productId).subscribe({
+        next: () => console.log('Successfully removed related from wishlist'),
+        error: (err) => {
+          console.error('Error removing, rolling back', err);
+          this.wishlistIds.update(set => {
+            const nextSet = new Set(set);
+            nextSet.add(productId);
+            return nextSet;
+          });
+          if (this.product()?.id === productId) {
+            this.isWishlisted.set(true);
+          }
+        }
+      });
+    } else {
+      this.wishService.addWish({ productId }).subscribe({
+        next: () => console.log('Successfully added related to wishlist'),
+        error: (err) => {
+          console.error('Error adding, rolling back', err);
+          this.wishlistIds.update(set => {
+            const nextSet = new Set(set);
+            nextSet.delete(productId);
+            return nextSet;
+          });
+          if (this.product()?.id === productId) {
+            this.isWishlisted.set(false);
+          }
+        }
+      });
     }
   }
 
