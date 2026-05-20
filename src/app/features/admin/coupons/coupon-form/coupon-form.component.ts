@@ -137,7 +137,7 @@ import { CreateCouponDto, UpdateCouponDto, DiscountType } from '../../../../core
                      <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">local_activity</span>
                    }
                 </button>
-                <a [routerLink]="['/' + currentLang + '/admin/coupons']"
+                <a routerLink="/admin/coupons"
                    class="flex-1 py-6 bg-surface-container rounded-[32px] font-headline font-bold text-xs uppercase tracking-widest text-outline hover:bg-surface-container-high transition-all text-center flex items-center justify-center">
                    {{ 'admin.coupons.cancel' | translate }}
                 </a>
@@ -219,7 +219,7 @@ export class CouponFormComponent implements OnInit {
     api.subscribe({
       next: (res) => {
         if (res.success) {
-          this.router.navigate(['/', this.currentLang, 'admin', 'coupons']);
+          this.router.navigate(['/admin/coupons']);
         } else {
           this.submitting.set(false);
           this.error.set(res.error?.message || 'Submission failed.');

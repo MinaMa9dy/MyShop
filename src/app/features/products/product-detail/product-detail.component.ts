@@ -223,7 +223,13 @@ import { environment } from '../../../../environments/environment';
                    </div>
                    @if (product()?.supplierName) {
                     <div class="flex items-center gap-2">
-                      <span class="material-symbols-outlined text-sm text-outline">verified</span>
+                      @if (product()?.supplierLogoUrl) {
+                        <img [src]="photoService.getPhotoUrl(product()?.supplierLogoUrl, 'user')" 
+                             [alt]="product()?.supplierName"
+                             class="w-5 h-5 rounded-full object-cover border border-outline-variant/10">
+                      } @else {
+                        <span class="material-symbols-outlined text-sm text-outline">verified</span>
+                      }
                       <span class="text-[11px] font-black uppercase tracking-[0.15em] text-outline">{{ 'product.source' | translate }}: {{ product()?.supplierName }}</span>
                     </div>
                    }
@@ -353,7 +359,7 @@ import { environment } from '../../../../environments/environment';
                     <div class="bg-surface-container-low p-10 rounded-[40px] text-center border border-dashed border-outline-variant/40 space-y-6">
                        <span class="material-symbols-outlined text-5xl text-outline-variant">lock</span>
                        <p class="font-headline font-bold text-on-surface-variant leading-relaxed">{{ 'product.loggingRestricted' | translate }}</p>
-                       <a [routerLink]="'/' + currentLang + '/auth/login'" class="inline-block px-8 py-4 bg-primary text-on-primary rounded-2xl font-headline font-bold shadow-lg hover:scale-105 transition-all">{{ 'product.signInToCommit' | translate }}</a>
+                       <a routerLink="/auth/login" class="inline-block px-8 py-4 bg-primary text-on-primary rounded-2xl font-headline font-bold shadow-lg hover:scale-105 transition-all">{{ 'product.signInToCommit' | translate }}</a>
                     </div>
                   }
                </div>
@@ -484,7 +490,7 @@ import { environment } from '../../../../environments/environment';
                     </button>
 
                     <!-- Product Image -->
-                    <a [routerLink]="'/' + currentLang + '/products/' + item.id"
+                    <a [routerLink]="'/products/' + item.id"
                        class="block aspect-square overflow-hidden bg-surface-container-low no-underline">
                       <img [src]="getMainPhotoUrl(item) || 'assets/images/placeholder.svg'"
                            [alt]="item.name"
@@ -502,28 +508,35 @@ import { environment } from '../../../../environments/environment';
                       }
                       
                       <!-- Title -->
-                      <a [routerLink]="'/' + currentLang + '/products/' + item.id" class="no-underline">
+                      <a [routerLink]="'/products/' + item.id" class="no-underline">
                         <h3 class="text-on-surface font-bold text-[12px] md:text-sm line-clamp-2 mb-1 hover:text-primary transition-colors leading-tight"
                             style="font-family:'Cairo',sans-serif;">
                           {{ item.name }}
                         </h3>
                       </a>
 
-                      <!-- Rating & Supplier -->
-                      <div class="flex items-center justify-between mb-2">
-                        <!-- Rating -->
+                      <!-- Rating -->
+                      <div class="flex items-center mb-1">
                         <div class="flex items-center gap-0.5 text-[10px] text-on-surface-variant">
                           <span class="material-symbols-outlined text-[12px] text-[#C4962A]" style="font-variation-settings: 'FILL' 1">star</span>
                           <span class="font-bold text-[#7B1818]">{{ item.averageRating | number:'1.1-1' }}</span>
                           <span>({{ item.reviewCount }})</span>
                         </div>
-                        <!-- Supplier -->
-                        @if (item.supplierName) {
-                          <div class="text-[9px] text-outline-variant truncate max-w-[60px]" style="font-family:'Tajawal',sans-serif;" [title]="item.supplierName">
+                      </div>
+
+                      <!-- Supplier -->
+                      @if (item.supplierName) {
+                        <div class="flex items-center gap-1.5 mb-2 min-w-0" [title]="item.supplierName">
+                          @if (item.supplierLogoUrl) {
+                            <img [src]="photoService.getPhotoUrl(item.supplierLogoUrl, 'user')" 
+                                 [alt]="item.supplierName"
+                                 class="w-[18px] h-[18px] rounded-full object-cover border border-outline-variant/10 flex-shrink-0">
+                          }
+                          <div class="text-[9px] text-outline-variant truncate font-bold" style="font-family:'Tajawal',sans-serif;">
                             {{ item.supplierName }}
                           </div>
-                        }
-                      </div>
+                        </div>
+                      }
 
                       <!-- Price + Cart -->
                       <div class="flex items-center justify-between mt-auto pt-1 gap-1">
@@ -807,7 +820,7 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   toggleWishlist(): void {
     const userId = this.tokenService.getUserId();
     const productId = this.product()?.id;
-    if (!userId) { this.router.navigate(['/' + this.currentLang + '/auth/login']); return; }
+    if (!userId) { this.router.navigate(['/auth/login']); return; }
     if (!productId) return;
     
     // --- OPTIMISTIC UPDATE START ---
@@ -969,7 +982,7 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   addToCart(): void {
     const userId = this.tokenService.getUserId();
     if (!userId) {
-      this.router.navigate(['/' + this.currentLang + '/auth/login']);
+      this.router.navigate(['/auth/login']);
       return;
     }
 
@@ -995,7 +1008,7 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     event.preventDefault(); event.stopPropagation();
     const userId = this.tokenService.getUserId();
     if (!userId) {
-      this.router.navigate(['/' + this.currentLang + '/auth/login']);
+      this.router.navigate(['/auth/login']);
       return;
     }
     const variantId = product.productVariants?.[0]?.id || product.id;
@@ -1009,7 +1022,7 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   toggleWishlistForProduct(product: any, event: Event): void {
     event.preventDefault(); event.stopPropagation();
     const userId = this.tokenService.getUserId();
-    if (!userId) { this.router.navigate(['/' + this.currentLang + '/auth/login']); return; }
+    if (!userId) { this.router.navigate(['/auth/login']); return; }
     
     const productId = product.id;
     const isCurrentlyInWishlist = this.wishlistIds().has(productId);
@@ -1087,12 +1100,12 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   }
 
   editProduct(): void {
-    if (this.product()?.id) this.router.navigate([`/${this.currentLang}/admin/products/add`], { queryParams: { id: this.product().id } });
+    if (this.product()?.id) this.router.navigate(['/admin/products/add'], { queryParams: { id: this.product().id } });
   }
 
   deleteProduct(): void {
     if (this.product()?.id && confirm('Delete product?')) {
-      this.productService.delete(this.product().id).subscribe({ next: () => this.router.navigate([`/${this.currentLang}/products`]) });
+      this.productService.delete(this.product().id).subscribe({ next: () => this.router.navigate(['/products']) });
     }
   }
 
@@ -1110,6 +1123,7 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
       categoryName: p.categoryName || p.CategoryName,
       supplierId: p.supplierId || p.SupplierId,
       supplierName: p.supplierName || p.SupplierName || p.supplier || p.Supplier,
+      supplierLogoUrl: p.supplierLogoUrl || p.SupplierLogoUrl || null,
       shownQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.productVariants?.[0]?.stockQuantity ?? p.productVariants?.[0]?.StockQuantity) ?? 0,
       stockQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.productVariants?.[0]?.stockQuantity ?? p.productVariants?.[0]?.StockQuantity) ?? 0,
       quantityInStock: p.quantityInStock || p.QuantityInStock,

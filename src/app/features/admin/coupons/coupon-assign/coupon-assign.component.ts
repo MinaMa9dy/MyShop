@@ -122,7 +122,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
                      <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">rocket_launch</span>
                    }
                 </button>
-                <a [routerLink]="['/' + currentLang + '/admin/coupons']"
+                <a routerLink="/admin/coupons"
                    class="order-2 sm:order-1 flex-1 py-5 md:py-6 bg-surface-container rounded-[24px] md:rounded-[32px] font-headline font-bold text-[10px] uppercase tracking-widest text-outline hover:bg-surface-container-high transition-all text-center flex items-center justify-center">
                    {{ 'admin.coupons.cancel' | translate }}
                 </a>
@@ -238,7 +238,7 @@ export class CouponAssignComponent implements OnInit, OnDestroy {
     const toRemove = Array.from(original).filter(id => !current.has(id));
 
     if (toAdd.length === 0 && toRemove.length === 0) {
-      this.submitting.set(false); this.router.navigate(['/', this.currentLang, 'admin', 'coupons']); return;
+      this.submitting.set(false); this.router.navigate(['/admin/coupons']); return;
     }
 
     const requests: any = {};
@@ -252,7 +252,7 @@ export class CouponAssignComponent implements OnInit, OnDestroy {
         
         if (addSuccess && removeSuccess) {
           this.submitting.set(false); this.success.set('Associations saved.');
-          setTimeout(() => this.router.navigate(['/', this.currentLang, 'admin', 'coupons']), 1000);
+          setTimeout(() => this.router.navigate(['/admin/coupons']), 1000);
         } else {
           this.submitting.set(false);
           const errorMsg = res.add?.error?.message || res.remove?.error?.message || 'Authorization update failure.';

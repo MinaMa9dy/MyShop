@@ -87,7 +87,7 @@ import { AddCategoryDto, Category } from '../../../core/models/category.model';
                    <span class="material-symbols-outlined group-hover:translate-y-1 transition-transform">schema</span>
                  }
               </button>
-              <a [routerLink]="['/' + currentLang + '/categories']"
+              <a routerLink="/categories"
                  class="flex-1 py-6 bg-surface-container rounded-[32px] font-headline font-bold text-xs uppercase tracking-widest text-outline hover:bg-surface-container-high transition-all text-center flex items-center justify-center">
                  {{ 'admin.addCategory.cancel' | translate }}
               </a>
@@ -142,7 +142,7 @@ export class AddCategoryComponent implements OnInit {
       next: () => {
         this.submitting.set(false); this.success.set(this.translate.instant('admin.addCategory.success'));
         this.categoryForm.reset();
-        setTimeout(() => this.router.navigate(['/', this.currentLang, 'categories']), 1000);
+        setTimeout(() => this.router.navigate(['/categories']), 1000);
       },
       error: (err) => { this.submitting.set(false); this.error.set(err.error?.message || this.translate.instant('admin.addCategory.error')); }
     });

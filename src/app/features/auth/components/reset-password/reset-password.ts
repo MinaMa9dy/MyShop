@@ -12,7 +12,7 @@ import { TranslateModule } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule],
   template: `
-    <main class="min-h-screen flex items-center justify-center bg-surface px-6 py-20 overflow-hidden relative" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
+    <main class="min-h-[calc(100vh-152px)] md:min-h-[calc(100vh-72px)] flex items-center justify-center bg-surface px-6 py-20 overflow-hidden relative" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
       <!-- Dynamic Background Elements -->
       <div class="absolute top-0 left-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -ml-40 -mt-40 animate-pulse"></div>
       <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-secondary/5 rounded-full blur-[100px] -mr-40 -mb-40 animate-pulse" style="animation-delay: 2s"></div>
@@ -38,7 +38,7 @@ import { TranslateModule } from '@ngx-translate/core';
                 <h3 class="font-headline text-2xl font-black text-on-surface mb-2">{{ 'auth.sequenceVerified' | translate }}</h3>
                 <p class="font-body text-on-surface-variant opacity-60">{{ 'auth.resetSuccessDesc' | translate }}</p>
               </div>
-              <a [routerLink]="['/' + currentLang + '/auth/login']" 
+              <a routerLink="/auth/login" 
                  class="inline-block py-5 px-12 bg-on-surface text-surface rounded-[32px] font-headline font-bold text-lg shadow-xl hover:scale-[1.05] transition-all">
                 {{ 'auth.accessProfile' | translate }}
               </a>
@@ -89,7 +89,7 @@ import { TranslateModule } from '@ngx-translate/core';
                 </button>
 
                 <div class="text-center">
-                   <a [routerLink]="['/' + currentLang + '/auth/login']" class="text-[10px] font-black uppercase tracking-widest text-outline hover:text-primary transition-colors">
+                   <a routerLink="/auth/login" class="text-[10px] font-black uppercase tracking-widest text-outline hover:text-primary transition-colors">
                       {{ 'auth.backToSecureGate' | translate }}
                    </a>
                 </div>

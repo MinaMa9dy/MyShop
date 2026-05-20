@@ -18,7 +18,7 @@ import { TokenService } from '../../../core/services/token.service';
           التصنيفات
         </h1>
         @if (isAdmin()) {
-          <a [routerLink]="['/' + currentLang + '/admin/categories/add']"
+          <a routerLink="/admin/categories/add"
              class="flex items-center gap-1.5 bg-primary text-white rounded-full px-4 py-2 text-sm font-bold no-underline hover:bg-primary-dim transition-all"
              style="font-family:'Cairo',sans-serif;">
             <span class="material-symbols-outlined text-[18px]">add</span>
@@ -56,7 +56,7 @@ import { TokenService } from '../../../core/services/token.service';
         <div class="px-4 md:px-6 lg:px-10 pb-10 max-w-[1400px] mx-auto pt-2 md:pt-4">
           <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
             @for (category of categories(); track category.id) {
-              <a [routerLink]="['/' + currentLang + '/products']"
+              <a routerLink="/products"
                  [queryParams]="{categoryId: category.id}"
                  class="flex flex-col items-center gap-2 no-underline group w-full">
                 <!-- Icon Box -->

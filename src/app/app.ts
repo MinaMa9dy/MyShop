@@ -70,7 +70,7 @@ export class App implements OnInit, OnDestroy {
   
   onSearch(): void {
     if (this.searchQuery.trim()) {
-      this.router.navigate(['/' + this.currentLanguage() + '/products'], { 
+      this.router.navigate(['/products'], { 
         queryParams: { searchTerm: this.searchQuery.trim() }
       });
       // Clear the search bar after navigation
@@ -307,6 +307,13 @@ export class App implements OnInit, OnDestroy {
     this.closeMobileMenu();
   }
   
+  onHomeClick(event: MouseEvent): void {
+    const currentUrl = this.router.url;
+    if (currentUrl === '/' || currentUrl === '') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
   toggleLanguage(): void {
     this.languageService.toggleLanguage();
   }

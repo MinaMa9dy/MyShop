@@ -159,7 +159,7 @@ import { UserProfile } from '../../../../core/models/auth.model';
                      <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">security_update_good</span>
                    }
                 </button>
-                <a [routerLink]="['/' + currentLang + '/admin/coupons']"
+                <a routerLink="/admin/coupons"
                    class="order-2 sm:order-1 flex-1 py-5 md:py-6 bg-surface-container rounded-[24px] md:rounded-[32px] font-headline font-bold text-[10px] uppercase tracking-widest text-outline hover:bg-surface-container-high transition-all text-center flex items-center justify-center">
                    {{ 'admin.coupons.cancel' | translate }}
                 </a>
@@ -311,7 +311,7 @@ export class CouponUserComponent implements OnInit, OnDestroy {
       next: (res) => {
         if (res.success) {
           this.success.set('Global distribution complete.');
-          setTimeout(() => this.router.navigate(['/', this.currentLang, 'admin', 'coupons']), 1000);
+          setTimeout(() => this.router.navigate(['/admin/coupons']), 1000);
         } else {
           this.error.set(res.error?.message || 'Distribution failure.');
         }
@@ -356,14 +356,14 @@ export class CouponUserComponent implements OnInit, OnDestroy {
 
     toRemove.forEach(uid => requests.push(this.couponService.removeFromUser(this.couponId()!, uid)));
 
-    if (requests.length === 0) { this.submitting.set(false); this.router.navigate(['/', this.currentLang, 'admin', 'coupons']); return; }
+    if (requests.length === 0) { this.submitting.set(false); this.router.navigate(['/admin/coupons']); return; }
 
     forkJoin(requests).subscribe({
       next: (responses) => {
         const failed = responses.some((r: any) => !r.success);
         if (!failed) {
           this.success.set('Permissions updated.');
-          setTimeout(() => this.router.navigate(['/', this.currentLang, 'admin', 'coupons']), 1000);
+          setTimeout(() => this.router.navigate(['/admin/coupons']), 1000);
         } else {
           this.error.set('Some assignments failed to synchronize.');
         }

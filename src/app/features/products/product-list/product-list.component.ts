@@ -169,7 +169,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   toggleWishlist(product: any, event: Event): void {
     event.preventDefault(); event.stopPropagation();
     const userId = this.tokenService.getUserId();
-    if (!userId) { this.router.navigate(['/' + this.currentLang + '/auth/login']); return; }
+    if (!userId) { this.router.navigate(['/auth/login']); return; }
 
     const productId = product.id;
     const isCurrentlyInWishlist = this.wishlistIds().has(productId);
@@ -245,7 +245,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
     // Auth Check
     const userId = this.tokenService.getUserId();
     if (!userId) {
-      this.router.navigate(['/' + this.currentLang + '/auth/login']);
+      this.router.navigate(['/auth/login']);
       return;
     }
 
@@ -266,7 +266,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   editProduct(product: any, event: Event): void {
     event.preventDefault(); event.stopPropagation();
-    if (product.id) this.router.navigate([`/${this.currentLang}/admin/products/add`], { queryParams: { id: product.id } });
+    if (product.id) this.router.navigate(['/admin/products/add'], { queryParams: { id: product.id } });
   }
 
   deleteProduct(product: any, event: Event): void {
@@ -309,6 +309,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
       categoryName: p.categoryName || p.CategoryName,
       supplierId: p.supplierId || p.SupplierId,
       supplierName: p.supplierName || p.SupplierName || p.supplier || p.Supplier,
+      supplierLogoUrl: p.supplierLogoUrl || p.SupplierLogoUrl || null,
       quantityInStock: p.quantityInStock || p.QuantityInStock,
       productPhotos: (p.productPhotos || p.ProductPhotos || p.productphotos || []).map((ph: any) => ({
         id: ph.id || ph.Id,

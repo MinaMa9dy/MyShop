@@ -378,7 +378,7 @@ export class OrderConfirmComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.cartItems().length === 0) this.router.navigate(['/' + this.currentLang + '/products']);
+    if (this.cartItems().length === 0) this.router.navigate(['/products']);
     this.loadCities();
   }
 
@@ -415,7 +415,7 @@ export class OrderConfirmComponent implements OnInit, OnDestroy {
           this.submitting.set(false);
           this.cartService.clear();
           this.cartService.clearCoupon();
-          this.router.navigate(['/' + this.currentLang + '/orders']);
+          this.router.navigate(['/orders']);
         } else {
           this.submitting.set(false);
           this.error.set(res.error?.message || 'Execution failed.');

@@ -212,7 +212,7 @@ export class CartComponent {
 
   proceedToCheckout(): void {
     this.cartService.close();
-    this.router.navigate(['/' + this.currentLang + '/orders/confirm']);
+    this.router.navigate(['/orders/confirm']);
   }
 
   isItemDiscounted(variantId: string | undefined): boolean {

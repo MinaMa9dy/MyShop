@@ -227,7 +227,7 @@
           {{ products().length }} منتج
         </span>
         @if (canAddProduct) {
-          <a [routerLink]="'/' + currentLang + '/admin/products/add'"
+          <a routerLink="/admin/products/add"
              class="flex items-center gap-1.5 bg-primary text-white rounded-full px-4 py-2 text-sm font-bold no-underline hover:bg-primary-dim transition-all"
              style="font-family:'Cairo',sans-serif;">
             <span class="material-symbols-outlined text-[18px]">add</span>
@@ -303,7 +303,7 @@
               </button>
 
               <!-- Product Image -->
-              <a [routerLink]="'/' + currentLang + '/products/' + product.id"
+              <a [routerLink]="'/products/' + product.id"
                  class="block aspect-square overflow-hidden bg-surface-container-low no-underline">
                 <img [src]="getMainPhotoUrl(product) || 'assets/images/placeholder.svg'"
                      [alt]="product.name"
@@ -321,28 +321,35 @@
                 }
                 
                 <!-- Title -->
-                <a [routerLink]="'/' + currentLang + '/products/' + product.id" class="no-underline">
+                <a [routerLink]="'/products/' + product.id" class="no-underline">
                   <h3 class="text-on-surface font-bold text-[12px] md:text-sm line-clamp-2 mb-1 hover:text-primary transition-colors leading-tight"
                       style="font-family:'Cairo',sans-serif;">
                     {{ product.name }}
                   </h3>
                 </a>
 
-                <!-- Rating & Supplier -->
-                <div class="flex items-center justify-between mb-2">
-                  <!-- Rating -->
+                <!-- Rating -->
+                <div class="flex items-center mb-1">
                   <div class="flex items-center gap-0.5 text-[10px] text-on-surface-variant">
                     <span class="material-symbols-outlined text-[12px] text-[#C4962A]" style="font-variation-settings: 'FILL' 1">star</span>
                     <span class="font-bold text-[#7B1818]">{{ product.averageRating | number:'1.1-1' }}</span>
                     <span>({{ product.reviewCount }})</span>
                   </div>
-                  <!-- Supplier -->
-                  @if (product.supplierName) {
-                    <div class="text-[9px] text-outline-variant truncate max-w-[60px]" style="font-family:'Tajawal',sans-serif;" [title]="product.supplierName">
+                </div>
+
+                <!-- Supplier -->
+                @if (product.supplierName) {
+                  <div class="flex items-center gap-1.5 mb-2 min-w-0" [title]="product.supplierName">
+                    @if (product.supplierLogoUrl) {
+                      <img [src]="photoService.getPhotoUrl(product.supplierLogoUrl, 'user')" 
+                           [alt]="product.supplierName"
+                           class="w-[18px] h-[18px] rounded-full object-cover border border-outline-variant/10 flex-shrink-0">
+                    }
+                    <div class="text-[9px] text-outline-variant truncate font-bold" style="font-family:'Tajawal',sans-serif;">
                       {{ product.supplierName }}
                     </div>
-                  }
-                </div>
+                  </div>
+                }
 
                 <!-- Price + Cart -->
                 <div class="flex items-center justify-between mt-auto pt-1 gap-1">

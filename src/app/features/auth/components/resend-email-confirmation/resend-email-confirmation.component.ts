@@ -11,7 +11,7 @@ import { TranslatePipe } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslatePipe],
   template: `
-    <main class="min-h-screen flex items-center justify-center bg-surface px-6 py-20 overflow-hidden relative" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
+    <main class="min-h-[calc(100vh-152px)] md:min-h-[calc(100vh-72px)] flex items-center justify-center bg-surface px-6 py-20 overflow-hidden relative" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
       <!-- Dynamic Background Elements -->
       <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -mr-40 -mt-40 animate-pulse"></div>
       <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-tertiary/5 rounded-full blur-[100px] -ml-40 -mb-40 animate-pulse" style="animation-delay: 2s"></div>
@@ -84,7 +84,7 @@ import { TranslatePipe } from '@ngx-translate/core';
                 </button>
 
                 <div class="text-center pt-2">
-                   <a [routerLink]="'/' + currentLang + '/auth/login'" class="text-[10px] font-black uppercase tracking-widest text-outline hover:text-primary transition-colors flex items-center justify-center gap-2 group">
+                   <a routerLink="/auth/login" class="text-[10px] font-black uppercase tracking-widest text-outline hover:text-primary transition-colors flex items-center justify-center gap-2 group">
                       <span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
                       <span>{{ 'auth.backToLogin' | translate }}</span>
                    </a>
@@ -116,7 +116,7 @@ export class ResendEmailConfirmationComponent {
     const email = this.resendForm.value.email!;
     
     this.authService.resendEmailConfirmation({ 
-      email: email, clientURI: `${window.location.origin}/${this.currentLang}/auth/confirm-email`
+      email: email, clientURI: `${window.location.origin}/auth/confirm-email`
     }).subscribe({
       next: () => { this.loading.set(false); this.success.set(true); },
       error: (err) => { this.loading.set(false); this.error.set(err.error?.message || 'Submission failed.'); }

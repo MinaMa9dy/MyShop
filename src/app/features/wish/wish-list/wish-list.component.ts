@@ -168,7 +168,7 @@ export class WishListComponent implements OnInit, OnDestroy {
   addToCart(wish: Wish): void {
     const userId = this.tokenService.getUserId();
     if (!userId) {
-      this.router.navigate(['/' + this.currentLang + '/auth/login']);
+      this.router.navigate(['/auth/login']);
       return;
     }
 
@@ -200,10 +200,10 @@ export class WishListComponent implements OnInit, OnDestroy {
   }
 
   goToProduct(productId: string): void {
-    this.router.navigate(['/' + this.currentLang + '/products', productId]);
+    this.router.navigate(['/products', productId]);
   }
 
   continueShopping(): void {
-    this.router.navigate(['/' + this.currentLang + '/products']);
+    this.router.navigate(['/products']);
   }
 }

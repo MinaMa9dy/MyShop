@@ -47,7 +47,7 @@ import { PhotoService } from '../../../core/services/photo.service';
             </div>
             <p class="font-black text-on-surface text-lg" style="font-family:'Cairo',sans-serif;">لا توجد طلبات</p>
             <p class="text-on-surface-variant text-sm" style="font-family:'Tajawal',sans-serif;">ابدأ التسوق وضع أول طلباتك</p>
-            <button [routerLink]="'/' + currentLang() + '/products'"
+            <button routerLink="/products"
                     class="text-white rounded-full px-6 py-2.5 font-bold text-sm transition-all"
                     style="font-family:'Cairo',sans-serif; background:#7B1818;">تصفح المنتجات</button>
           </div>
@@ -116,7 +116,7 @@ import { PhotoService } from '../../../core/services/photo.service';
                     {{ order.city }}{{ order.street ? ' - ' + order.street : '' }}
                   </div>
                   <div class="flex items-center gap-3">
-                    @if (order.status === 'Pending' || order.status === '1') {
+                    @if (canCancel(order.status)) {
                       <button (click)="cancelOrder(order.id)"
                               class="text-error text-xs font-bold border border-error/20 rounded-full px-3 py-1 hover:bg-error/5 transition-all"
                               style="font-family:'Cairo',sans-serif;">إلغاء</button>
@@ -175,23 +175,30 @@ export class OrderListComponent implements OnInit {
     return order.totalAmount || (order.orderItems || []).reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
   }
 
+  canCancel(status: any): boolean {
+    const s = status?.toString().toLowerCase();
+    return s === '1' || s === 'pending';
+  }
+
   getStatusArabic(status: any): string {
     const s = status?.toString();
     const map: Record<string, string> = {
       '1': 'قيد الانتظار', 'Pending': 'قيد الانتظار',
-      '2': 'تم الشحن',     'Shipped': 'تم الشحن',
-      '3': 'تم التسليم',   'Delivered': 'تم التسليم',
-      '4': 'ملغي',         'Cancelled': 'ملغي', 'Canceled': 'ملغي'
+      '2': 'تم التأكيد',   'Confirmed': 'تم التأكيد',
+      '3': 'مرفوض',        'Rejected': 'مرفوض',
+      '4': 'تم التسليم',   'Delivered': 'تم التسليم',
+      '5': 'ملغي',         'Canceled': 'ملغي', 'Cancelled': 'ملغي'
     };
     return map[s] || 'قيد الانتظار';
   }
 
   getStatusClasses(status: any): string {
-    const s = status?.toString();
-    if (s === '1' || s === 'Pending')   return 'bg-yellow-50 text-yellow-700 border border-yellow-200';
-    if (s === '2' || s === 'Shipped')   return 'bg-blue-50 text-blue-700 border border-blue-200';
-    if (s === '3' || s === 'Delivered') return 'bg-green-50 text-green-700 border border-green-200';
-    if (s === '4' || s === 'Cancelled' || s === 'Canceled') return 'bg-red-50 text-red-700 border border-red-200';
+    const s = status?.toString().toLowerCase();
+    if (s === '1' || s === 'pending')   return 'bg-yellow-50 text-yellow-700 border border-yellow-200';
+    if (s === '2' || s === 'confirmed') return 'bg-blue-50 text-blue-700 border border-blue-200';
+    if (s === '3' || s === 'rejected')  return 'bg-amber-50 text-amber-700 border border-amber-200';
+    if (s === '4' || s === 'delivered') return 'bg-green-50 text-green-700 border border-green-200';
+    if (s === '5' || s === 'cancelled' || s === 'canceled') return 'bg-red-50 text-red-700 border border-red-200';
     return 'bg-surface-container text-outline';
   }
 

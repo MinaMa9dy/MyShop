@@ -41,7 +41,7 @@ import { TokenService } from '../../core/services/token.service';
         <!-- Scrollable category chips -->
         <div class="flex gap-3 px-4 overflow-x-auto no-scrollbar pb-2">
           @for (category of categories(); track category.id) {
-            <a [routerLink]="'/' + currentLang + '/products'"
+            <a routerLink="/products"
                [queryParams]="{categoryId: category.id}"
                class="flex-shrink-0 flex flex-col items-center gap-1.5 no-underline group"
                style="min-width: 72px;">
@@ -59,7 +59,7 @@ import { TokenService } from '../../core/services/token.service';
           }
 
           <!-- "More" chip -->
-          <a [routerLink]="'/' + currentLang + '/categories'"
+          <a routerLink="/categories"
              class="flex-shrink-0 flex flex-col items-center gap-1.5 no-underline group"
              style="min-width: 72px;">
             <div class="w-[68px] h-[68px] rounded-2xl bg-surface-container-lowest border border-outline-variant/20 flex items-center justify-center group-hover:border-primary/30 group-hover:bg-primary/5 transition-all duration-300"
@@ -81,7 +81,7 @@ import { TokenService } from '../../core/services/token.service';
           <h2 class="font-black text-on-surface text-base md:text-lg" style="font-family:'Cairo',sans-serif;">
             الأكثر مبيعاً
           </h2>
-          <a [routerLink]="'/' + currentLang + '/products'"
+          <a routerLink="/products"
              class="text-primary text-sm font-bold no-underline hover:underline flex items-center gap-0.5"
              style="font-family:'Cairo',sans-serif;">
             <span class="material-symbols-outlined text-base">chevron_left</span>
@@ -119,7 +119,7 @@ import { TokenService } from '../../core/services/token.service';
                 }
 
                 <!-- Product Image -->
-                <a [routerLink]="'/' + currentLang + '/products/' + product.id"
+                <a [routerLink]="'/products/' + product.id"
                    class="block aspect-square overflow-hidden bg-surface-container-low no-underline">
                   <img [src]="getMainPhotoUrl(product) || placeholder"
                        [alt]="product.name"
@@ -136,7 +136,7 @@ import { TokenService } from '../../core/services/token.service';
                     </div>
                   }
                   
-                  <a [routerLink]="'/' + currentLang + '/products/' + product.id"
+                  <a [routerLink]="'/products/' + product.id"
                      class="no-underline">
                     <h3 class="text-on-surface font-bold text-[12px] md:text-sm leading-tight line-clamp-2 mb-1 hover:text-primary transition-colors"
                         style="font-family:'Cairo',sans-serif;">
@@ -144,21 +144,28 @@ import { TokenService } from '../../core/services/token.service';
                     </h3>
                   </a>
 
-                  <!-- Rating & Supplier -->
-                  <div class="flex items-center justify-between mb-2">
-                    <!-- Rating -->
+                  <!-- Rating -->
+                  <div class="flex items-center mb-1">
                     <div class="flex items-center gap-0.5 text-[10px] text-on-surface-variant">
                       <span class="material-symbols-outlined text-[12px] text-[#C4962A]" style="font-variation-settings: 'FILL' 1">star</span>
                       <span class="font-bold text-[#7B1818]">{{ product.averageRating | number:'1.1-1' }}</span>
                       <span>({{ product.reviewCount }})</span>
                     </div>
-                    <!-- Supplier -->
-                    @if (product.supplierName) {
-                      <div class="text-[9px] text-outline-variant truncate max-w-[60px]" style="font-family:'Tajawal',sans-serif;" [title]="product.supplierName">
+                  </div>
+
+                  <!-- Supplier -->
+                  @if (product.supplierName) {
+                    <div class="flex items-center gap-1.5 mb-2 min-w-0" [title]="product.supplierName">
+                      @if (product.supplierLogoUrl) {
+                        <img [src]="photoService.getPhotoUrl(product.supplierLogoUrl, 'user')" 
+                             [alt]="product.supplierName"
+                             class="w-[18px] h-[18px] rounded-full object-cover border border-outline-variant/10 flex-shrink-0">
+                      }
+                      <div class="text-[9px] text-outline-variant truncate font-bold" style="font-family:'Tajawal',sans-serif;">
                         {{ product.supplierName }}
                       </div>
-                    }
-                  </div>
+                    </div>
+                  }
 
                   @if (product.description) {
                     <p class="text-on-surface-variant text-[10px] line-clamp-1 mb-1 hidden md:block"
@@ -219,7 +226,7 @@ import { TokenService } from '../../core/services/token.service';
       <!-- Admin add product button (visible only for admins/sellers) -->
       @if (canAddProduct()) {
         <div class="fixed bottom-24 left-4 z-50 md:bottom-8 md:right-6 md:left-auto">
-          <a [routerLink]="'/' + currentLang + '/admin/products/add'"
+          <a routerLink="/admin/products/add"
              class="flex items-center gap-2 bg-primary text-white font-bold rounded-full px-5 py-3 shadow-xl hover:bg-primary-dim transition-all active:scale-95 no-underline"
              style="font-family:'Cairo',sans-serif; box-shadow: 0 8px 24px rgba(123,24,24,0.35);">
             <span class="material-symbols-outlined text-xl">add</span>
@@ -370,7 +377,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     event.stopPropagation();
 
     if (!this.tokenService.getUserId()) {
-      this.router.navigate(['/' + this.currentLang + '/auth/login']);
+      this.router.navigate(['/auth/login']);
       return;
     }
 
@@ -398,7 +405,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     event.stopPropagation();
 
     if (!this.tokenService.getUserId()) {
-      this.router.navigate(['/' + this.currentLang + '/auth/login']);
+      this.router.navigate(['/auth/login']);
       return;
     }
     if (product.stockQuantity <= 0) return;
@@ -426,6 +433,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       oldPrice: p.oldPrice || p.OldPrice || p.productVariants?.[0]?.oldPrice || 0,
       categoryId: p.categoryId || p.CategoryId,
       categoryName: p.categoryName || p.CategoryName,
+      supplierId: p.supplierId || p.SupplierId,
+      supplierName: p.supplierName || p.SupplierName || p.supplier || p.Supplier,
+      supplierLogoUrl: p.supplierLogoUrl || p.SupplierLogoUrl || null,
       stockQuantity: (p.stockQuantity ?? p.StockQuantity ?? p.productVariants?.[0]?.stockQuantity) ?? 0,
       productPhotos: p.productPhotos || p.ProductPhotos || [],
       productVariants: p.productVariants || p.ProductVariants || [],

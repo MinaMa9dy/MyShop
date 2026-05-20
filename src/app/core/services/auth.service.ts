@@ -18,7 +18,6 @@ import {
 } from '../models/auth.model';
 import { TokenService } from './token.service';
 import { CartService } from './cart.service';
-import { LanguageService } from './language.service';
 import { Result } from '../models/result.model';
 @Injectable({
   providedIn: 'root'
@@ -27,7 +26,6 @@ export class AuthService {
   private http = inject(HttpClient);
   private tokenService = inject(TokenService);
   private cartService = inject(CartService);
-  private languageService = inject(LanguageService);
   private router = inject(Router);
   
   private apiUrl = `${environment.apiUrl}/Auth`;
@@ -172,8 +170,7 @@ export class AuthService {
     this.currentUserSubject.next(null);
 
     if (redirect) {
-      const lang = this.languageService.currentLanguage();
-      this.router.navigateByUrl(`/${lang}/auth/login`);
+      this.router.navigateByUrl('/auth/login');
     }
   }
   

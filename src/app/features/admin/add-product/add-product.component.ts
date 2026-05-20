@@ -244,7 +244,7 @@ import { ProductVariantManagementComponent } from '../product-variants/product-v
                          <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">rocket_launch</span>
                        }
                     </button>
-                     <a [routerLink]="'/' + currentLang + '/products'"
+                     <a routerLink="/products"
                         class="flex-1 py-6 bg-surface-container rounded-[32px] font-headline font-bold text-sm uppercase tracking-widest text-outline hover:bg-surface-container-high transition-all text-center flex items-center justify-center">
                         {{ 'admin.addProduct.cancel' | translate }}
                      </a>
@@ -552,11 +552,11 @@ export class AddProductComponent implements OnInit {
                 next: () => {
                   this.submitting.set(false);
                   this.success.set(this.translate.instant('admin.addProduct.modificationVerified'));
-                  setTimeout(() => this.router.navigate([`/${this.currentLang}/products/${this.productId()}`]), 1000);
+                  setTimeout(() => this.router.navigate([`/products/${this.productId()}`]), 1000);
                 },
                 error: () => {
                   this.submitting.set(false);
-                  this.router.navigate([`/${this.currentLang}/products/${this.productId()}`]);
+                  this.router.navigate([`/products/${this.productId()}`]);
                 }
               });
               return;
@@ -565,7 +565,7 @@ export class AddProductComponent implements OnInit {
           
           this.submitting.set(false); 
           this.success.set(this.translate.instant('admin.addProduct.modificationVerified'));
-          setTimeout(() => this.router.navigate([`/${this.currentLang}/products/${this.productId()}`]), 1000);
+          setTimeout(() => this.router.navigate([`/products/${this.productId()}`]), 1000);
         } else {
           this.submitting.set(false);
           this.error.set(result.error?.message || 'Error');

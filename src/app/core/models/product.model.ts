@@ -10,6 +10,7 @@ export interface Product {
   isFasting: boolean;
   supplierId: string;
   supplierName: string;
+  supplierLogoUrl?: string;
   categoryId: string;
   categoryName: string;
   averageRating: number;

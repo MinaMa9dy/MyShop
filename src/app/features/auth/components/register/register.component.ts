@@ -11,7 +11,7 @@ import { TranslatePipe } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslatePipe],
   template: `
-    <div class="min-h-screen bg-surface flex flex-col md:flex-row overflow-hidden" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
+    <div class="min-h-[calc(100vh-152px)] md:min-h-[calc(100vh-72px)] bg-surface flex flex-col md:flex-row overflow-hidden" [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
       <!-- Left Branding Side -->
       <div class="hidden md:flex md:w-1/2 bg-gradient-to-br from-secondary to-secondary-dim relative items-center justify-center p-12 overflow-hidden">
         <!-- Abstract Topo Background -->
@@ -36,7 +36,7 @@ import { TranslatePipe } from '@ngx-translate/core';
       </div>
 
       <!-- Right Form Side -->
-      <div class="w-full md:w-1/2 flex items-center justify-center p-8 md:p-16 bg-surface-container-lowest overflow-y-auto">
+      <div class="w-full md:w-1/2 flex-grow flex items-center justify-center p-8 md:p-16 bg-surface-container-lowest overflow-y-auto">
         <div class="w-full max-w-lg animate-slide-up py-10">
           <div class="text-center md:text-start mb-10">
             <h2 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">
@@ -51,7 +51,7 @@ import { TranslatePipe } from '@ngx-translate/core';
                 <span class="material-symbols-outlined text-xl">verified</span>
                 <div class="flex flex-col">
                   <p class="text-sm font-bold">{{ successMessage() }}</p>
-                  <a [routerLink]="'/' + currentLang + '/auth/resend-email-confirmation'" class="text-xs underline font-black hover:opacity-80 transition-opacity">
+                  <a routerLink="/auth/resend-email-confirmation" class="text-xs underline font-black hover:opacity-80 transition-opacity">
                     {{ 'auth.resendConfirmationLink' | translate }}
                   </a>
                 </div>
@@ -153,12 +153,12 @@ import { TranslatePipe } from '@ngx-translate/core';
           <div class="mt-10 flex flex-col items-center gap-6">
             <p class="text-on-surface-variant font-body text-sm text-center">
               {{ 'auth.hasAccount' | translate }}
-              <a [routerLink]="'/' + currentLang + '/auth/login'" class="text-primary font-black hover:underline px-1">
+              <a routerLink="/auth/login" class="text-primary font-black hover:underline px-1">
                 {{ 'auth.loginLink' | translate }}
               </a>
             </p>
             
-            <a [routerLink]="'/' + currentLang + '/'" class="text-on-surface-variant text-[10px] font-black uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-2">
+            <a routerLink="/" class="text-on-surface-variant text-[10px] font-black uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">arrow_back</span>
               {{ 'common.backToProducts' | translate }}
             </a>
@@ -228,7 +228,7 @@ export class RegisterComponent {
           this.successMessage.set(response.message || 'Registration successful. Please check your email to confirm your account.');
           this.registerForm.reset();
         } else {
-          this.router.navigate([`/${this.currentLang}/dashboard`]);
+          this.router.navigate(['/dashboard']);
         }
       },
       error: (err) => {

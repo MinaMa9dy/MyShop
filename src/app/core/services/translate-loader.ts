@@ -1,28 +1,23 @@
-import { HttpClient } from '@angular/common/http';
 import { TranslateLoader, TranslationObject } from '@ngx-translate/core';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable, from } from 'rxjs';
 
-export class CustomTranslateLoader implements TranslateLoader {
-  constructor(private http: HttpClient) {}
-
+/**
+ * Loads translations via static dynamic imports so they are bundled into
+ * the JavaScript output rather than served as public static assets.
+ * This prevents direct URL access to /assets/i18n/*.json.
+ */
+export class StaticTranslateLoader implements TranslateLoader {
   getTranslation(lang: string): Observable<TranslationObject> {
-    // Use absolute path from root
-    const translationPath = `/assets/i18n/${lang}.json`;
-    console.log(`Loading translations from: ${translationPath}`);
-    
-    return this.http.get<TranslationObject>(translationPath).pipe(
-      map((translations) => {
-        console.log(`Translations loaded successfully for language: ${lang}`);
-        console.log(`Available cart translations:`, translations['cart']);
-        return translations;
-      }),
-      catchError((error) => {
-        console.error(`Error loading translations for language: ${lang}`, error);
-        console.error(`Translation path: ${translationPath}`);
-        // Return empty object to prevent app crash
-        return of({});
-      })
-    );
+    switch (lang) {
+      case 'ar':
+        return from(
+          import('../../../assets/i18n/ar.json').then((m) => m as TranslationObject)
+        );
+      case 'en':
+      default:
+        return from(
+          import('../../../assets/i18n/en.json').then((m) => m as TranslationObject)
+        );
+    }
   }
 }

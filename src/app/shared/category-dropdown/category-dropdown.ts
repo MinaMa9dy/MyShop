@@ -66,6 +66,6 @@ export class CategoryDropdownComponent {
     this.selectedCategoryId.set(id);
     const lang = this.currentLanguage();
     const params = id ? { categoryId: id } : {};
-    this.router.navigate([`/${lang}/products`], { queryParams: params });
+    this.router.navigate(['/products'], { queryParams: params });
   }
 }

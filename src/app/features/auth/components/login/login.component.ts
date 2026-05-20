@@ -13,7 +13,7 @@ declare var google: any;
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-surface flex flex-col md:flex-row overflow-hidden" dir="rtl">
+    <div class="min-h-[calc(100vh-152px)] md:min-h-[calc(100vh-72px)] bg-surface flex flex-col md:flex-row overflow-hidden" dir="rtl">
 
       <!-- ── Left Branding Panel (Desktop) ── -->
       <div class="hidden md:flex md:w-1/2 relative items-center justify-center p-12 overflow-hidden"
@@ -35,17 +35,6 @@ declare var google: any;
           <p class="text-white/70 text-base max-w-xs text-center leading-relaxed" style="font-family:'Tajawal',sans-serif;">
             اطلب منتجات الكانتين بسهولة وجودة عالية. نحن هنا لخدمتكم.
           </p>
-          <div class="flex flex-col gap-3 w-full max-w-xs">
-            <div class="flex items-center gap-3 text-white/70 text-sm" style="font-family:'Tajawal',sans-serif;">
-              <span class="material-symbols-outlined text-xl" style="color:#C4962A;">verified_user</span>جودة مضمونة
-            </div>
-            <div class="flex items-center gap-3 text-white/70 text-sm" style="font-family:'Tajawal',sans-serif;">
-              <span class="material-symbols-outlined text-xl" style="color:#C4962A;">local_shipping</span>توصيل سريع
-            </div>
-            <div class="flex items-center gap-3 text-white/70 text-sm" style="font-family:'Tajawal',sans-serif;">
-              <span class="material-symbols-outlined text-xl" style="color:#C4962A;">favorite</span>خدمة بمحبة
-            </div>
-          </div>
         </div>
         <div class="absolute bottom-8 text-white/30 text-xs" style="font-family:'Tajawal',sans-serif;">
           © 2026 كانتين سان مارك
@@ -53,7 +42,7 @@ declare var google: any;
       </div>
 
       <!-- ── Right Form Side ── -->
-      <div class="w-full md:w-1/2 flex items-center justify-center p-6 md:p-16 bg-surface-container-lowest">
+      <div class="w-full md:w-1/2 flex-grow flex items-center justify-center p-6 md:p-16 bg-surface-container-lowest">
         <div class="w-full max-w-md">
 
           <!-- Mobile Brand -->
@@ -82,7 +71,7 @@ declare var google: any;
                 <div>
                   <p class="text-sm font-bold" style="font-family:'Tajawal',sans-serif;">{{ error() }}</p>
                   @if (showResendLink()) {
-                    <a [routerLink]="'/' + currentLang + '/auth/resend-email-confirmation'"
+                    <a routerLink="/auth/resend-email-confirmation"
                        class="text-xs underline font-bold" style="font-family:'Cairo',sans-serif;">إعادة إرسال رابط التفعيل</a>
                   }
                 </div>
@@ -122,7 +111,7 @@ declare var google: any;
 
             <!-- Forgot -->
             <div class="flex justify-start">
-              <a [routerLink]="'/' + currentLang + '/auth/forgot-password'"
+              <a routerLink="/auth/forgot-password"
                  class="text-primary text-xs font-bold hover:underline" style="font-family:'Cairo',sans-serif;">نسيت كلمة المرور؟</a>
             </div>
 
@@ -153,13 +142,13 @@ declare var google: any;
           <!-- Register -->
           <p class="text-center text-sm text-on-surface-variant mt-6" style="font-family:'Tajawal',sans-serif;">
             ليس لديك حساب؟
-            <a [routerLink]="'/' + currentLang + '/auth/register'"
+            <a routerLink="/auth/register"
                class="text-primary font-black hover:underline mr-1" style="font-family:'Cairo',sans-serif;">سجّل الآن</a>
           </p>
 
           <!-- Back -->
           <div class="flex justify-center mt-4">
-            <a [routerLink]="'/' + currentLang + '/'"
+            <a routerLink="/"
                class="text-on-surface-variant text-xs flex items-center gap-1 hover:text-primary transition-colors"
                style="font-family:'Cairo',sans-serif;">
               <span class="material-symbols-outlined text-sm">arrow_forward</span>
@@ -210,7 +199,7 @@ export class LoginComponent implements AfterViewInit {
     this.authService.googleLogin({ token: response.credential }).subscribe({
       next: () => {
         this.loading.set(false);
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/' + this.currentLang + '/';
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
         this.router.navigateByUrl(returnUrl);
       },
       error: () => {
@@ -228,7 +217,7 @@ export class LoginComponent implements AfterViewInit {
     this.authService.login({ email: email!, password: password! }).subscribe({
       next: () => {
         this.loading.set(false);
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/' + this.currentLang + '/';
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
         this.router.navigateByUrl(returnUrl);
       },
       error: (err) => {

@@ -122,39 +122,39 @@ import { Order } from '../../core/models/order.model';
         @if (activeTab() === 'overview') {
           <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 mb-6">
             @if (canAddProduct()) {
-              <a [routerLink]="['/' + currentLang() + '/admin/products/add']"
+              <a routerLink="/admin/products/add"
                  class="flex flex-col items-center gap-2 p-4 rounded-2xl no-underline transition-all active:scale-95"
                  style="background:#FFF3F3; border: 1px solid #F0D4D4;">
                 <span class="material-symbols-outlined text-2xl" style="color:#7B1818;">add_box</span>
                 <span class="text-[10px] font-black text-center leading-tight" style="font-family:'Cairo',sans-serif; color:#7B1818;">إضافة منتج</span>
               </a>
             }
-            <a [routerLink]="'/' + currentLang() + '/products'"
+            <a routerLink="/products"
                class="flex flex-col items-center gap-2 p-4 rounded-2xl no-underline transition-all active:scale-95"
                style="background:#F9F7F4; border: 1px solid #E8E0D5;">
               <span class="material-symbols-outlined text-2xl text-on-surface-variant">category</span>
               <span class="text-[10px] font-black text-center text-on-surface-variant leading-tight" style="font-family:'Cairo',sans-serif;">تصفح المنتجات</span>
             </a>
-            <a [routerLink]="'/' + currentLang() + '/orders'"
+            <a routerLink="/orders"
                class="flex flex-col items-center gap-2 p-4 rounded-2xl no-underline transition-all active:scale-95"
                style="background:#F9F7F4; border: 1px solid #E8E0D5;">
               <span class="material-symbols-outlined text-2xl text-on-surface-variant">list_alt</span>
               <span class="text-[10px] font-black text-center text-on-surface-variant leading-tight" style="font-family:'Cairo',sans-serif;">طلباتي</span>
             </a>
-            <a [routerLink]="'/' + currentLang() + '/dashboard/my-coupons'"
+            <a routerLink="/dashboard/my-coupons"
                class="flex flex-col items-center gap-2 p-4 rounded-2xl no-underline transition-all active:scale-95"
                style="background:#FFF8EC; border: 1px solid #EDD89A;">
               <span class="material-symbols-outlined text-2xl" style="color:#C4962A;">confirmation_number</span>
               <span class="text-[10px] font-black text-center leading-tight" style="font-family:'Cairo',sans-serif; color:#C4962A;">كوبوناتي</span>
             </a>
             @if (isAdmin()) {
-              <a [routerLink]="['/' + currentLang() + '/admin/categories/add']"
+              <a routerLink="/admin/categories/add"
                  class="flex flex-col items-center gap-2 p-4 rounded-2xl no-underline transition-all active:scale-95"
                  style="background:#FFF3F3; border: 1px solid #F0D4D4;">
                 <span class="material-symbols-outlined text-2xl" style="color:#7B1818;">create_new_folder</span>
                 <span class="text-[10px] font-black text-center leading-tight" style="font-family:'Cairo',sans-serif; color:#7B1818;">إضافة تصنيف</span>
               </a>
-              <a [routerLink]="['/' + currentLang() + '/admin/coupons']"
+              <a routerLink="/admin/coupons"
                  class="flex flex-col items-center gap-2 p-4 rounded-2xl no-underline transition-all active:scale-95"
                  style="background:#F9F7F4; border: 1px solid #E8E0D5;">
                 <span class="material-symbols-outlined text-2xl text-on-surface-variant">settings_input_component</span>
@@ -184,7 +184,7 @@ import { Order } from '../../core/models/order.model';
               <span class="material-symbols-outlined text-4xl text-outline-variant">inventory_2</span>
             </div>
             <p class="font-black text-on-surface text-lg" style="font-family:'Cairo',sans-serif;">طلباتي</p>
-            <a [routerLink]="'/' + currentLang() + '/orders'"
+            <a routerLink="/orders"
                class="text-white rounded-full px-6 py-2.5 font-bold text-sm no-underline transition-all"
                style="font-family:'Cairo',sans-serif; background:#7B1818;">
               عرض جميع الطلبات
