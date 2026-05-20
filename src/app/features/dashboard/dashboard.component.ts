@@ -166,12 +166,72 @@ import { Order } from '../../core/models/order.model';
 
         <!-- Account -->
         @if (activeTab() === 'account') {
-          <div class="bg-white rounded-2xl overflow-hidden" style="box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-            @for (field of profileFields; track field.label; let last = $last) {
-              <div class="px-4 py-3.5" [class.border-b]="!last" style="border-color:#F0EAE0;">
-                <div class="text-[10px] font-black uppercase tracking-wider mb-0.5"
-                     style="font-family:'Cairo',sans-serif; color:#C4962A;">{{ field.label }}</div>
-                <div class="font-bold text-on-surface text-sm" style="font-family:'Tajawal',sans-serif;">{{ field.value() }}</div>
+          <div class="bg-white rounded-2xl overflow-hidden relative" style="box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            @if (!isEditingProfile()) {
+              <div class="px-4 py-3 border-b flex justify-between items-center" style="border-color:#F0EAE0; background-color:#FAFAFA;">
+                <h3 class="font-black text-base m-0" style="font-family:'Cairo',sans-serif; color:#7B1818;">المعلومات الشخصية</h3>
+                <button (click)="startEditProfile()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-sm font-bold" style="color: #C4962A;">
+                  <span class="material-symbols-outlined text-sm">edit</span>
+                  <span style="font-family:'Tajawal',sans-serif;">تعديل</span>
+                </button>
+              </div>
+              @for (field of profileFields; track field.label; let last = $last) {
+                <div class="px-4 py-3.5" [class.border-b]="!last" style="border-color:#F0EAE0;">
+                  <div class="text-[10px] font-black uppercase tracking-wider mb-0.5"
+                       style="font-family:'Cairo',sans-serif; color:#C4962A;">{{ field.label }}</div>
+                  <div class="font-bold text-on-surface text-sm" style="font-family:'Tajawal',sans-serif;">{{ field.value() }}</div>
+                </div>
+              }
+            } @else {
+              <div class="p-4 md:p-6">
+                <div class="flex items-center justify-between mb-6">
+                  <h3 class="font-black text-lg" style="font-family:'Cairo',sans-serif; color:#7B1818;">تعديل الملف الشخصي</h3>
+                  <button (click)="cancelEditProfile()" class="text-on-surface-variant hover:text-error transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                  </button>
+                </div>
+                
+                <form (ngSubmit)="saveProfile()" #profileForm="ngForm" class="space-y-4" dir="rtl">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-xs font-bold mb-1.5" style="color:#6B7280; font-family:'Tajawal',sans-serif;">الاسم الأول</label>
+                      <input type="text" name="firstName" [ngModel]="editProfileData().firstName" (ngModelChange)="updateEditData('firstName', $event)"
+                             class="w-full px-3 py-2.5 rounded-xl border border-outline-variant bg-surface-container-lowest focus:outline-none focus:border-[#C4962A] transition-colors text-sm" required>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold mb-1.5" style="color:#6B7280; font-family:'Tajawal',sans-serif;">الاسم الأخير</label>
+                      <input type="text" name="lastName" [ngModel]="editProfileData().lastName" (ngModelChange)="updateEditData('lastName', $event)"
+                             class="w-full px-3 py-2.5 rounded-xl border border-outline-variant bg-surface-container-lowest focus:outline-none focus:border-[#C4962A] transition-colors text-sm" required>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-xs font-bold mb-1.5" style="color:#6B7280; font-family:'Tajawal',sans-serif;">رقم الهاتف</label>
+                    <input type="tel" name="phoneNumber" [ngModel]="editProfileData().phoneNumber" (ngModelChange)="updateEditData('phoneNumber', $event)"
+                           class="w-full px-3 py-2.5 rounded-xl border border-outline-variant bg-surface-container-lowest focus:outline-none focus:border-[#C4962A] transition-colors text-sm" dir="ltr" style="text-align: right;">
+                  </div>
+                  
+                  <div>
+                    <label class="block text-xs font-bold mb-1.5" style="color:#6B7280; font-family:'Tajawal',sans-serif;">العنوان</label>
+                    <textarea name="address" [ngModel]="editProfileData().address" (ngModelChange)="updateEditData('address', $event)"
+                              class="w-full px-3 py-2.5 rounded-xl border border-outline-variant bg-surface-container-lowest focus:outline-none focus:border-[#C4962A] transition-colors text-sm min-h-[80px] resize-y"></textarea>
+                  </div>
+                  
+                  <div class="pt-4 flex gap-3">
+                    <button type="submit" [disabled]="profileForm.invalid || isSavingProfile()"
+                            class="flex-1 bg-[#7B1818] hover:bg-[#5A1010] text-white py-2.5 rounded-xl font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2" style="font-family:'Tajawal',sans-serif;">
+                      @if (isSavingProfile()) {
+                        <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      } @else {
+                        <span>حفظ التغييرات</span>
+                      }
+                    </button>
+                    <button type="button" (click)="cancelEditProfile()"
+                            class="flex-1 bg-surface-container hover:bg-surface-container-high text-on-surface py-2.5 rounded-xl font-bold transition-colors" style="font-family:'Tajawal',sans-serif;">
+                      إلغاء
+                    </button>
+                  </div>
+                </form>
               </div>
             }
           </div>
@@ -212,6 +272,16 @@ export class DashboardComponent implements OnInit {
   activeTab = signal<'overview' | 'orders' | 'account'>('overview');
   stats = signal({ totalOrders: 0, cartItems: 0, wishlist: 0 });
   photoUploading = signal(false);
+  
+  isEditingProfile = signal(false);
+  isSavingProfile = signal(false);
+  editProfileData = signal<{firstName: string, lastName: string, address: string, phoneNumber: string}>({
+    firstName: '',
+    lastName: '',
+    address: '',
+    phoneNumber: ''
+  });
+
   carttotal = this.cartService.total;
   userEmail = computed(() => this.tokenService.getEmail());
 
@@ -318,4 +388,51 @@ export class DashboardComponent implements OnInit {
   }
 
   logout(): void { this.authService.logout(); }
+
+  startEditProfile() {
+    const p = this.profile();
+    const u = this.user();
+    let firstName = u?.firstName || '';
+    let lastName = u?.lastName || '';
+    
+    if (p?.fullName && (!firstName || !lastName)) {
+      const parts = p.fullName.split(' ');
+      firstName = parts[0];
+      lastName = parts.length > 1 ? parts.slice(1).join(' ') : '';
+    }
+
+    this.editProfileData.set({
+      firstName: firstName,
+      lastName: lastName,
+      address: p?.address || '',
+      phoneNumber: p?.phoneNumber || u?.phoneNumber || ''
+    });
+    this.isEditingProfile.set(true);
+  }
+
+  updateEditData(field: 'firstName' | 'lastName' | 'address' | 'phoneNumber', value: any) {
+    this.editProfileData.update(d => ({...d, [field]: value}));
+  }
+
+  cancelEditProfile() {
+    this.isEditingProfile.set(false);
+  }
+
+  saveProfile() {
+    this.isSavingProfile.set(true);
+    this.profileService.updateProfile(this.editProfileData()).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.loadProfile();
+          // Optionally update user signal to reflect first/last name changes if authService has a method, 
+          // or at least wait for profile reload to update the UI
+          this.isEditingProfile.set(false);
+        }
+        this.isSavingProfile.set(false);
+      },
+      error: () => {
+        this.isSavingProfile.set(false);
+      }
+    });
+  }
 }
